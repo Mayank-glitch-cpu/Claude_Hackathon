@@ -1,0 +1,680 @@
+23:26:39 | INFO     | Logging initialized for run: 20251108_232639_7c77a173
+23:26:39 | INFO     | Logging initialized for run: 20251108_232639_7c77a173
+23:26:39 | INFO     | Logging initialized for run: 20251108_232639_7c77a173
+23:26:39 | INFO     | Logging initialized for run: 20251108_232639_7c77a173
+23:26:39 | INFO     | Logging initialized for run: 20251108_232639_7c77a173
+================================================================================
+PROCESS ANALYSIS: edfa9484-a34f-480e-81cc-8591c959f25a
+================================================================================
+Status: processing
+Progress: 88%
+Current Step: asset_planning
+Started: 2025-11-09 06:05:49.875346
+Completed: None
+
+================================================================================
+QUESTION
+================================================================================
+ID: 52150003-ee78-43c5-854c-f5fc01a5fd25
+Text: How much water must be added to 10 liters of 30% salt solution to make it 20%?
+Options: None
+
+================================================================================
+PIPELINE STEPS (8 total)
+================================================================================
+
+--- Step 1: document_parsing ---
+Status: skipped
+Started: 2025-11-09 06:06:04.388062
+Completed: 2025-11-09 06:06:04.505443
+Duration: 0.12 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": null,
+  "analysis": null,
+  "template_type": null,
+  "strategy": null,
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "message": "File content not provided, using existing question"
+}
+
+--- Step 2: question_extraction ---
+Status: completed
+Started: 2025-11-09 06:06:04.639211
+Completed: 2025-11-09 06:06:04.765063
+Duration: 0.13 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": null,
+  "analysis": null,
+  "template_type": null,
+  "strategy": null,
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "options": null,
+  "file_type": "existing"
+}
+
+--- Step 3: question_analysis ---
+Status: completed
+Started: 2025-11-09 06:06:04.888116
+Completed: 2025-11-09 06:06:09.231115
+Duration: 4.34 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": null,
+  "template_type": null,
+  "strategy": null,
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "question_type": "word_problem",
+  "subject": "mathematics",
+  "difficulty": "intermediate",
+  "key_concepts": [
+    "percentage concentration",
+    "dilution",
+    "algebraic equations"
+  ],
+  "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+  "complexity_score": 5,
+  "topic": "mixture problems"
+}
+
+VALIDATION RESULT:
+{
+  "is_valid": true,
+  "errors": [],
+  "warnings": []
+}
+
+--- Step 4: template_routing ---
+Status: completed
+Started: 2025-11-09 06:06:09.344618
+Completed: 2025-11-09 06:06:11.061084
+Duration: 1.72 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": {
+    "question_type": "word_problem",
+    "subject": "mathematics",
+    "difficulty": "intermediate",
+    "key_concepts": [
+      "percentage concentration",
+      "dilution",
+      "algebraic equations"
+    ],
+    "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+    "complexity_score": 5,
+    "topic": "mixture problems"
+  },
+  "template_type": null,
+  "strategy": null,
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "templateType": "PARAMETER_PLAYGROUND",
+  "confidence": 0.9,
+  "rationale": "The question involves understanding how changing the amount of water affects the concentration of a solution, which can be effectively explored through a parametric simulation. 'PARAMETER_PLAYGROUND' allows users to experiment with different quantities and observe the impact on concentration, aligning well with the key concepts of dilution and algebraic equations."
+}
+
+--- Step 5: strategy_creation ---
+Status: completed
+Started: 2025-11-09 06:06:11.268970
+Completed: 2025-11-09 06:06:17.278638
+Duration: 6.01 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": {
+    "question_type": "word_problem",
+    "subject": "mathematics",
+    "difficulty": "intermediate",
+    "key_concepts": [
+      "percentage concentration",
+      "dilution",
+      "algebraic equations"
+    ],
+    "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+    "complexity_score": 5,
+    "topic": "mixture problems"
+  },
+  "template_type": "PARAMETER_PLAYGROUND",
+  "strategy": null,
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "game_format": "simulation",
+  "format_rationale": "A simulation format allows learners to experiment with different scenarios involving percentage concentration and dilution. By manipulating variables within interactive simulations, students can visualize the impact of their choices on the solution, thereby enhancing their understanding of algebraic equations and mathematical concepts in a dynamic and engaging way.",
+  "storyline": {
+    "story_title": "The Alchemist's Salt Solution Challenge",
+    "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+    "characters": [
+      "Luna",
+      "Orion",
+      "Master Alaric"
+    ],
+    "setting": "The enchanting village of Aquamira, within Master Alaric's potion laboratory"
+  },
+  "interactions": {
+    "interaction_type": "click",
+    "feedback_style": "progressive",
+    "hints_enabled": true,
+    "animation_style": "smooth"
+  },
+  "prompt_template": "---\n\n## \ud83e\udde0 **Master Prompt: \"Story-Based Intuitive Visualization Generator\"**\n\n### \ud83e\udde9 **System Role**\n\nYou are a **Visual Story Architect for Learning**.\nYour goal is to transform coding or reasoning problems into **question-driven, interactive visual experiences** that help learners *see, feel, and understand* the core concept through answering questions \u2014 not just viewing visualizations.\n\n**CRITICAL: The visualization must be question-answer based.** The HTML should present questions to the learner and require them to answer before proceeding. The visualization serves as the context and feedback mechanism for the questions, not just a passive display.\n\nEach output must include:\n\n* A **story** that grounds the logic of the problem in a relatable or fantastical world.\n* A **visual metaphor** that maps the data and relationships directly to objects, movement, or colors.\n* **Multiple intuitive questions** that test whether the learner *understands the logic visually* \u2014 questions are the primary interaction, not optional.\n* A **question-driven interaction flow** where learners must answer questions to progress through the visualization.\n* A **visual feedback mechanism** that responds to answers with animation, light, or sound.\n* A **learning alignment statement** showing how the story preserves the exact reasoning skill of the original problem.\n\n---\n\n### \u2699\ufe0f **Prompt Input Schema**\n\n```json\n{\n  \"problem_title\": \"\",\n  \"intent_of_question\": \"What reasoning or intuition this problem tests (e.g., pattern recognition, search space reduction, boundary logic)\",\n  \"difficulty_level\": \"\",\n  \"key_concepts\": [],\n  \"expected_input_output\": {\n    \"input_format\": \"\",\n    \"output_format\": \"\"\n  }\n}\n```\n\n---\n\n### \ud83e\uddf1 **Prompt Output Schema**\n\n```json\n{\n  \"story_title\": \"\",\n  \"story_context\": \"Set the scene and give narrative meaning to the problem without using code terms.\",\n  \"learning_intuition\": \"Describe what the learner should intuitively realize while engaging.\",\n  \"visual_metaphor\": \"Explain how inputs, logic, and outputs are represented visually.\",\n  \"interaction_design\": \"Describe the question-driven flow where learners must answer questions to progress.\",\n  \"visual_elements\": [\n    \"List visual features: colors, objects, animations, characters\"\n  ],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Phrase the visual challenge as a natural, curiosity-driven question that must be answered.\",\n      \"question_type\": \"multiple_choice|interactive|prediction\",\n      \"answer_structure\": {\n        \"options\": [],\n        \"correct_answer\": \"\",\n        \"feedback\": {\n          \"correct\": \"\",\n          \"incorrect\": \"\"\n        }\n      },\n      \"visual_context\": \"Describe what visualization elements are shown when this question is presented.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"The main question that drives the entire visualization experience (for backward compatibility).\",\n  \"learning_alignment\": \"Explain exactly which cognitive skill or intuition this visualization tests.\",\n  \"animation_cues\": \"Describe how motion or visual effects illustrate the logic or feedback based on answers.\",\n  \"question_implementation_notes\": \"Instructions for HTML: Questions must be prominently displayed, answers must be required before showing results, visualization updates based on answers.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### \ud83d\udccb **HTML Implementation Requirements**\n\nWhen generating HTML for the visualization, **MANDATORY requirements**:\n\n1. **Questions must be prominently displayed** - Questions should appear at the top or in a dedicated question area, clearly visible before any answer options.\n\n2. **Answer submission is required** - Learners cannot see the final visualization result or proceed without first submitting an answer. The visualization should show:\n   - Initial state: Question + visualization context (e.g., towers, gems, runes)\n   - After answer submission: Full visualization with feedback animation\n\n3. **Question-driven flow** - The HTML should structure the experience around questions:\n   - Display question first\n   - Show visualization context (partial or animated setup)\n   - Present answer options (buttons, dropdowns, etc.)\n   - Require answer selection and submission\n   - Show feedback and complete visualization only after submission\n\n4. **Visual feedback on answers** - The visualization must respond to the learner's answer:\n   - Correct answers: Positive animations (glow, success effects, etc.)\n   - Incorrect answers: Negative feedback (shake, red flash, etc.)\n   - Both should update the visualization to show the correct result\n\n5. **No passive viewing** - The visualization is not just for display; it's an interactive question-answer experience where the visual elements support understanding the question and provide feedback.\n\n---\n\n## \ud83c\udfae **Few-Shot Examples**\n\n---\n\n### **Example 1: Trapping Rain Water**\n\n```json\n{\n  \"story_title\": \"Echoes of the Rain Towers\",\n  \"story_context\": \"In a land of uneven towers, a celestial storm fills the valleys with starlight rain. The student, acting as the 'Rainkeeper', must answer questions about how much dew will be trapped when the rain ceases.\",\n  \"learning_intuition\": \"Valleys between taller walls store water \u2014 boundaries define capacity.\",\n  \"visual_metaphor\": \"Gray towers of different heights represent terrain. Blue animated water fills valleys. Total trapped water corresponds to the problem's solution.\",\n  \"interaction_design\": \"The visualization presents questions that must be answered. Learner watches rainfall animation, then must answer: 'How many units of water will remain trapped?' The visualization only shows the final result after the learner submits their answer.\",\n  \"visual_elements\": [\"Gray bars for towers\", \"Blue fill for trapped water\", \"Rainfall animation\", \"Glowing feedback\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Observe the towers and the rainfall. When the rain stops, how many units of water will remain trapped between the towers?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"7\", \"8\", \"9\", \"11\"],\n        \"correct_answer\": \"9\",\n        \"feedback\": {\n          \"correct\": \"\u2705 Correct \u2014 the deepest valleys hold 9 units of water.\",\n          \"incorrect\": \"\u274c Observe again: water overflows in lower gaps, leaving 9 units.\"\n        }\n      },\n      \"visual_context\": \"Towers are displayed with heights [0,1,0,2,1,0,1,3,2,1,2,1]. Rainfall animation plays, showing water filling valleys. The question is displayed prominently above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"When the rain stops, how many units of water will remain trapped between towers?\",\n  \"learning_alignment\": \"Tests spatial reasoning and boundary logic \u2014 core to dynamic programming and array traversal thinking.\",\n  \"animation_cues\": \"After learner submits answer: Blue water rises between towers; correct answer glows green; incorrect triggers overflow animation with red flash.\",\n  \"question_implementation_notes\": \"HTML must display the question prominently at the top. The visualization shows the towers and rainfall animation. Answer options are displayed as buttons. Only after selecting an answer and clicking 'Submit' does the visualization show the trapped water result with feedback animation.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 2: Two Sum**\n\n```json\n{\n  \"story_title\": \"Gem Pairs \u2014 Unlock the Chest\",\n  \"story_context\": \"In a crystal cavern, glowing gems each hold a numeric essence. A magical chest opens only when two gems together reach its secret value. The learner must answer which pair unlocks it.\",\n  \"learning_intuition\": \"Every value has a complementary partner that completes the target sum.\",\n  \"visual_metaphor\": \"Gems represent numbers. A chest labeled with the target sum opens when two selected gems' values add to that target.\",\n  \"interaction_design\": \"The visualization displays gems and a chest. A question asks: 'Which two gems together unlock the chest?' Learner must select their answer from options. Only after answering does the visualization show the result with animation.\",\n  \"visual_elements\": [\"Colored gems with numbers\", \"Treasure chest\", \"Curved golden connection line\", \"Coin burst animation\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"The chest requires a sum of 9. Which two gems together unlock the chest?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"(2,7)\", \"(3,5)\", \"(1,8)\", \"(4,6)\"],\n        \"correct_answer\": \"(2,7)\",\n        \"feedback\": {\n          \"correct\": \"\ud83d\udc8e The chest bursts open \u2014 you found the perfect pair!\",\n          \"incorrect\": \"\ud83d\udeab Wrong pair \u2014 try again and find the true complement.\"\n        }\n      },\n      \"visual_context\": \"Gems are displayed with values [2, 7, 11, 15, 3, 5]. A chest shows target sum: 9. The question is displayed above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"Which two gems together unlock the chest?\",\n  \"learning_alignment\": \"Tests intuitive understanding of pair relationships and additive complementarity.\",\n  \"animation_cues\": \"After learner submits answer: Selected gems glow; golden line connects the chosen pair; correct answer sends an energy beam into the chest causing a gold coin burst; incorrect answer shakes the chest with red flash.\",\n  \"question_implementation_notes\": \"HTML displays the question prominently. Gems and chest are visible. Multiple choice options are shown as buttons. After selecting and submitting, the visualization animates the result based on the answer.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 3: Longest Substring Without Repeating Characters**\n\n```json\n{\n  \"story_title\": \"The Chain of Light\",\n  \"story_context\": \"A line of glowing runes forms a magic spell. Each rune glows differently, but if two identical runes appear too close, the chain breaks.\",\n  \"learning_intuition\": \"A valid sequence is one where every element is unique \u2014 continuity breaks when repetition occurs.\",\n  \"visual_metaphor\": \"Runes represent characters in a string. Each rune glows when unique; when a repeat appears, the chain flashes red and resets.\",\n  \"interaction_design\": \"Learner observes the glowing sequence and must predict the longest glowing chain before repetition.\",\n  \"visual_elements\": [\"Runes of varying colors\", \"Sequential glowing\", \"Red flash on repetition\", \"Length counter\"],\n  \"intuitive_question\": \"What is the length of the longest glowing chain before any rune repeats?\",\n  \"answer_structure\": {\n    \"options\": [\"3\", \"5\", \"7\", \"8\"],\n    \"correct_answer\": \"5\",\n    \"feedback\": {\n      \"correct\": \"\u2728 Perfect! You spotted the longest unique sequence.\",\n      \"incorrect\": \"\ud83d\udca1 Look again \u2014 duplication resets the spell chain.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive grasp of uniqueness and sliding window logic.\",\n  \"animation_cues\": \"Runes light up sequentially; on repetition, a red flash breaks the chain; counter updates dynamically.\"\n}\n```\n\n---\n\n### **Example 4: Binary Search**\n\n```json\n{\n  \"story_title\": \"The Library of Halves\",\n  \"story_context\": \"A wise archivist searches an ancient library for a secret scroll. To save time, they split the shelves in half repeatedly, always choosing the correct half.\",\n  \"learning_intuition\": \"Halving reduces search space logarithmically \u2014 each step eliminates half the data.\",\n  \"visual_metaphor\": \"Shelves represent sorted data; each click halves the section visually, focusing attention on the remaining range.\",\n  \"interaction_design\": \"Learner clicks midpoints to guess where the scroll lies. Correctly following binary search steps narrows to the target.\",\n  \"visual_elements\": [\"Shelf tiles\", \"Golden highlight for midpoint\", \"Fade-out animation for discarded halves\", \"Scroll glow when found\"],\n  \"intuitive_question\": \"Which sequence of choices finds the scroll in the fewest steps?\",\n  \"answer_structure\": {\n    \"options\": [\"Left \u2192 Mid \u2192 Right\", \"Mid \u2192 Left \u2192 Mid\", \"Right \u2192 Mid \u2192 Left\", \"Mid \u2192 Right \u2192 Right\"],\n    \"correct_answer\": \"Mid \u2192 Left \u2192 Mid\",\n    \"feedback\": {\n      \"correct\": \"\ud83d\udcdc Found it! Each halving step brought you closer efficiently.\",\n      \"incorrect\": \"\u274c That path took longer \u2014 binary search cuts the search space in half each step.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive understanding of logarithmic reduction and search strategy efficiency.\",\n  \"animation_cues\": \"Shelves collapse visually by halves; midpoints glow; correct path causes scroll to illuminate.\"\n}\n```\n\n",
+  "difficulty": "intermediate"
+}
+
+--- Step 6: story_generation ---
+Status: completed
+Started: 2025-11-09 06:06:17.730687
+Completed: 2025-11-09 06:06:27.030116
+Duration: 9.30 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": {
+    "question_type": "word_problem",
+    "subject": "mathematics",
+    "difficulty": "intermediate",
+    "key_concepts": [
+      "percentage concentration",
+      "dilution",
+      "algebraic equations"
+    ],
+    "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+    "complexity_score": 5,
+    "topic": "mixture problems"
+  },
+  "template_type": "PARAMETER_PLAYGROUND",
+  "strategy": {
+    "game_format": "simulation",
+    "format_rationale": "A simulation format allows learners to experiment with different scenarios involving percentage concentration and dilution. By manipulating variables within interactive simulations, students can visualize the impact of their choices on the solution, thereby enhancing their understanding of algebraic equations and mathematical concepts in a dynamic and engaging way.",
+    "storyline": {
+      "story_title": "The Alchemist's Salt Solution Challenge",
+      "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+      "characters": [
+        "Luna",
+        "Orion",
+        "Master Alaric"
+      ],
+      "setting": "The enchanting village of Aquamira, within Master Alaric's potion laboratory"
+    },
+    "interactions": {
+      "interaction_type": "click",
+      "feedback_style": "progressive",
+      "hints_enabled": true,
+      "animation_style": "smooth"
+    },
+    "prompt_template": "---\n\n## \ud83e\udde0 **Master Prompt: \"Story-Based Intuitive Visualization Generator\"**\n\n### \ud83e\udde9 **System Role**\n\nYou are a **Visual Story Architect for Learning**.\nYour goal is to transform coding or reasoning problems into **question-driven, interactive visual experiences** that help learners *see, feel, and understand* the core concept through answering questions \u2014 not just viewing visualizations.\n\n**CRITICAL: The visualization must be question-answer based.** The HTML should present questions to the learner and require them to answer before proceeding. The visualization serves as the context and feedback mechanism for the questions, not just a passive display.\n\nEach output must include:\n\n* A **story** that grounds the logic of the problem in a relatable or fantastical world.\n* A **visual metaphor** that maps the data and relationships directly to objects, movement, or colors.\n* **Multiple intuitive questions** that test whether the learner *understands the logic visually* \u2014 questions are the primary interaction, not optional.\n* A **question-driven interaction flow** where learners must answer questions to progress through the visualization.\n* A **visual feedback mechanism** that responds to answers with animation, light, or sound.\n* A **learning alignment statement** showing how the story preserves the exact reasoning skill of the original problem.\n\n---\n\n### \u2699\ufe0f **Prompt Input Schema**\n\n```json\n{\n  \"problem_title\": \"\",\n  \"intent_of_question\": \"What reasoning or intuition this problem tests (e.g., pattern recognition, search space reduction, boundary logic)\",\n  \"difficulty_level\": \"\",\n  \"key_concepts\": [],\n  \"expected_input_output\": {\n    \"input_format\": \"\",\n    \"output_format\": \"\"\n  }\n}\n```\n\n---\n\n### \ud83e\uddf1 **Prompt Output Schema**\n\n```json\n{\n  \"story_title\": \"\",\n  \"story_context\": \"Set the scene and give narrative meaning to the problem without using code terms.\",\n  \"learning_intuition\": \"Describe what the learner should intuitively realize while engaging.\",\n  \"visual_metaphor\": \"Explain how inputs, logic, and outputs are represented visually.\",\n  \"interaction_design\": \"Describe the question-driven flow where learners must answer questions to progress.\",\n  \"visual_elements\": [\n    \"List visual features: colors, objects, animations, characters\"\n  ],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Phrase the visual challenge as a natural, curiosity-driven question that must be answered.\",\n      \"question_type\": \"multiple_choice|interactive|prediction\",\n      \"answer_structure\": {\n        \"options\": [],\n        \"correct_answer\": \"\",\n        \"feedback\": {\n          \"correct\": \"\",\n          \"incorrect\": \"\"\n        }\n      },\n      \"visual_context\": \"Describe what visualization elements are shown when this question is presented.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"The main question that drives the entire visualization experience (for backward compatibility).\",\n  \"learning_alignment\": \"Explain exactly which cognitive skill or intuition this visualization tests.\",\n  \"animation_cues\": \"Describe how motion or visual effects illustrate the logic or feedback based on answers.\",\n  \"question_implementation_notes\": \"Instructions for HTML: Questions must be prominently displayed, answers must be required before showing results, visualization updates based on answers.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### \ud83d\udccb **HTML Implementation Requirements**\n\nWhen generating HTML for the visualization, **MANDATORY requirements**:\n\n1. **Questions must be prominently displayed** - Questions should appear at the top or in a dedicated question area, clearly visible before any answer options.\n\n2. **Answer submission is required** - Learners cannot see the final visualization result or proceed without first submitting an answer. The visualization should show:\n   - Initial state: Question + visualization context (e.g., towers, gems, runes)\n   - After answer submission: Full visualization with feedback animation\n\n3. **Question-driven flow** - The HTML should structure the experience around questions:\n   - Display question first\n   - Show visualization context (partial or animated setup)\n   - Present answer options (buttons, dropdowns, etc.)\n   - Require answer selection and submission\n   - Show feedback and complete visualization only after submission\n\n4. **Visual feedback on answers** - The visualization must respond to the learner's answer:\n   - Correct answers: Positive animations (glow, success effects, etc.)\n   - Incorrect answers: Negative feedback (shake, red flash, etc.)\n   - Both should update the visualization to show the correct result\n\n5. **No passive viewing** - The visualization is not just for display; it's an interactive question-answer experience where the visual elements support understanding the question and provide feedback.\n\n---\n\n## \ud83c\udfae **Few-Shot Examples**\n\n---\n\n### **Example 1: Trapping Rain Water**\n\n```json\n{\n  \"story_title\": \"Echoes of the Rain Towers\",\n  \"story_context\": \"In a land of uneven towers, a celestial storm fills the valleys with starlight rain. The student, acting as the 'Rainkeeper', must answer questions about how much dew will be trapped when the rain ceases.\",\n  \"learning_intuition\": \"Valleys between taller walls store water \u2014 boundaries define capacity.\",\n  \"visual_metaphor\": \"Gray towers of different heights represent terrain. Blue animated water fills valleys. Total trapped water corresponds to the problem's solution.\",\n  \"interaction_design\": \"The visualization presents questions that must be answered. Learner watches rainfall animation, then must answer: 'How many units of water will remain trapped?' The visualization only shows the final result after the learner submits their answer.\",\n  \"visual_elements\": [\"Gray bars for towers\", \"Blue fill for trapped water\", \"Rainfall animation\", \"Glowing feedback\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Observe the towers and the rainfall. When the rain stops, how many units of water will remain trapped between the towers?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"7\", \"8\", \"9\", \"11\"],\n        \"correct_answer\": \"9\",\n        \"feedback\": {\n          \"correct\": \"\u2705 Correct \u2014 the deepest valleys hold 9 units of water.\",\n          \"incorrect\": \"\u274c Observe again: water overflows in lower gaps, leaving 9 units.\"\n        }\n      },\n      \"visual_context\": \"Towers are displayed with heights [0,1,0,2,1,0,1,3,2,1,2,1]. Rainfall animation plays, showing water filling valleys. The question is displayed prominently above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"When the rain stops, how many units of water will remain trapped between towers?\",\n  \"learning_alignment\": \"Tests spatial reasoning and boundary logic \u2014 core to dynamic programming and array traversal thinking.\",\n  \"animation_cues\": \"After learner submits answer: Blue water rises between towers; correct answer glows green; incorrect triggers overflow animation with red flash.\",\n  \"question_implementation_notes\": \"HTML must display the question prominently at the top. The visualization shows the towers and rainfall animation. Answer options are displayed as buttons. Only after selecting an answer and clicking 'Submit' does the visualization show the trapped water result with feedback animation.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 2: Two Sum**\n\n```json\n{\n  \"story_title\": \"Gem Pairs \u2014 Unlock the Chest\",\n  \"story_context\": \"In a crystal cavern, glowing gems each hold a numeric essence. A magical chest opens only when two gems together reach its secret value. The learner must answer which pair unlocks it.\",\n  \"learning_intuition\": \"Every value has a complementary partner that completes the target sum.\",\n  \"visual_metaphor\": \"Gems represent numbers. A chest labeled with the target sum opens when two selected gems' values add to that target.\",\n  \"interaction_design\": \"The visualization displays gems and a chest. A question asks: 'Which two gems together unlock the chest?' Learner must select their answer from options. Only after answering does the visualization show the result with animation.\",\n  \"visual_elements\": [\"Colored gems with numbers\", \"Treasure chest\", \"Curved golden connection line\", \"Coin burst animation\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"The chest requires a sum of 9. Which two gems together unlock the chest?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"(2,7)\", \"(3,5)\", \"(1,8)\", \"(4,6)\"],\n        \"correct_answer\": \"(2,7)\",\n        \"feedback\": {\n          \"correct\": \"\ud83d\udc8e The chest bursts open \u2014 you found the perfect pair!\",\n          \"incorrect\": \"\ud83d\udeab Wrong pair \u2014 try again and find the true complement.\"\n        }\n      },\n      \"visual_context\": \"Gems are displayed with values [2, 7, 11, 15, 3, 5]. A chest shows target sum: 9. The question is displayed above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"Which two gems together unlock the chest?\",\n  \"learning_alignment\": \"Tests intuitive understanding of pair relationships and additive complementarity.\",\n  \"animation_cues\": \"After learner submits answer: Selected gems glow; golden line connects the chosen pair; correct answer sends an energy beam into the chest causing a gold coin burst; incorrect answer shakes the chest with red flash.\",\n  \"question_implementation_notes\": \"HTML displays the question prominently. Gems and chest are visible. Multiple choice options are shown as buttons. After selecting and submitting, the visualization animates the result based on the answer.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 3: Longest Substring Without Repeating Characters**\n\n```json\n{\n  \"story_title\": \"The Chain of Light\",\n  \"story_context\": \"A line of glowing runes forms a magic spell. Each rune glows differently, but if two identical runes appear too close, the chain breaks.\",\n  \"learning_intuition\": \"A valid sequence is one where every element is unique \u2014 continuity breaks when repetition occurs.\",\n  \"visual_metaphor\": \"Runes represent characters in a string. Each rune glows when unique; when a repeat appears, the chain flashes red and resets.\",\n  \"interaction_design\": \"Learner observes the glowing sequence and must predict the longest glowing chain before repetition.\",\n  \"visual_elements\": [\"Runes of varying colors\", \"Sequential glowing\", \"Red flash on repetition\", \"Length counter\"],\n  \"intuitive_question\": \"What is the length of the longest glowing chain before any rune repeats?\",\n  \"answer_structure\": {\n    \"options\": [\"3\", \"5\", \"7\", \"8\"],\n    \"correct_answer\": \"5\",\n    \"feedback\": {\n      \"correct\": \"\u2728 Perfect! You spotted the longest unique sequence.\",\n      \"incorrect\": \"\ud83d\udca1 Look again \u2014 duplication resets the spell chain.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive grasp of uniqueness and sliding window logic.\",\n  \"animation_cues\": \"Runes light up sequentially; on repetition, a red flash breaks the chain; counter updates dynamically.\"\n}\n```\n\n---\n\n### **Example 4: Binary Search**\n\n```json\n{\n  \"story_title\": \"The Library of Halves\",\n  \"story_context\": \"A wise archivist searches an ancient library for a secret scroll. To save time, they split the shelves in half repeatedly, always choosing the correct half.\",\n  \"learning_intuition\": \"Halving reduces search space logarithmically \u2014 each step eliminates half the data.\",\n  \"visual_metaphor\": \"Shelves represent sorted data; each click halves the section visually, focusing attention on the remaining range.\",\n  \"interaction_design\": \"Learner clicks midpoints to guess where the scroll lies. Correctly following binary search steps narrows to the target.\",\n  \"visual_elements\": [\"Shelf tiles\", \"Golden highlight for midpoint\", \"Fade-out animation for discarded halves\", \"Scroll glow when found\"],\n  \"intuitive_question\": \"Which sequence of choices finds the scroll in the fewest steps?\",\n  \"answer_structure\": {\n    \"options\": [\"Left \u2192 Mid \u2192 Right\", \"Mid \u2192 Left \u2192 Mid\", \"Right \u2192 Mid \u2192 Left\", \"Mid \u2192 Right \u2192 Right\"],\n    \"correct_answer\": \"Mid \u2192 Left \u2192 Mid\",\n    \"feedback\": {\n      \"correct\": \"\ud83d\udcdc Found it! Each halving step brought you closer efficiently.\",\n      \"incorrect\": \"\u274c That path took longer \u2014 binary search cuts the search space in half each step.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive understanding of logarithmic reduction and search strategy efficiency.\",\n  \"animation_cues\": \"Shelves collapse visually by halves; midpoints glow; correct path causes scroll to illuminate.\"\n}\n```\n\n",
+    "difficulty": "intermediate"
+  },
+  "story": null,
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "story_title": "The Alchemist's Salt Solution Challenge",
+  "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+  "learning_intuition": "Learners should intuitively grasp the relationship between the amount of added water and its effect on the dilution of the solution's concentration.",
+  "visual_metaphor": "The cauldron is filled with a swirling, glowing liquid representing the salt solution. Adding water is visualized by a stream of clear liquid pouring into the cauldron, changing the glow's intensity to reflect the new concentration.",
+  "interaction_design": "Learners adjust a water volume slider to simulate adding water to the cauldron. They must answer: 'How many liters of water must you add to achieve a 20% concentration?' before seeing the full result. The visualization updates real-time as they adjust, but locks the final visualization until an answer is submitted.",
+  "visual_elements": [
+    "Cauldron with swirling glow",
+    "Clear water stream animation",
+    "Slider for water volume",
+    "Concentration percentage display",
+    "Luna and Orion as animated characters giving hints"
+  ],
+  "question_flow": [
+    {
+      "question_number": 1,
+      "question_type": "interactive",
+      "answer_structure": {
+        "options": [],
+        "correct_answer": "5",
+        "feedback": {
+          "correct": "\u2728 Brilliant! You've precisely diluted the potion to a 20% concentration.",
+          "incorrect": "\u274c Not quite. Try adjusting the water volume again to reach the correct concentration."
+        }
+      },
+      "visual_context": "The glowing cauldron shows a dynamic change in glow intensity as the water volume slider is adjusted. Luna and Orion provide encouraging hints.",
+      "required_to_proceed": true,
+      "question_text": "How many liters of water must you add to the cauldron to achieve a 20% salt concentration?"
+    }
+  ],
+  "primary_question": "How many liters of water must you add to achieve a 20% salt concentration?",
+  "learning_alignment": "This visualization tests understanding of percentage concentration and the algebraic calculations involved in dilution problems.",
+  "animation_cues": "As water is added, the glow of the cauldron shifts in hue, indicating changes in concentration. Correct answers trigger a sparkling effect over the cauldron, while incorrect answers cause the cauldron to dim slightly and shake.",
+  "question_implementation_notes": "The question is displayed prominently above the cauldron visualization. A slider allows learners to adjust water volume, with real-time feedback on concentration until submission. After submitting an answer, the visualization provides feedback with animations.",
+  "non_negotiables": [
+    "Preserve the original logic and learning goal.",
+    "Questions are mandatory - learners cannot proceed without answering.",
+    "Visualization serves as context and feedback for questions, not just display.",
+    "Use animation and color to express logic and provide answer feedback, not decoration."
+  ]
+}
+
+VALIDATION RESULT:
+{
+  "is_valid": true,
+  "errors": [],
+  "warnings": []
+}
+
+--- Step 7: blueprint_generation ---
+Status: completed
+Started: 2025-11-09 06:06:27.224087
+Completed: 2025-11-09 06:06:30.934236
+Duration: 3.71 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": {
+    "question_type": "word_problem",
+    "subject": "mathematics",
+    "difficulty": "intermediate",
+    "key_concepts": [
+      "percentage concentration",
+      "dilution",
+      "algebraic equations"
+    ],
+    "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+    "complexity_score": 5,
+    "topic": "mixture problems"
+  },
+  "template_type": "PARAMETER_PLAYGROUND",
+  "strategy": {
+    "game_format": "simulation",
+    "format_rationale": "A simulation format allows learners to experiment with different scenarios involving percentage concentration and dilution. By manipulating variables within interactive simulations, students can visualize the impact of their choices on the solution, thereby enhancing their understanding of algebraic equations and mathematical concepts in a dynamic and engaging way.",
+    "storyline": {
+      "story_title": "The Alchemist's Salt Solution Challenge",
+      "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+      "characters": [
+        "Luna",
+        "Orion",
+        "Master Alaric"
+      ],
+      "setting": "The enchanting village of Aquamira, within Master Alaric's potion laboratory"
+    },
+    "interactions": {
+      "interaction_type": "click",
+      "feedback_style": "progressive",
+      "hints_enabled": true,
+      "animation_style": "smooth"
+    },
+    "prompt_template": "---\n\n## \ud83e\udde0 **Master Prompt: \"Story-Based Intuitive Visualization Generator\"**\n\n### \ud83e\udde9 **System Role**\n\nYou are a **Visual Story Architect for Learning**.\nYour goal is to transform coding or reasoning problems into **question-driven, interactive visual experiences** that help learners *see, feel, and understand* the core concept through answering questions \u2014 not just viewing visualizations.\n\n**CRITICAL: The visualization must be question-answer based.** The HTML should present questions to the learner and require them to answer before proceeding. The visualization serves as the context and feedback mechanism for the questions, not just a passive display.\n\nEach output must include:\n\n* A **story** that grounds the logic of the problem in a relatable or fantastical world.\n* A **visual metaphor** that maps the data and relationships directly to objects, movement, or colors.\n* **Multiple intuitive questions** that test whether the learner *understands the logic visually* \u2014 questions are the primary interaction, not optional.\n* A **question-driven interaction flow** where learners must answer questions to progress through the visualization.\n* A **visual feedback mechanism** that responds to answers with animation, light, or sound.\n* A **learning alignment statement** showing how the story preserves the exact reasoning skill of the original problem.\n\n---\n\n### \u2699\ufe0f **Prompt Input Schema**\n\n```json\n{\n  \"problem_title\": \"\",\n  \"intent_of_question\": \"What reasoning or intuition this problem tests (e.g., pattern recognition, search space reduction, boundary logic)\",\n  \"difficulty_level\": \"\",\n  \"key_concepts\": [],\n  \"expected_input_output\": {\n    \"input_format\": \"\",\n    \"output_format\": \"\"\n  }\n}\n```\n\n---\n\n### \ud83e\uddf1 **Prompt Output Schema**\n\n```json\n{\n  \"story_title\": \"\",\n  \"story_context\": \"Set the scene and give narrative meaning to the problem without using code terms.\",\n  \"learning_intuition\": \"Describe what the learner should intuitively realize while engaging.\",\n  \"visual_metaphor\": \"Explain how inputs, logic, and outputs are represented visually.\",\n  \"interaction_design\": \"Describe the question-driven flow where learners must answer questions to progress.\",\n  \"visual_elements\": [\n    \"List visual features: colors, objects, animations, characters\"\n  ],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Phrase the visual challenge as a natural, curiosity-driven question that must be answered.\",\n      \"question_type\": \"multiple_choice|interactive|prediction\",\n      \"answer_structure\": {\n        \"options\": [],\n        \"correct_answer\": \"\",\n        \"feedback\": {\n          \"correct\": \"\",\n          \"incorrect\": \"\"\n        }\n      },\n      \"visual_context\": \"Describe what visualization elements are shown when this question is presented.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"The main question that drives the entire visualization experience (for backward compatibility).\",\n  \"learning_alignment\": \"Explain exactly which cognitive skill or intuition this visualization tests.\",\n  \"animation_cues\": \"Describe how motion or visual effects illustrate the logic or feedback based on answers.\",\n  \"question_implementation_notes\": \"Instructions for HTML: Questions must be prominently displayed, answers must be required before showing results, visualization updates based on answers.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### \ud83d\udccb **HTML Implementation Requirements**\n\nWhen generating HTML for the visualization, **MANDATORY requirements**:\n\n1. **Questions must be prominently displayed** - Questions should appear at the top or in a dedicated question area, clearly visible before any answer options.\n\n2. **Answer submission is required** - Learners cannot see the final visualization result or proceed without first submitting an answer. The visualization should show:\n   - Initial state: Question + visualization context (e.g., towers, gems, runes)\n   - After answer submission: Full visualization with feedback animation\n\n3. **Question-driven flow** - The HTML should structure the experience around questions:\n   - Display question first\n   - Show visualization context (partial or animated setup)\n   - Present answer options (buttons, dropdowns, etc.)\n   - Require answer selection and submission\n   - Show feedback and complete visualization only after submission\n\n4. **Visual feedback on answers** - The visualization must respond to the learner's answer:\n   - Correct answers: Positive animations (glow, success effects, etc.)\n   - Incorrect answers: Negative feedback (shake, red flash, etc.)\n   - Both should update the visualization to show the correct result\n\n5. **No passive viewing** - The visualization is not just for display; it's an interactive question-answer experience where the visual elements support understanding the question and provide feedback.\n\n---\n\n## \ud83c\udfae **Few-Shot Examples**\n\n---\n\n### **Example 1: Trapping Rain Water**\n\n```json\n{\n  \"story_title\": \"Echoes of the Rain Towers\",\n  \"story_context\": \"In a land of uneven towers, a celestial storm fills the valleys with starlight rain. The student, acting as the 'Rainkeeper', must answer questions about how much dew will be trapped when the rain ceases.\",\n  \"learning_intuition\": \"Valleys between taller walls store water \u2014 boundaries define capacity.\",\n  \"visual_metaphor\": \"Gray towers of different heights represent terrain. Blue animated water fills valleys. Total trapped water corresponds to the problem's solution.\",\n  \"interaction_design\": \"The visualization presents questions that must be answered. Learner watches rainfall animation, then must answer: 'How many units of water will remain trapped?' The visualization only shows the final result after the learner submits their answer.\",\n  \"visual_elements\": [\"Gray bars for towers\", \"Blue fill for trapped water\", \"Rainfall animation\", \"Glowing feedback\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Observe the towers and the rainfall. When the rain stops, how many units of water will remain trapped between the towers?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"7\", \"8\", \"9\", \"11\"],\n        \"correct_answer\": \"9\",\n        \"feedback\": {\n          \"correct\": \"\u2705 Correct \u2014 the deepest valleys hold 9 units of water.\",\n          \"incorrect\": \"\u274c Observe again: water overflows in lower gaps, leaving 9 units.\"\n        }\n      },\n      \"visual_context\": \"Towers are displayed with heights [0,1,0,2,1,0,1,3,2,1,2,1]. Rainfall animation plays, showing water filling valleys. The question is displayed prominently above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"When the rain stops, how many units of water will remain trapped between towers?\",\n  \"learning_alignment\": \"Tests spatial reasoning and boundary logic \u2014 core to dynamic programming and array traversal thinking.\",\n  \"animation_cues\": \"After learner submits answer: Blue water rises between towers; correct answer glows green; incorrect triggers overflow animation with red flash.\",\n  \"question_implementation_notes\": \"HTML must display the question prominently at the top. The visualization shows the towers and rainfall animation. Answer options are displayed as buttons. Only after selecting an answer and clicking 'Submit' does the visualization show the trapped water result with feedback animation.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 2: Two Sum**\n\n```json\n{\n  \"story_title\": \"Gem Pairs \u2014 Unlock the Chest\",\n  \"story_context\": \"In a crystal cavern, glowing gems each hold a numeric essence. A magical chest opens only when two gems together reach its secret value. The learner must answer which pair unlocks it.\",\n  \"learning_intuition\": \"Every value has a complementary partner that completes the target sum.\",\n  \"visual_metaphor\": \"Gems represent numbers. A chest labeled with the target sum opens when two selected gems' values add to that target.\",\n  \"interaction_design\": \"The visualization displays gems and a chest. A question asks: 'Which two gems together unlock the chest?' Learner must select their answer from options. Only after answering does the visualization show the result with animation.\",\n  \"visual_elements\": [\"Colored gems with numbers\", \"Treasure chest\", \"Curved golden connection line\", \"Coin burst animation\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"The chest requires a sum of 9. Which two gems together unlock the chest?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"(2,7)\", \"(3,5)\", \"(1,8)\", \"(4,6)\"],\n        \"correct_answer\": \"(2,7)\",\n        \"feedback\": {\n          \"correct\": \"\ud83d\udc8e The chest bursts open \u2014 you found the perfect pair!\",\n          \"incorrect\": \"\ud83d\udeab Wrong pair \u2014 try again and find the true complement.\"\n        }\n      },\n      \"visual_context\": \"Gems are displayed with values [2, 7, 11, 15, 3, 5]. A chest shows target sum: 9. The question is displayed above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"Which two gems together unlock the chest?\",\n  \"learning_alignment\": \"Tests intuitive understanding of pair relationships and additive complementarity.\",\n  \"animation_cues\": \"After learner submits answer: Selected gems glow; golden line connects the chosen pair; correct answer sends an energy beam into the chest causing a gold coin burst; incorrect answer shakes the chest with red flash.\",\n  \"question_implementation_notes\": \"HTML displays the question prominently. Gems and chest are visible. Multiple choice options are shown as buttons. After selecting and submitting, the visualization animates the result based on the answer.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 3: Longest Substring Without Repeating Characters**\n\n```json\n{\n  \"story_title\": \"The Chain of Light\",\n  \"story_context\": \"A line of glowing runes forms a magic spell. Each rune glows differently, but if two identical runes appear too close, the chain breaks.\",\n  \"learning_intuition\": \"A valid sequence is one where every element is unique \u2014 continuity breaks when repetition occurs.\",\n  \"visual_metaphor\": \"Runes represent characters in a string. Each rune glows when unique; when a repeat appears, the chain flashes red and resets.\",\n  \"interaction_design\": \"Learner observes the glowing sequence and must predict the longest glowing chain before repetition.\",\n  \"visual_elements\": [\"Runes of varying colors\", \"Sequential glowing\", \"Red flash on repetition\", \"Length counter\"],\n  \"intuitive_question\": \"What is the length of the longest glowing chain before any rune repeats?\",\n  \"answer_structure\": {\n    \"options\": [\"3\", \"5\", \"7\", \"8\"],\n    \"correct_answer\": \"5\",\n    \"feedback\": {\n      \"correct\": \"\u2728 Perfect! You spotted the longest unique sequence.\",\n      \"incorrect\": \"\ud83d\udca1 Look again \u2014 duplication resets the spell chain.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive grasp of uniqueness and sliding window logic.\",\n  \"animation_cues\": \"Runes light up sequentially; on repetition, a red flash breaks the chain; counter updates dynamically.\"\n}\n```\n\n---\n\n### **Example 4: Binary Search**\n\n```json\n{\n  \"story_title\": \"The Library of Halves\",\n  \"story_context\": \"A wise archivist searches an ancient library for a secret scroll. To save time, they split the shelves in half repeatedly, always choosing the correct half.\",\n  \"learning_intuition\": \"Halving reduces search space logarithmically \u2014 each step eliminates half the data.\",\n  \"visual_metaphor\": \"Shelves represent sorted data; each click halves the section visually, focusing attention on the remaining range.\",\n  \"interaction_design\": \"Learner clicks midpoints to guess where the scroll lies. Correctly following binary search steps narrows to the target.\",\n  \"visual_elements\": [\"Shelf tiles\", \"Golden highlight for midpoint\", \"Fade-out animation for discarded halves\", \"Scroll glow when found\"],\n  \"intuitive_question\": \"Which sequence of choices finds the scroll in the fewest steps?\",\n  \"answer_structure\": {\n    \"options\": [\"Left \u2192 Mid \u2192 Right\", \"Mid \u2192 Left \u2192 Mid\", \"Right \u2192 Mid \u2192 Left\", \"Mid \u2192 Right \u2192 Right\"],\n    \"correct_answer\": \"Mid \u2192 Left \u2192 Mid\",\n    \"feedback\": {\n      \"correct\": \"\ud83d\udcdc Found it! Each halving step brought you closer efficiently.\",\n      \"incorrect\": \"\u274c That path took longer \u2014 binary search cuts the search space in half each step.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive understanding of logarithmic reduction and search strategy efficiency.\",\n  \"animation_cues\": \"Shelves collapse visually by halves; midpoints glow; correct path causes scroll to illuminate.\"\n}\n```\n\n",
+    "difficulty": "intermediate"
+  },
+  "story": {
+    "story_title": "The Alchemist's Salt Solution Challenge",
+    "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+    "learning_intuition": "Learners should intuitively grasp the relationship between the amount of added water and its effect on the dilution of the solution's concentration.",
+    "visual_metaphor": "The cauldron is filled with a swirling, glowing liquid representing the salt solution. Adding water is visualized by a stream of clear liquid pouring into the cauldron, changing the glow's intensity to reflect the new concentration.",
+    "interaction_design": "Learners adjust a water volume slider to simulate adding water to the cauldron. They must answer: 'How many liters of water must you add to achieve a 20% concentration?' before seeing the full result. The visualization updates real-time as they adjust, but locks the final visualization until an answer is submitted.",
+    "visual_elements": [
+      "Cauldron with swirling glow",
+      "Clear water stream animation",
+      "Slider for water volume",
+      "Concentration percentage display",
+      "Luna and Orion as animated characters giving hints"
+    ],
+    "question_flow": [
+      {
+        "question_number": 1,
+        "question_type": "interactive",
+        "answer_structure": {
+          "options": [],
+          "correct_answer": "5",
+          "feedback": {
+            "correct": "\u2728 Brilliant! You've precisely diluted the potion to a 20% concentration.",
+            "incorrect": "\u274c Not quite. Try adjusting the water volume again to reach the correct concentration."
+          }
+        },
+        "visual_context": "The glowing cauldron shows a dynamic change in glow intensity as the water volume slider is adjusted. Luna and Orion provide encouraging hints.",
+        "required_to_proceed": true,
+        "question_text": "How many liters of water must you add to the cauldron to achieve a 20% salt concentration?"
+      }
+    ],
+    "primary_question": "How many liters of water must you add to achieve a 20% salt concentration?",
+    "learning_alignment": "This visualization tests understanding of percentage concentration and the algebraic calculations involved in dilution problems.",
+    "animation_cues": "As water is added, the glow of the cauldron shifts in hue, indicating changes in concentration. Correct answers trigger a sparkling effect over the cauldron, while incorrect answers cause the cauldron to dim slightly and shake.",
+    "question_implementation_notes": "The question is displayed prominently above the cauldron visualization. A slider allows learners to adjust water volume, with real-time feedback on concentration until submission. After submitting an answer, the visualization provides feedback with animations.",
+    "non_negotiables": [
+      "Preserve the original logic and learning goal.",
+      "Questions are mandatory - learners cannot proceed without answering.",
+      "Visualization serves as context and feedback for questions, not just display.",
+      "Use animation and color to express logic and provide answer feedback, not decoration."
+    ]
+  },
+  "blueprint": null,
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "templateType": "PARAMETER_PLAYGROUND",
+  "title": "The Alchemist's Salt Solution Challenge",
+  "narrativeIntro": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+  "parameters": [
+    {
+      "id": "water_volume",
+      "label": "Water Volume",
+      "type": "slider",
+      "min": 0,
+      "max": 10,
+      "defaultValue": 0,
+      "unit": "liters"
+    }
+  ],
+  "visualization": {
+    "type": "simulation",
+    "assetPrompt": "Illustrate a mystical cauldron filled with a swirling, glowing liquid representing a salt solution. Show a stream of clear liquid pouring into it, causing a change in glow intensity to visually represent concentration dilution. Include animated characters Luna and Orion providing hints."
+  },
+  "tasks": [
+    {
+      "id": "task1",
+      "type": "parameter_adjustment",
+      "questionText": "How many liters of water must you add to the cauldron to achieve a 20% salt concentration?",
+      "targetValues": {
+        "water_volume": 5
+      },
+      "requiredToProceed": true
+    }
+  ],
+  "animationCues": {
+    "parameterChange": "The glow of the cauldron shifts in hue as water is added, indicating changes in concentration.",
+    "visualizationUpdate": "The cauldron's glow intensity updates in real-time with water addition.",
+    "targetReached": "A sparkling effect appears over the cauldron for the correct answer, while incorrect answers cause the cauldron to dim and shake slightly."
+  }
+}
+
+--- Step 8: asset_planning ---
+Status: completed
+Started: 2025-11-09 06:06:31.385389
+Completed: 2025-11-09 06:06:31.513551
+Duration: 0.13 seconds
+
+INPUT DATA:
+{
+  "question_id": "52150003-ee78-43c5-854c-f5fc01a5fd25",
+  "question_text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+  "question_options": null,
+  "file_content": "<binary data: 22 bytes>",
+  "filename": null,
+  "parsed_data": null,
+  "extracted_question": {
+    "text": "How much water must be added to 10 liters of 30% salt solution to make it 20%?",
+    "options": null,
+    "file_type": "existing"
+  },
+  "analysis": {
+    "question_type": "word_problem",
+    "subject": "mathematics",
+    "difficulty": "intermediate",
+    "key_concepts": [
+      "percentage concentration",
+      "dilution",
+      "algebraic equations"
+    ],
+    "intent": "This question tests the understanding of dilution and concentration changes in solutions using percentage and algebraic equations.",
+    "complexity_score": 5,
+    "topic": "mixture problems"
+  },
+  "template_type": "PARAMETER_PLAYGROUND",
+  "strategy": {
+    "game_format": "simulation",
+    "format_rationale": "A simulation format allows learners to experiment with different scenarios involving percentage concentration and dilution. By manipulating variables within interactive simulations, students can visualize the impact of their choices on the solution, thereby enhancing their understanding of algebraic equations and mathematical concepts in a dynamic and engaging way.",
+    "storyline": {
+      "story_title": "The Alchemist's Salt Solution Challenge",
+      "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+      "characters": [
+        "Luna",
+        "Orion",
+        "Master Alaric"
+      ],
+      "setting": "The enchanting village of Aquamira, within Master Alaric's potion laboratory"
+    },
+    "interactions": {
+      "interaction_type": "click",
+      "feedback_style": "progressive",
+      "hints_enabled": true,
+      "animation_style": "smooth"
+    },
+    "prompt_template": "---\n\n## \ud83e\udde0 **Master Prompt: \"Story-Based Intuitive Visualization Generator\"**\n\n### \ud83e\udde9 **System Role**\n\nYou are a **Visual Story Architect for Learning**.\nYour goal is to transform coding or reasoning problems into **question-driven, interactive visual experiences** that help learners *see, feel, and understand* the core concept through answering questions \u2014 not just viewing visualizations.\n\n**CRITICAL: The visualization must be question-answer based.** The HTML should present questions to the learner and require them to answer before proceeding. The visualization serves as the context and feedback mechanism for the questions, not just a passive display.\n\nEach output must include:\n\n* A **story** that grounds the logic of the problem in a relatable or fantastical world.\n* A **visual metaphor** that maps the data and relationships directly to objects, movement, or colors.\n* **Multiple intuitive questions** that test whether the learner *understands the logic visually* \u2014 questions are the primary interaction, not optional.\n* A **question-driven interaction flow** where learners must answer questions to progress through the visualization.\n* A **visual feedback mechanism** that responds to answers with animation, light, or sound.\n* A **learning alignment statement** showing how the story preserves the exact reasoning skill of the original problem.\n\n---\n\n### \u2699\ufe0f **Prompt Input Schema**\n\n```json\n{\n  \"problem_title\": \"\",\n  \"intent_of_question\": \"What reasoning or intuition this problem tests (e.g., pattern recognition, search space reduction, boundary logic)\",\n  \"difficulty_level\": \"\",\n  \"key_concepts\": [],\n  \"expected_input_output\": {\n    \"input_format\": \"\",\n    \"output_format\": \"\"\n  }\n}\n```\n\n---\n\n### \ud83e\uddf1 **Prompt Output Schema**\n\n```json\n{\n  \"story_title\": \"\",\n  \"story_context\": \"Set the scene and give narrative meaning to the problem without using code terms.\",\n  \"learning_intuition\": \"Describe what the learner should intuitively realize while engaging.\",\n  \"visual_metaphor\": \"Explain how inputs, logic, and outputs are represented visually.\",\n  \"interaction_design\": \"Describe the question-driven flow where learners must answer questions to progress.\",\n  \"visual_elements\": [\n    \"List visual features: colors, objects, animations, characters\"\n  ],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Phrase the visual challenge as a natural, curiosity-driven question that must be answered.\",\n      \"question_type\": \"multiple_choice|interactive|prediction\",\n      \"answer_structure\": {\n        \"options\": [],\n        \"correct_answer\": \"\",\n        \"feedback\": {\n          \"correct\": \"\",\n          \"incorrect\": \"\"\n        }\n      },\n      \"visual_context\": \"Describe what visualization elements are shown when this question is presented.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"The main question that drives the entire visualization experience (for backward compatibility).\",\n  \"learning_alignment\": \"Explain exactly which cognitive skill or intuition this visualization tests.\",\n  \"animation_cues\": \"Describe how motion or visual effects illustrate the logic or feedback based on answers.\",\n  \"question_implementation_notes\": \"Instructions for HTML: Questions must be prominently displayed, answers must be required before showing results, visualization updates based on answers.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### \ud83d\udccb **HTML Implementation Requirements**\n\nWhen generating HTML for the visualization, **MANDATORY requirements**:\n\n1. **Questions must be prominently displayed** - Questions should appear at the top or in a dedicated question area, clearly visible before any answer options.\n\n2. **Answer submission is required** - Learners cannot see the final visualization result or proceed without first submitting an answer. The visualization should show:\n   - Initial state: Question + visualization context (e.g., towers, gems, runes)\n   - After answer submission: Full visualization with feedback animation\n\n3. **Question-driven flow** - The HTML should structure the experience around questions:\n   - Display question first\n   - Show visualization context (partial or animated setup)\n   - Present answer options (buttons, dropdowns, etc.)\n   - Require answer selection and submission\n   - Show feedback and complete visualization only after submission\n\n4. **Visual feedback on answers** - The visualization must respond to the learner's answer:\n   - Correct answers: Positive animations (glow, success effects, etc.)\n   - Incorrect answers: Negative feedback (shake, red flash, etc.)\n   - Both should update the visualization to show the correct result\n\n5. **No passive viewing** - The visualization is not just for display; it's an interactive question-answer experience where the visual elements support understanding the question and provide feedback.\n\n---\n\n## \ud83c\udfae **Few-Shot Examples**\n\n---\n\n### **Example 1: Trapping Rain Water**\n\n```json\n{\n  \"story_title\": \"Echoes of the Rain Towers\",\n  \"story_context\": \"In a land of uneven towers, a celestial storm fills the valleys with starlight rain. The student, acting as the 'Rainkeeper', must answer questions about how much dew will be trapped when the rain ceases.\",\n  \"learning_intuition\": \"Valleys between taller walls store water \u2014 boundaries define capacity.\",\n  \"visual_metaphor\": \"Gray towers of different heights represent terrain. Blue animated water fills valleys. Total trapped water corresponds to the problem's solution.\",\n  \"interaction_design\": \"The visualization presents questions that must be answered. Learner watches rainfall animation, then must answer: 'How many units of water will remain trapped?' The visualization only shows the final result after the learner submits their answer.\",\n  \"visual_elements\": [\"Gray bars for towers\", \"Blue fill for trapped water\", \"Rainfall animation\", \"Glowing feedback\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"Observe the towers and the rainfall. When the rain stops, how many units of water will remain trapped between the towers?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"7\", \"8\", \"9\", \"11\"],\n        \"correct_answer\": \"9\",\n        \"feedback\": {\n          \"correct\": \"\u2705 Correct \u2014 the deepest valleys hold 9 units of water.\",\n          \"incorrect\": \"\u274c Observe again: water overflows in lower gaps, leaving 9 units.\"\n        }\n      },\n      \"visual_context\": \"Towers are displayed with heights [0,1,0,2,1,0,1,3,2,1,2,1]. Rainfall animation plays, showing water filling valleys. The question is displayed prominently above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"When the rain stops, how many units of water will remain trapped between towers?\",\n  \"learning_alignment\": \"Tests spatial reasoning and boundary logic \u2014 core to dynamic programming and array traversal thinking.\",\n  \"animation_cues\": \"After learner submits answer: Blue water rises between towers; correct answer glows green; incorrect triggers overflow animation with red flash.\",\n  \"question_implementation_notes\": \"HTML must display the question prominently at the top. The visualization shows the towers and rainfall animation. Answer options are displayed as buttons. Only after selecting an answer and clicking 'Submit' does the visualization show the trapped water result with feedback animation.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 2: Two Sum**\n\n```json\n{\n  \"story_title\": \"Gem Pairs \u2014 Unlock the Chest\",\n  \"story_context\": \"In a crystal cavern, glowing gems each hold a numeric essence. A magical chest opens only when two gems together reach its secret value. The learner must answer which pair unlocks it.\",\n  \"learning_intuition\": \"Every value has a complementary partner that completes the target sum.\",\n  \"visual_metaphor\": \"Gems represent numbers. A chest labeled with the target sum opens when two selected gems' values add to that target.\",\n  \"interaction_design\": \"The visualization displays gems and a chest. A question asks: 'Which two gems together unlock the chest?' Learner must select their answer from options. Only after answering does the visualization show the result with animation.\",\n  \"visual_elements\": [\"Colored gems with numbers\", \"Treasure chest\", \"Curved golden connection line\", \"Coin burst animation\"],\n  \"question_flow\": [\n    {\n      \"question_number\": 1,\n      \"intuitive_question\": \"The chest requires a sum of 9. Which two gems together unlock the chest?\",\n      \"question_type\": \"multiple_choice\",\n      \"answer_structure\": {\n        \"options\": [\"(2,7)\", \"(3,5)\", \"(1,8)\", \"(4,6)\"],\n        \"correct_answer\": \"(2,7)\",\n        \"feedback\": {\n          \"correct\": \"\ud83d\udc8e The chest bursts open \u2014 you found the perfect pair!\",\n          \"incorrect\": \"\ud83d\udeab Wrong pair \u2014 try again and find the true complement.\"\n        }\n      },\n      \"visual_context\": \"Gems are displayed with values [2, 7, 11, 15, 3, 5]. A chest shows target sum: 9. The question is displayed above the visualization.\",\n      \"required_to_proceed\": true\n    }\n  ],\n  \"primary_question\": \"Which two gems together unlock the chest?\",\n  \"learning_alignment\": \"Tests intuitive understanding of pair relationships and additive complementarity.\",\n  \"animation_cues\": \"After learner submits answer: Selected gems glow; golden line connects the chosen pair; correct answer sends an energy beam into the chest causing a gold coin burst; incorrect answer shakes the chest with red flash.\",\n  \"question_implementation_notes\": \"HTML displays the question prominently. Gems and chest are visible. Multiple choice options are shown as buttons. After selecting and submitting, the visualization animates the result based on the answer.\",\n  \"non_negotiables\": [\n    \"Preserve the original logic and learning goal.\",\n    \"Questions are mandatory - learners cannot proceed without answering.\",\n    \"Visualization serves as context and feedback for questions, not just display.\",\n    \"Use animation and color to express logic and provide answer feedback, not decoration.\"\n  ]\n}\n```\n\n---\n\n### **Example 3: Longest Substring Without Repeating Characters**\n\n```json\n{\n  \"story_title\": \"The Chain of Light\",\n  \"story_context\": \"A line of glowing runes forms a magic spell. Each rune glows differently, but if two identical runes appear too close, the chain breaks.\",\n  \"learning_intuition\": \"A valid sequence is one where every element is unique \u2014 continuity breaks when repetition occurs.\",\n  \"visual_metaphor\": \"Runes represent characters in a string. Each rune glows when unique; when a repeat appears, the chain flashes red and resets.\",\n  \"interaction_design\": \"Learner observes the glowing sequence and must predict the longest glowing chain before repetition.\",\n  \"visual_elements\": [\"Runes of varying colors\", \"Sequential glowing\", \"Red flash on repetition\", \"Length counter\"],\n  \"intuitive_question\": \"What is the length of the longest glowing chain before any rune repeats?\",\n  \"answer_structure\": {\n    \"options\": [\"3\", \"5\", \"7\", \"8\"],\n    \"correct_answer\": \"5\",\n    \"feedback\": {\n      \"correct\": \"\u2728 Perfect! You spotted the longest unique sequence.\",\n      \"incorrect\": \"\ud83d\udca1 Look again \u2014 duplication resets the spell chain.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive grasp of uniqueness and sliding window logic.\",\n  \"animation_cues\": \"Runes light up sequentially; on repetition, a red flash breaks the chain; counter updates dynamically.\"\n}\n```\n\n---\n\n### **Example 4: Binary Search**\n\n```json\n{\n  \"story_title\": \"The Library of Halves\",\n  \"story_context\": \"A wise archivist searches an ancient library for a secret scroll. To save time, they split the shelves in half repeatedly, always choosing the correct half.\",\n  \"learning_intuition\": \"Halving reduces search space logarithmically \u2014 each step eliminates half the data.\",\n  \"visual_metaphor\": \"Shelves represent sorted data; each click halves the section visually, focusing attention on the remaining range.\",\n  \"interaction_design\": \"Learner clicks midpoints to guess where the scroll lies. Correctly following binary search steps narrows to the target.\",\n  \"visual_elements\": [\"Shelf tiles\", \"Golden highlight for midpoint\", \"Fade-out animation for discarded halves\", \"Scroll glow when found\"],\n  \"intuitive_question\": \"Which sequence of choices finds the scroll in the fewest steps?\",\n  \"answer_structure\": {\n    \"options\": [\"Left \u2192 Mid \u2192 Right\", \"Mid \u2192 Left \u2192 Mid\", \"Right \u2192 Mid \u2192 Left\", \"Mid \u2192 Right \u2192 Right\"],\n    \"correct_answer\": \"Mid \u2192 Left \u2192 Mid\",\n    \"feedback\": {\n      \"correct\": \"\ud83d\udcdc Found it! Each halving step brought you closer efficiently.\",\n      \"incorrect\": \"\u274c That path took longer \u2014 binary search cuts the search space in half each step.\"\n    }\n  },\n  \"learning_alignment\": \"Tests intuitive understanding of logarithmic reduction and search strategy efficiency.\",\n  \"animation_cues\": \"Shelves collapse visually by halves; midpoints glow; correct path causes scroll to illuminate.\"\n}\n```\n\n",
+    "difficulty": "intermediate"
+  },
+  "story": {
+    "story_title": "The Alchemist's Salt Solution Challenge",
+    "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+    "learning_intuition": "Learners should intuitively grasp the relationship between the amount of added water and its effect on the dilution of the solution's concentration.",
+    "visual_metaphor": "The cauldron is filled with a swirling, glowing liquid representing the salt solution. Adding water is visualized by a stream of clear liquid pouring into the cauldron, changing the glow's intensity to reflect the new concentration.",
+    "interaction_design": "Learners adjust a water volume slider to simulate adding water to the cauldron. They must answer: 'How many liters of water must you add to achieve a 20% concentration?' before seeing the full result. The visualization updates real-time as they adjust, but locks the final visualization until an answer is submitted.",
+    "visual_elements": [
+      "Cauldron with swirling glow",
+      "Clear water stream animation",
+      "Slider for water volume",
+      "Concentration percentage display",
+      "Luna and Orion as animated characters giving hints"
+    ],
+    "question_flow": [
+      {
+        "question_number": 1,
+        "question_type": "interactive",
+        "answer_structure": {
+          "options": [],
+          "correct_answer": "5",
+          "feedback": {
+            "correct": "\u2728 Brilliant! You've precisely diluted the potion to a 20% concentration.",
+            "incorrect": "\u274c Not quite. Try adjusting the water volume again to reach the correct concentration."
+          }
+        },
+        "visual_context": "The glowing cauldron shows a dynamic change in glow intensity as the water volume slider is adjusted. Luna and Orion provide encouraging hints.",
+        "required_to_proceed": true,
+        "question_text": "How many liters of water must you add to the cauldron to achieve a 20% salt concentration?"
+      }
+    ],
+    "primary_question": "How many liters of water must you add to achieve a 20% salt concentration?",
+    "learning_alignment": "This visualization tests understanding of percentage concentration and the algebraic calculations involved in dilution problems.",
+    "animation_cues": "As water is added, the glow of the cauldron shifts in hue, indicating changes in concentration. Correct answers trigger a sparkling effect over the cauldron, while incorrect answers cause the cauldron to dim slightly and shake.",
+    "question_implementation_notes": "The question is displayed prominently above the cauldron visualization. A slider allows learners to adjust water volume, with real-time feedback on concentration until submission. After submitting an answer, the visualization provides feedback with animations.",
+    "non_negotiables": [
+      "Preserve the original logic and learning goal.",
+      "Questions are mandatory - learners cannot proceed without answering.",
+      "Visualization serves as context and feedback for questions, not just display.",
+      "Use animation and color to express logic and provide answer feedback, not decoration."
+    ]
+  },
+  "blueprint": {
+    "templateType": "PARAMETER_PLAYGROUND",
+    "title": "The Alchemist's Salt Solution Challenge",
+    "narrativeIntro": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+    "parameters": [
+      {
+        "id": "water_volume",
+        "label": "Water Volume",
+        "type": "slider",
+        "min": 0,
+        "max": 10,
+        "defaultValue": 0,
+        "unit": "liters"
+      }
+    ],
+    "visualization": {
+      "type": "simulation",
+      "assetPrompt": "Illustrate a mystical cauldron filled with a swirling, glowing liquid representing a salt solution. Show a stream of clear liquid pouring into it, causing a change in glow intensity to visually represent concentration dilution. Include animated characters Luna and Orion providing hints."
+    },
+    "tasks": [
+      {
+        "id": "task1",
+        "type": "parameter_adjustment",
+        "questionText": "How many liters of water must you add to the cauldron to achieve a 20% salt concentration?",
+        "targetValues": {
+          "water_volume": 5
+        },
+        "requiredToProceed": true
+      }
+    ],
+    "animationCues": {
+      "parameterChange": "The glow of the cauldron shifts in hue as water is added, indicating changes in concentration.",
+      "visualizationUpdate": "The cauldron's glow intensity updates in real-time with water addition.",
+      "targetReached": "A sparkling effect appears over the cauldron for the correct answer, while incorrect answers cause the cauldron to dim and shake slightly."
+    }
+  },
+  "assets": null
+}
+
+OUTPUT DATA:
+{
+  "asset_request_count": 1
+}
+
+================================================================================
+SUMMARY
+================================================================================
+Total Steps: 8
+Completed: 7
+Failed: 0
+Skipped: 1
+Total Duration: 25.33 seconds
+
+================================================================================
+TEMPLATE ROUTING DECISION
+================================================================================
+Selected Template: PARAMETER_PLAYGROUND
+Confidence: 0.9
+Rationale: The question involves understanding how changing the amount of water affects the concentration of a solution, which can be effectively explored through a parametric simulation. 'PARAMETER_PLAYGROUND' allows users to experiment with different quantities and observe the impact on concentration, aligning well with the key concepts of dilution and algebraic equations.
+
+================================================================================
+STRATEGY DETAILS
+================================================================================
+Game Format: simulation
+Format Rationale: A simulation format allows learners to experiment with different scenarios involving percentage concentration and dilution. By manipulating variables within interactive simulations, students can visualize the impact of their choices on the solution, thereby enhancing their understanding of algebraic equations and mathematical concepts in a dynamic and engaging way.
+Difficulty: intermediate
+
+Storyline: {
+  "story_title": "The Alchemist's Salt Solution Challenge",
+  "story_context": "In the mystical village of Aquamira, where alchemy and mathematics intertwine, two young apprentices, Luna and Orion, are tasked by their mentor, Master Alaric, to solve a perplexing problem. The village relies on a magical salt solution for their enchanting potions, and Master Alaric needs a precise concentration for his latest creation. He presents the apprentices with a 10-liter cauldron containing a 30% salt solution and challenges them to dilute it to a 20% solution by adding the right amount of pure water. Luna and Orion must use their knowledge of ratios and proportions to save the day and prove their worth as budding alchemists.",
+  "characters": [
+    "Luna",
+    "Orion",
+    "Master Alaric"
+  ],
+  "setting": "The enchanting village of Aquamira, within Master Alaric's potion laboratory"
+}
+
+Interactions: {
+  "interaction_type": "click",
+  "feedback_style": "progressive",
+  "hints_enabled": true,
+  "animation_style": "smooth"
+}
+Traceback (most recent call last):
+  File "E:\ASU Coral Lab Learning\Claude_Hackathon\backend\scripts\analyze_run.py", line 227, in <module>
+    analyze_run(process_id=arg)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "E:\ASU Coral Lab Learning\Claude_Hackathon\backend\scripts\analyze_run.py", line 216, in analyze_run
+    print(f"\nPrompt Template Used: {strategy_output['prompt_template'][:200]}...")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Priyanuj\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f9e0' in position 34: character maps to <undefined>
