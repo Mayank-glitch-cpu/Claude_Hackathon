@@ -5,9 +5,81 @@ The resulting visualization will be implemented as:
 - Cells represent relationships between row and column items.
 - Selecting row and column creates a match.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+MATRIX_MATCH template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Matrix Components**:
+   - **Matrix Grid**: Grid structure with rows and columns
+   - **Row Headers**: Items in rows
+   - **Column Headers**: Items in columns
+   - **Cells**: Intersection points representing matches
+
+2. **Interactive Elements**:
+   - **Cell Click**: Click to select cell (row + column)
+   - **Row Selection**: Select row item
+   - **Column Selection**: Select column item
+   - **Submit Button**: Button to validate matches
+   - **Reset Button**: Button to reset selections
+
+3. **Feedback Elements**:
+   - **Correct Match Feedback**: Visual feedback when match is correct
+   - **Incorrect Match Feedback**: Visual feedback when match is incorrect
+   - **Success Message**: Appears when all matches are correct
+   - **Cell Highlighting**: Visual highlighting of selected cells
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Matrix Pane**: Main area for matrix grid display
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Cell Selection Animation**: Visual feedback when cell is selected
+   - **Match Animation**: Success animation when match is correct
+   - **Mismatch Animation**: Error animation when match is incorrect
+   - **Matrix Complete Animation**: Success animation when all matches are correct
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Matrix Component Customization:
+- **Matrix Size**: Extract number of rows and columns from component_specifications
+- **Row Items**: Extract row item text from component_specifications (e.g., "Apple", "Orange", "Banana")
+- **Column Items**: Extract column item text from component_specifications (e.g., "Red", "Orange", "Yellow")
+- **Matrix Styling**: Extract colors, borders, shadows, grid styling from component_specifications
+
+### 2. Interactive Element Customization:
+- **Cell Click**: Customize click feedback, highlighting from component_specifications
+- **Selection Behavior**: Customize selection feedback, highlighting from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Matches")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Cell Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Cell Selection**: Extract selection animation details from component_specifications (pulse, glow, etc.)
+- **Match**: Extract success animation from component_specifications (glow, checkmark, connection line)
+- **Mismatch**: Extract error animation from component_specifications (shake, flash, X)
+- **Matrix Complete**: Extract completion animation from component_specifications (celebration, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Matching Logic**: Extract which row items match which column items from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (all correct matches found)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize two-dimensional relationships and correlations.
 - Visual elements should represent matrix structure with rows and columns.
 - Questions should involve finding matches or relationships in a matrix.
 - Animation cues should show cell selection and match validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

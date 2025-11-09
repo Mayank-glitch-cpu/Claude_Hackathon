@@ -5,9 +5,80 @@ The resulting visualization will be implemented as:
 - Steps are represented as cards that can be reordered.
 - Correct ordering is validated on submission.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+SEQUENCE_BUILDER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Step Components**:
+   - **Step Cards**: Draggable cards representing steps in a sequence
+   - **Step Content**: Text or images on step cards
+   - **Step Ordering**: Correct order index for validation
+
+2. **Interactive Elements**:
+   - **Drag-and-Drop**: Drag steps to reorder them
+   - **Drop Zones**: Areas where steps can be placed
+   - **Submit Button**: Button to validate sequence
+   - **Reset Button**: Button to reset order
+
+3. **Feedback Elements**:
+   - **Correct Placement Feedback**: Visual feedback when step is in correct position
+   - **Incorrect Placement Feedback**: Visual feedback when step is in wrong position
+   - **Success Message**: Appears when sequence is correct
+   - **Step Highlighting**: Visual highlighting of steps
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Steps Pane**: Main area for step cards (unordered initially)
+   - **Sequence Pane**: Area for ordered steps (drop zones)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Step Drag Animation**: Smooth dragging animation
+   - **Correct Placement Animation**: Success effect when step is correctly placed
+   - **Incorrect Placement Animation**: Error effect when step is incorrectly placed
+   - **Sequence Complete Animation**: Success animation when all steps are correctly ordered
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Step Component Customization:
+- **Step Text**: Extract exact step text from component_specifications (e.g., "Mix ingredients", "Bake at 350°F", "Cool for 10 minutes")
+- **Step Styling**: Extract colors, fonts, borders, shadows from component_specifications
+- **Step Count**: Extract number of steps from component_specifications
+- **Step Order**: Extract correct order from component_specifications
+
+### 2. Interactive Element Customization:
+- **Drag Behavior**: Customize drag animation, snap behavior, drop zones from component_specifications
+- **Drop Zones**: Extract drop zone styling, positioning from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Order")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Step Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Step Drag**: Extract drag animation details from component_specifications (smooth movement, snap behavior)
+- **Correct Placement**: Extract success animation from component_specifications (glow, highlight, checkmark)
+- **Incorrect Placement**: Extract error animation from component_specifications (shake, flash, X)
+- **Sequence Complete**: Extract completion animation from component_specifications (celebration, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Ordering Logic**: Extract correct sequence order from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (all steps in correct order)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize ordered steps, processes, or sequences.
 - Visual elements should represent discrete steps that have a natural order.
 - Questions should involve ordering or sequencing tasks.
 - Animation cues should show step transitions and correct/incorrect placement.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

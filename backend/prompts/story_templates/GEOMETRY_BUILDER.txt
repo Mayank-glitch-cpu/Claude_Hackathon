@@ -5,9 +5,86 @@ The resulting visualization will be implemented as:
 - Canvas allows drawing geometric shapes.
 - Shape properties are validated on submission.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+GEOMETRY_BUILDER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Geometry Components**:
+   - **Drawing Canvas**: Canvas for geometric construction
+   - **Geometric Shapes**: Shapes that can be drawn (circles, lines, polygons, etc.)
+   - **Construction Tools**: Tools for geometric construction (compass, ruler, protractor, etc.)
+   - **Shape Styling**: Colors, borders, shadows for shapes
+
+2. **Interactive Elements**:
+   - **Shape Drawing**: Draw shapes on canvas
+   - **Shape Manipulation**: Move, resize, rotate shapes
+   - **Tool Selection**: Select construction tools
+   - **Point Placement**: Place points on canvas
+   - **Submit Button**: Button to validate construction
+   - **Reset Button**: Button to clear canvas
+
+3. **Feedback Elements**:
+   - **Correct Construction Feedback**: Visual feedback when construction is correct
+   - **Incorrect Construction Feedback**: Visual feedback when construction is incorrect
+   - **Success Message**: Appears when construction is correct
+   - **Shape Highlighting**: Visual highlighting of shapes
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Canvas Pane**: Main area for geometric construction
+   - **Tools Pane**: Area for construction tools
+   - **Properties Pane**: Area for shape properties display (if needed)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Shape Drawing Animation**: Visual feedback when shape is drawn
+   - **Tool Usage Animation**: Visual feedback when tool is used
+   - **Construction Validation Animation**: Success/error animation on validation
+   - **Shape Highlight Animation**: Highlight animation for shapes
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Geometry Component Customization:
+- **Shape Types**: Extract shape types from component_specifications (circles, lines, polygons, angles, etc.)
+- **Construction Tools**: Extract tool types from component_specifications (compass, ruler, protractor, etc.)
+- **Shape Configuration**: Customize number, properties of shapes based on question
+- **Shape Styling**: Extract colors, borders, shadows, line styles from component_specifications
+
+### 2. Interactive Element Customization:
+- **Drawing Tools**: Extract tool configurations from component_specifications (draw tool, select tool, etc.)
+- **Manipulation Behavior**: Customize drag, resize, rotate behavior from component_specifications
+- **Point Placement**: Customize point placement behavior, snap behavior from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Clear")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Shape Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Shape Drawing**: Extract drawing animation details from component_specifications (line drawing, shape creation, etc.)
+- **Tool Usage**: Extract tool usage animation from component_specifications (compass arc, ruler line, etc.)
+- **Construction Validation**: Extract validation animation from component_specifications (glow, highlight, checkmark)
+- **Shape Highlight**: Extract highlight animation from component_specifications (pulse, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Construction Requirements**: Extract required construction from component_specifications (shapes, properties, relationships)
+- **Shape Properties**: Extract shape properties from component_specifications (angles, lengths, areas, etc.)
+- **Win Condition**: Extract win condition from component_specifications (correct construction, correct properties)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on geometric construction, spatial reasoning, and shape properties.
 - Visual elements should represent geometric shapes, tools, and construction lines.
 - Questions should involve constructing shapes or understanding geometric properties.
 - Animation cues should show shape construction, tool usage, and property validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

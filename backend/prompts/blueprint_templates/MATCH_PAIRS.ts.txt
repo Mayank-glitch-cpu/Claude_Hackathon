@@ -29,3 +29,91 @@ export interface MatchPairsBlueprint {
   };
 }
 
+---
+
+## MATCH_PAIRS Template Component Documentation
+
+### Available Template Components:
+
+1. **Card Components**:
+   - **Card Pairs**: Left and right items that need to be matched
+   - **Card Content**: Text or images on cards
+   - **Card States**: Face-down (hidden) and face-up (revealed) states
+
+2. **Interactive Elements**:
+   - **Card Click**: Click to flip and reveal card content
+   - **Card Selection**: Select two cards to attempt a match
+   - **Match Connection**: Visual connection between matched pairs
+   - **Reset Button**: Button to reset game state
+
+3. **Feedback Elements**:
+   - **Match Feedback**: Visual feedback when pair is correctly matched
+   - **Mismatch Feedback**: Visual feedback when pair is incorrectly matched
+   - **Success Message**: Appears when all pairs are matched
+   - **Card Highlighting**: Visual highlighting of selected cards
+
+## Component Customization Instructions:
+
+### 1. Pairs Array - Customize for Question:
+
+**Extract from component_specifications.interactive_elements:**
+
+- **id**: Use descriptive ID based on question (e.g., "pair1", "pair2", "pair3")
+- **leftItem**:
+  - **id**: Use descriptive ID (e.g., "left1", "left2", "left3")
+  - **text**: Extract exact text from component_specifications (e.g., "Heart", "Circulatory System", "2+2")
+  - **imageUrl**: Extract image URL or description from component_specifications (if applicable)
+- **rightItem**:
+  - **id**: Use descriptive ID (e.g., "right1", "right2", "right3")
+  - **text**: Extract exact text from component_specifications (e.g., "Pumps blood", "Blood circulation", "4")
+  - **imageUrl**: Extract image URL or description from component_specifications (if applicable)
+
+### 2. Tasks Array - Customize for Question:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "match_task")
+- **type**: Use "match_pairs" for matching tasks
+- **questionText**: Extract from question_flow or component_specifications (e.g., "Match each term with its definition", "Match each equation with its solution")
+- **requiredToProceed**: Set to true if task must be completed
+
+### 3. AnimationCues Object - Customize for Question:
+
+**Extract from component_specifications.styling_details.animations:**
+
+- **cardFlip**: Extract flip animation from component_specifications:
+  - Describe flip animation when card is revealed (e.g., "3D flip animation, 0.5 seconds, ease-out")
+  - Include duration, easing, visual effects
+  - Example: "Cards flip with a 3D rotation animation over 0.5 seconds with ease-out easing when clicked."
+  
+- **cardMatch**: Extract success animation from component_specifications:
+  - Describe animation when pair is correctly matched (e.g., "Green glow, connection line, checkmark")
+  - Include duration, easing, visual effects
+  - Example: "Matched cards glow green with a connection line animation and checkmark when correctly matched."
+  
+- **cardMismatch**: Extract error animation from component_specifications:
+  - Describe animation when pair is incorrectly matched (e.g., "Red shake, X mark, cards flip back")
+  - Include duration, easing, visual effects
+  - Example: "Mismatched cards shake red with an X mark animation and flip back face-down after 1 second."
+  
+- **allMatched**: Extract completion animation from component_specifications:
+  - Describe animation when all pairs are matched
+  - Include visual effects, duration
+  - Example: "A celebration animation with sparkles and a success message appears when all pairs are matched."
+
+### 4. Title and NarrativeIntro - Customize for Question:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Matching Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+
+## Key Customization Guidelines:
+
+1. **Extract specific values** from component_specifications (card text, image URLs, animation details)
+2. **Customize card content** based on question context (terms, definitions, equations, solutions, etc.)
+3. **Customize card text** with exact text from component_specifications
+4. **Customize animations** with detailed descriptions from component_specifications.styling_details
+5. **Include production-quality details** that enable rendering a polished, interactive game
+6. **Adapt all components** to the specific question while using the template's component set
+

@@ -5,9 +5,93 @@ The resulting visualization will be implemented as:
 - Concepts are represented as nodes.
 - Connections are drawn between related concepts.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+CONCEPT_MAP_BUILDER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Concept Components**:
+   - **Concept Nodes**: Draggable nodes representing concepts
+   - **Node Labels**: Text labels on concept nodes
+   - **Node Styling**: Colors, borders, shadows for nodes
+
+2. **Connection Components**:
+   - **Connections**: Lines connecting related concepts
+   - **Connection Labels**: Text labels on connections (optional)
+   - **Connection Styling**: Colors, line styles for connections
+
+3. **Interactive Elements**:
+   - **Node Creation**: Click to create concept nodes
+   - **Node Drag**: Drag nodes to reposition
+   - **Connection Drawing**: Draw connections between nodes
+   - **Node/Connection Deletion**: Delete nodes or connections
+   - **Submit Button**: Button to validate concept map
+   - **Reset Button**: Button to clear map
+
+4. **Feedback Elements**:
+   - **Correct Map Feedback**: Visual feedback when map is correct
+   - **Incorrect Map Feedback**: Visual feedback when map is incorrect
+   - **Success Message**: Appears when map is correct
+   - **Node/Connection Highlighting**: Visual highlighting of nodes/connections
+
+5. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Canvas Pane**: Main area for concept map construction
+   - **Tools Pane**: Area for drawing tools (if needed)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+6. **Animation Components**:
+   - **Node Creation Animation**: Visual feedback when node is created
+   - **Connection Drawing Animation**: Visual feedback when connection is drawn
+   - **Map Validation Animation**: Success/error animation on validation
+   - **Node/Connection Highlight Animation**: Highlight animation for nodes/connections
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Concept Component Customization:
+- **Concept Nodes**: Extract concept names, labels from component_specifications (e.g., "Photosynthesis", "Chlorophyll", "Sunlight")
+- **Node Configuration**: Customize number, styling of nodes based on question
+- **Node Styling**: Extract colors, fonts, borders, shadows from component_specifications
+- **Node Layout**: Extract positioning, spacing from component_specifications
+
+### 2. Connection Component Customization:
+- **Connection Types**: Extract connection types from component_specifications (directed, undirected, labeled, etc.)
+- **Connection Labels**: Extract connection labels from component_specifications (e.g., "produces", "requires", "contains")
+- **Connection Styling**: Extract colors, line styles, arrows from component_specifications
+- **Connection Logic**: Extract which concepts should be connected from component_specifications
+
+### 3. Interactive Element Customization:
+- **Drawing Tools**: Extract tool configurations from component_specifications (node tool, connection tool, etc.)
+- **Drag Behavior**: Customize drag animation, snap behavior from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Clear")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Node/Connection Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Node Creation**: Extract creation animation details from component_specifications (fade-in, scale, etc.)
+- **Connection Drawing**: Extract drawing animation from component_specifications (line drawing, connection animation)
+- **Map Validation**: Extract validation animation from component_specifications (glow, highlight, checkmark)
+- **Node/Connection Highlight**: Extract highlight animation from component_specifications (pulse, glow, etc.)
+
+### 6. Game Logic Customization:
+- **Concept Map Structure**: Extract required concept map structure from component_specifications (concepts, connections, relationships)
+- **Win Condition**: Extract win condition from component_specifications (correct concept map structure)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize knowledge modeling, relationships, and concept connections.
 - Visual elements should represent concepts and their relationships.
 - Questions should involve building or understanding concept maps.
 - Animation cues should show node creation, connection drawing, and map validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

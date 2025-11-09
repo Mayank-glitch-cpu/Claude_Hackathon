@@ -2,12 +2,95 @@
 
 The resulting visualization will be implemented as:
 - Interactive playground to adjust parameters and see results.
-- Parameters are controlled via sliders or inputs.
+- Parameters are controlled via sliders, buttons, or inputs.
 - Visualization updates in real-time based on parameters.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+PARAMETER_PLAYGROUND template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Parameter Controls**:
+   - **Buttons**: Increment/decrement buttons with customizable labels, icons, and increment values
+   - **Sliders**: Range sliders with min/max values, default value, and unit labels
+   - **Input Fields**: Text/number inputs for direct value entry
+   - **Dropdowns**: Selection dropdowns for discrete parameter choices
+
+2. **Visualization Components** (adapts to question context):
+   - **Beakers/Containers**: For chemistry/physics problems (liquids, solutions, mixtures)
+   - **Graphs/Charts**: For math/statistics problems (functions, data visualization)
+   - **Diagrams**: For science/engineering problems (circuits, systems, processes)
+   - **Simulations**: For physics/chemistry problems (particles, forces, reactions)
+
+3. **Feedback Elements**:
+   - **Success Message**: Appears when win condition is met
+   - **Stats Display**: Shows current parameter values and calculated results
+   - **Goal Display**: Shows target value or goal condition
+   - **Visual Feedback**: Animations, color changes, transitions based on parameter changes
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Visual Pane**: Main area for visualization components
+   - **Controls Pane**: Bottom area for parameter controls
+
+5. **Animation Components**:
+   - **Parameter Change Animations**: Visual feedback when parameters change
+   - **Visualization Update Animations**: Smooth transitions when visualization updates
+   - **Win Condition Animations**: Success animations when target is reached
+   - **Error Feedback Animations**: Shake, flash, or other feedback for incorrect states
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Parameter Controls Customization:
+- **Button Labels**: Customize button text based on question context (e.g., "Add Water" for dilution, "Increase Force" for physics)
+- **Icons/Emojis**: Select appropriate icons (💧 for water, ⚡ for electricity, 📊 for data, etc.)
+- **Increment Values**: Specify appropriate step sizes (e.g., 0.1L for precise control, 1.0L for quick changes)
+- **Button Actions**: Describe what happens when clicked (e.g., "Adds 1.0L water to solution", "Increases force by 10N")
+- **Styling**: Specify colors, borders, shadows, hover effects appropriate for the question context
+
+### 2. Visualization Component Selection:
+- **Chemistry Questions**: Use beakers, containers, liquids, particles (adapt colors, dimensions to question)
+- **Math Questions**: Use graphs, charts, coordinate systems (adapt axes, scales to question)
+- **Physics Questions**: Use diagrams, simulations, force vectors (adapt visualizations to question)
+- **Science Questions**: Use diagrams, models, systems (adapt components to question)
+
+### 3. Visualization Component Customization:
+- **Dimensions**: Specify width, height, positioning based on question needs
+- **Colors**: Use appropriate color schemes (e.g., blue for water, red for heat, green for success)
+- **Dynamic Properties**: Describe what changes (e.g., liquid height, graph values, particle positions)
+- **Styling**: Specify borders, shadows, opacity, transitions
+
+### 4. Feedback Elements Customization:
+- **Success Message**: Customize text, styling, animation based on question context
+- **Stats Display**: Customize labels, value formats, units based on question (e.g., "Water Added: 5.0 L", "Force: 50 N")
+- **Goal Display**: Customize target value, label, styling based on question (e.g., "Goal: 20.0%", "Target: 100 N")
+- **Visual Feedback**: Customize animations, color changes, transitions based on question context
+
+### 5. Win Condition Customization:
+- **Target Value**: Specify exact target (e.g., concentration === 20.0%, force === 100N)
+- **Calculation Logic**: Describe how to calculate current value (e.g., concentration = (salt / total_volume) * 100)
+- **Comparison Logic**: Describe how to check if target is reached (e.g., Math.abs(concentration - 20.0) < 0.1)
+
+### 6. Animation Customization:
+- **Parameter Change**: Describe animation when parameter changes (e.g., water stream animation, graph update animation)
+- **Visualization Update**: Describe smooth transitions when visualization updates (e.g., liquid height transition, graph redraw)
+- **Win Condition**: Describe success animation when target is reached (e.g., sparkle effect, glow animation)
+- **Error Feedback**: Describe feedback for incorrect states (e.g., shake animation, red flash)
+
+### 7. Game Logic Customization:
+- **Calculations**: Extract mathematical formulas specific to the question (e.g., concentration = (initial_salt / (initial_volume + water_added)) * 100)
+- **State Variables**: Identify what state is needed (e.g., initial_volume, initial_concentration, water_added)
+- **Update Logic**: Describe how visual components update based on state (e.g., liquid height = base_height + (water_added * height_per_liter))
+
+## Key Requirements:
+
 - Focus on experimentation, parameter adjustment, and cause-effect relationships.
 - Visual elements should show how parameters affect outcomes.
 - Questions should involve predicting or understanding parameter effects.
 - Animation cues should show parameter changes and result updates.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

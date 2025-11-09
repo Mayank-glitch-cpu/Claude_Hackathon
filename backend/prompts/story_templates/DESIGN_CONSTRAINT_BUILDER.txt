@@ -5,9 +5,94 @@ The resulting visualization will be implemented as:
 - Constraints are displayed as requirements.
 - Design elements are placed on canvas with constraint validation.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+DESIGN_CONSTRAINT_BUILDER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Design Components**:
+   - **Design Canvas**: Drawing area for design construction
+   - **Design Elements**: Draggable elements to place on canvas
+   - **Element Styling**: Colors, borders, shadows for design elements
+
+2. **Constraint Components**:
+   - **Constraint Display**: Display area showing constraints and requirements
+   - **Constraint List**: List of constraints to satisfy
+   - **Constraint Styling**: Colors, fonts, borders for constraint display
+
+3. **Interactive Elements**:
+   - **Element Drag**: Drag elements to place on canvas
+   - **Element Resize**: Resize elements (if applicable)
+   - **Element Rotation**: Rotate elements (if applicable)
+   - **Submit Button**: Button to validate design
+   - **Reset Button**: Button to clear canvas
+
+4. **Feedback Elements**:
+   - **Constraint Violation Feedback**: Visual feedback when constraint is violated
+   - **Constraint Satisfaction Feedback**: Visual feedback when constraint is satisfied
+   - **Success Message**: Appears when all constraints are satisfied
+   - **Element Highlighting**: Visual highlighting of elements
+
+5. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Canvas Pane**: Main area for design construction
+   - **Constraints Pane**: Side or bottom area for constraint display
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+6. **Animation Components**:
+   - **Element Placement Animation**: Visual feedback when element is placed
+   - **Constraint Violation Animation**: Visual feedback when constraint is violated
+   - **Constraint Satisfaction Animation**: Visual feedback when constraint is satisfied
+   - **Design Validation Animation**: Success/error animation on validation
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Design Component Customization:
+- **Design Elements**: Extract element types, labels from component_specifications (adapts to question - shapes, components, parts, etc.)
+- **Element Configuration**: Customize number, styling of elements based on question
+- **Element Styling**: Extract colors, borders, shadows, dimensions from component_specifications
+- **Canvas Styling**: Extract canvas colors, grid, background from component_specifications
+
+### 2. Constraint Component Customization:
+- **Constraint Text**: Extract constraint text from component_specifications (e.g., "Width must be less than 100px", "Elements must not overlap")
+- **Constraint Count**: Extract number of constraints from component_specifications
+- **Constraint Styling**: Extract colors, fonts, borders from component_specifications
+- **Constraint Display**: Extract constraint display format, layout from component_specifications
+
+### 3. Interactive Element Customization:
+- **Drag Behavior**: Customize drag animation, snap behavior, grid alignment from component_specifications
+- **Resize Behavior**: Customize resize behavior, constraints from component_specifications
+- **Rotation Behavior**: Customize rotation behavior, constraints from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Constraints")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Violation Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Satisfaction Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Element Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Element Placement**: Extract placement animation details from component_specifications (fade-in, scale, snap, etc.)
+- **Constraint Violation**: Extract violation animation from component_specifications (shake, flash, red highlight)
+- **Constraint Satisfaction**: Extract satisfaction animation from component_specifications (glow, checkmark, green highlight)
+- **Design Validation**: Extract validation animation from component_specifications (glow, highlight, checkmark)
+
+### 6. Game Logic Customization:
+- **Constraint Logic**: Extract constraint rules from component_specifications (dimensions, positions, relationships, etc.)
+- **Design Requirements**: Extract design requirements from component_specifications (elements, properties, relationships)
+- **Win Condition**: Extract win condition from component_specifications (all constraints satisfied)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize problem-solving, constraints, and design optimization.
 - Visual elements should represent constraints and design space.
 - Questions should involve designing solutions or understanding constraints.
 - Animation cues should show constraint violations, design placement, and validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

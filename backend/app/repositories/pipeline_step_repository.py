@@ -108,4 +108,14 @@ class PipelineStepRepository:
             PipelineStep.process_id == process_id,
             PipelineStep.status == "completed"
         ).order_by(PipelineStep.step_number.desc()).first()
+    
+    @staticmethod
+    def delete_by_process_id(db: Session, process_id: str) -> int:
+        """Delete all pipeline steps for a process"""
+        deleted_count = db.query(PipelineStep).filter(
+            PipelineStep.process_id == process_id
+        ).delete()
+        db.commit()
+        logger.info(f"Deleted {deleted_count} pipeline steps for process {process_id}")
+        return deleted_count
 

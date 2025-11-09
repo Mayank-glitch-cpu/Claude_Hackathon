@@ -5,9 +5,96 @@ The resulting visualization will be implemented as:
 - Before and after states are displayed side-by-side.
 - Transformation steps are selectable or orderable.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+BEFORE_AFTER_TRANSFORMER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **State Components**:
+   - **Before State**: Visual representation of initial state
+   - **After State**: Visual representation of final state
+   - **State Images**: Images representing states (optional)
+   - **State Styling**: Colors, borders, shadows for state display
+
+2. **Transformation Components**:
+   - **Transformation Steps**: Steps that transform before to after state
+   - **Step Cards**: Cards representing transformation steps
+   - **Step Ordering**: Correct order of transformation steps
+   - **Step Styling**: Colors, borders, shadows for step cards
+
+3. **Interactive Elements**:
+   - **Step Selection**: Click to select transformation steps
+   - **Step Ordering**: Drag to order transformation steps
+   - **Step Application**: Apply steps to see transformation
+   - **Submit Button**: Button to validate transformation
+   - **Reset Button**: Button to reset transformation
+
+4. **Feedback Elements**:
+   - **Correct Step Feedback**: Visual feedback when step is correct
+   - **Incorrect Step Feedback**: Visual feedback when step is incorrect
+   - **Success Message**: Appears when transformation is correct
+   - **Step Highlighting**: Visual highlighting of steps
+
+5. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **States Pane**: Main area for before/after state display (side-by-side)
+   - **Steps Pane**: Area for transformation step cards
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+6. **Animation Components**:
+   - **State Transition Animation**: Visual transition between states
+   - **Step Application Animation**: Visual feedback when step is applied
+   - **Transformation Visualization Animation**: Visual progression of transformation
+   - **Transformation Complete Animation**: Success animation when transformation is complete
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. State Component Customization:
+- **Before State**: Extract before state visualization from component_specifications (adapts to question - image, diagram, code, etc.)
+- **After State**: Extract after state visualization from component_specifications
+- **State Styling**: Extract colors, borders, shadows, images from component_specifications
+- **State Layout**: Extract positioning, side-by-side layout from component_specifications
+
+### 2. Transformation Component Customization:
+- **Step Text**: Extract exact step text from component_specifications (e.g., "Apply filter", "Transform coordinates", "Execute function")
+- **Step Count**: Extract number of steps from component_specifications
+- **Step Order**: Extract correct order of steps from component_specifications
+- **Step Styling**: Extract colors, fonts, borders, shadows from component_specifications
+
+### 3. Interactive Element Customization:
+- **Step Selection**: Customize selection feedback, highlighting from component_specifications
+- **Step Ordering**: Customize drag behavior, ordering feedback from component_specifications
+- **Step Application**: Customize application behavior, animation from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Apply Steps")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Step Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **State Transition**: Extract transition animation details from component_specifications (fade, slide, morph, etc.)
+- **Step Application**: Extract application animation from component_specifications (visual effect, state change, etc.)
+- **Transformation Visualization**: Extract visualization animation from component_specifications (progressive reveal, animation, etc.)
+- **Transformation Complete**: Extract completion animation from component_specifications (celebration, glow, etc.)
+
+### 6. Game Logic Customization:
+- **Transformation Logic**: Extract transformation rules from component_specifications (how before becomes after)
+- **Step Logic**: Extract step order, application logic from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (correct transformation, correct step order)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize transformations, processes, and state changes.
 - Visual elements should represent before/after states and transformation steps.
 - Questions should involve understanding transformations or ordering steps.
 - Animation cues should show state transitions, step application, and transformation visualization.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

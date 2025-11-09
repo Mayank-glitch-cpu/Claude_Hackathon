@@ -30,3 +30,116 @@ export interface ParameterPlaygroundBlueprint {
   };
 }
 
+---
+
+## PARAMETER_PLAYGROUND Template Component Documentation
+
+### Available Template Components:
+
+1. **Parameter Controls**:
+   - **Buttons**: Increment/decrement buttons (can be added via parameters with type "input" or custom button configurations)
+   - **Sliders**: Range sliders (parameters with type "slider")
+   - **Input Fields**: Text/number inputs (parameters with type "input")
+   - **Dropdowns**: Selection dropdowns (parameters with type "dropdown")
+
+2. **Visualization Components** (adapts to question context):
+   - **Beakers/Containers**: For chemistry/physics (liquids, solutions, mixtures)
+   - **Graphs/Charts**: For math/statistics (functions, data visualization)
+   - **Diagrams**: For science/engineering (circuits, systems, processes)
+   - **Simulations**: For physics/chemistry (particles, forces, reactions)
+
+3. **Feedback Elements**:
+   - **Success Message**: Triggered by targetReached animation cue
+   - **Stats Display**: Shows current parameter values (can be derived from parameters)
+   - **Goal Display**: Shows target values (from tasks.targetValues)
+   - **Visual Feedback**: Animations based on animationCues
+
+4. **Layout Structure**:
+   - **Question Container**: Top area (title, narrativeIntro)
+   - **Visual Pane**: Main area (visualization)
+   - **Controls Pane**: Bottom area (parameters)
+
+## Component Customization Instructions:
+
+### 1. Parameters Array - Customize for Question:
+
+**For each parameter, extract from component_specifications.interactive_elements:**
+
+- **id**: Use descriptive ID based on question (e.g., "water_volume", "force_magnitude", "temperature")
+- **label**: Extract exact label text from component_specifications (e.g., "Water Volume", "Force", "Temperature")
+- **type**: Choose "slider" for continuous values, "input" for direct entry, "dropdown" for discrete choices
+- **min/max**: Extract from component_specifications (e.g., min: 0, max: 10 for water volume)
+- **defaultValue**: Extract initial value from component_specifications (e.g., 0 for water added)
+- **unit**: Extract unit from component_specifications (e.g., "liters", "N", "°C")
+
+**For button-based parameters (increment/decrement):**
+- Create parameters with appropriate increment values
+- Use label to specify button text (e.g., "Add 1.0 L Water", "Add 0.1 L Water")
+- Include icon/emoji in label if specified in component_specifications (e.g., "💧 Add 1.0 L Water")
+
+### 2. Visualization Object - Customize for Question:
+
+**Extract from component_specifications.visual_components:**
+
+- **type**: Choose based on question context:
+  - "simulation" for chemistry/physics (beakers, liquids, particles)
+  - "graph" for math (functions, data)
+  - "diagram" for science/engineering (circuits, systems)
+  - "chart" for statistics (data visualization)
+- **assetPrompt**: Extract detailed visualization description from component_specifications.visual_components:
+  - Include component name (e.g., "beaker", "graph", "diagram")
+  - Include dimensions, colors, styling details
+  - Include dynamic properties (what changes based on parameters)
+  - Include animation descriptions
+  - Example: "Illustrate a mystical cauldron filled with a swirling, glowing liquid representing a salt solution. Show a stream of clear liquid pouring into it, causing a change in glow intensity to visually represent concentration dilution. Include animated characters Luna and Orion providing hints."
+
+### 3. Tasks Array - Customize for Question:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "dilution_task")
+- **type**: Use "parameter_adjustment" for interactive parameter manipulation, "prediction" for prediction tasks
+- **questionText**: Extract from question_flow or component_specifications (e.g., "How many liters of water must you add to achieve a 20% salt concentration?")
+- **targetValues**: Extract from component_specifications.game_logic.win_condition:
+  - Map parameter IDs to target values
+  - Example: { "water_volume": 5 } for dilution problem
+- **requiredToProceed**: Set to true if task must be completed
+
+### 4. AnimationCues Object - Customize for Question:
+
+**Extract from component_specifications.styling_details.animations and component_specifications.animation_cues:**
+
+- **parameterChange**: Extract detailed animation description from component_specifications:
+  - Describe animation when parameter changes (e.g., "Water stream animation plays when water is added")
+  - Include duration, easing, visual effects
+  - Example: "The glow of the cauldron shifts in hue as water is added, indicating changes in concentration. A water stream animation plays from top to bottom."
+  
+- **visualizationUpdate**: Extract transition description from component_specifications:
+  - Describe smooth transitions when visualization updates
+  - Include what changes (e.g., liquid height, color opacity, graph values)
+  - Include duration, easing
+  - Example: "The cauldron's glow intensity updates in real-time with water addition. Liquid height transitions smoothly over 0.5 seconds with ease-out easing."
+  
+- **targetReached**: Extract success animation from component_specifications:
+  - Describe success animation when target is reached
+  - Include visual effects (e.g., sparkle, glow, burst)
+  - Include duration, easing
+  - Example: "A sparkling effect appears over the cauldron for the correct answer, while incorrect answers cause the cauldron to dim and shake slightly."
+
+### 5. Title and NarrativeIntro - Customize for Question:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Alchemist's Salt Solution Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+
+## Key Customization Guidelines:
+
+1. **Extract specific values** from component_specifications (hex codes, dimensions, durations, increment values)
+2. **Customize visualization type** based on question context (beaker for chemistry, graph for math, etc.)
+3. **Customize parameter labels** with exact text and icons from component_specifications
+4. **Customize target values** from win condition in component_specifications.game_logic
+5. **Customize animations** with detailed descriptions from component_specifications.styling_details
+6. **Include production-quality details** that enable rendering a polished, interactive game
+7. **Adapt all components** to the specific question while using the template's component set
+

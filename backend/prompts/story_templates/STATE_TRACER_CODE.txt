@@ -5,9 +5,93 @@ The resulting visualization will be implemented as:
 - Code is displayed with line-by-line execution.
 - Variable states are tracked and displayed at each step.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+STATE_TRACER_CODE template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Code Components**:
+   - **Code Display**: Code editor or display area showing code
+   - **Line Highlighting**: Highlighting of current execution line
+   - **Code Syntax**: Syntax highlighting for code readability
+
+2. **State Components**:
+   - **Variable Display**: Display area showing variable values
+   - **State Table**: Table showing variable states at each step
+   - **State History**: History of state changes
+
+3. **Interactive Elements**:
+   - **Step Forward**: Button to execute next line
+   - **Step Backward**: Button to go back one step
+   - **Run**: Button to execute all code
+   - **Reset**: Button to reset execution
+   - **Submit Button**: Button to submit answer
+
+4. **Feedback Elements**:
+   - **Correct Answer Feedback**: Visual feedback when answer is correct
+   - **Incorrect Answer Feedback**: Visual feedback when answer is incorrect
+   - **Success Message**: Appears when answer is correct
+   - **Line Highlighting**: Visual highlighting of execution line
+
+5. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Code Pane**: Main area for code display
+   - **State Pane**: Side or bottom area for variable state display
+   - **Controls Pane**: Bottom area for step/run/reset buttons
+
+6. **Animation Components**:
+   - **Line Highlight Animation**: Visual feedback when line is highlighted
+   - **State Update Animation**: Visual feedback when state is updated
+   - **Step Progression Animation**: Visual progression through code
+   - **Answer Validation Animation**: Success/error animation on validation
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Code Component Customization:
+- **Code Content**: Extract code content from component_specifications (adapts to question - Python, JavaScript, etc.)
+- **Code Styling**: Extract syntax highlighting, fonts, colors from component_specifications
+- **Line Highlighting**: Extract highlight color, animation from component_specifications
+- **Code Layout**: Extract positioning, spacing from component_specifications
+
+### 2. State Component Customization:
+- **Variable Display**: Extract variable names, value formats from component_specifications
+- **State Table**: Extract table styling, layout from component_specifications
+- **State History**: Extract history display styling from component_specifications
+- **State Styling**: Extract colors, fonts, borders from component_specifications
+
+### 3. Interactive Element Customization:
+- **Step Buttons**: Extract button labels, actions from component_specifications (e.g., "Step Forward", "Step Back", "Run")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+- **Button Layout**: Extract positioning, spacing from component_specifications
+- **Interaction Behavior**: Customize step behavior, execution speed from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Line Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Line Highlight**: Extract highlight animation details from component_specifications (pulse, glow, etc.)
+- **State Update**: Extract update animation from component_specifications (fade-in, slide, etc.)
+- **Step Progression**: Extract progression animation from component_specifications (smooth transition, etc.)
+- **Answer Validation**: Extract validation animation from component_specifications (glow, checkmark, X)
+
+### 6. Game Logic Customization:
+- **Execution Logic**: Extract code execution logic from component_specifications
+- **State Tracking**: Extract state tracking rules from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (correct variable values or execution flow)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize stepping through execution, variable states, and debugging.
 - Visual elements should represent code lines, variables, and state changes.
 - Questions should involve predicting variable values or execution flow.
 - Animation cues should show line highlighting, state updates, and step progression.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

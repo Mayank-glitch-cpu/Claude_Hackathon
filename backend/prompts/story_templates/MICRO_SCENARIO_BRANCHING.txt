@@ -5,9 +5,104 @@ The resulting visualization will be implemented as:
 - Scenarios present choices that lead to different branches.
 - Path taken is tracked and evaluated.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+MICRO_SCENARIO_BRANCHING template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Scenario Components**:
+   - **Scenario Display**: Text or visual representation of current scenario
+   - **Scenario Images**: Images representing scenarios (optional)
+   - **Scenario Styling**: Colors, fonts, borders for scenario display
+
+2. **Choice Components**:
+   - **Choice Buttons**: Buttons representing available choices
+   - **Choice Text**: Text labels on choice buttons
+   - **Choice Styling**: Colors, borders, shadows for choice buttons
+
+3. **Branch Components**:
+   - **Branch Paths**: Visual representation of branching paths
+   - **Path Tracking**: Visual tracking of path taken
+   - **Branch Styling**: Colors, lines, arrows for branches
+
+4. **Interactive Elements**:
+   - **Choice Selection**: Click to select a choice
+   - **Scenario Navigation**: Navigate through scenarios
+   - **Path Visualization**: Visualize branching paths
+   - **Reset Button**: Button to restart scenario
+
+5. **Feedback Elements**:
+   - **Correct Path Feedback**: Visual feedback when correct path is taken
+   - **Incorrect Path Feedback**: Visual feedback when incorrect path is taken
+   - **Success Message**: Appears when correct path is completed
+   - **Choice Highlighting**: Visual highlighting of selected choices
+
+6. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Scenario Pane**: Main area for scenario display
+   - **Choices Pane**: Area for choice buttons
+   - **Path Pane**: Area for path visualization (if needed)
+   - **Controls Pane**: Bottom area for navigation/reset buttons
+
+7. **Animation Components**:
+   - **Scenario Transition Animation**: Visual transition between scenarios
+   - **Choice Selection Animation**: Visual feedback when choice is selected
+   - **Path Visualization Animation**: Visual progression along path
+   - **Path Completion Animation**: Success animation when path is completed
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Scenario Component Customization:
+- **Scenario Content**: Extract scenario text, images from component_specifications (adapts to question context)
+- **Scenario Styling**: Extract colors, fonts, borders, images from component_specifications
+- **Scenario Count**: Extract number of scenarios from component_specifications
+- **Scenario Flow**: Extract scenario flow, branching logic from component_specifications
+
+### 2. Choice Component Customization:
+- **Choice Text**: Extract exact choice text from component_specifications (e.g., "Take the left path", "Wait for help", "Call for backup")
+- **Choice Count**: Extract number of choices per scenario from component_specifications
+- **Choice Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+- **Choice Layout**: Extract positioning, spacing from component_specifications
+
+### 3. Branch Component Customization:
+- **Branch Structure**: Extract branching structure from component_specifications (decision tree, flowchart, etc.)
+- **Path Visualization**: Extract path visualization styling from component_specifications (lines, arrows, nodes, etc.)
+- **Path Tracking**: Extract path tracking styling from component_specifications (highlighted path, completed nodes, etc.)
+- **Branch Styling**: Extract colors, line styles, arrows from component_specifications
+
+### 4. Interactive Element Customization:
+- **Choice Selection**: Customize click feedback, highlighting from component_specifications
+- **Scenario Navigation**: Customize navigation behavior, transitions from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Next", "Reset", "Restart")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 5. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Choice Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 6. Animation Customization:
+- **Scenario Transition**: Extract transition animation details from component_specifications (fade, slide, etc.)
+- **Choice Selection**: Extract selection animation from component_specifications (pulse, glow, etc.)
+- **Path Visualization**: Extract path animation from component_specifications (progressive reveal, highlight, etc.)
+- **Path Completion**: Extract completion animation from component_specifications (celebration, glow, etc.)
+
+### 7. Game Logic Customization:
+- **Branching Logic**: Extract branching structure, decision points from component_specifications
+- **Path Logic**: Extract correct path, consequences from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (correct path completed)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on decision-making, branching narratives, and consequences.
 - Visual elements should represent scenarios, choices, and branches.
 - Questions should involve making decisions or understanding consequences.
 - Animation cues should show scenario transitions, choice selection, and branch paths.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

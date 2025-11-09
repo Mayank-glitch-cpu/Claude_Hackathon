@@ -6,9 +6,86 @@ The resulting visualization will be implemented as:
 - Draggable labels and/or clickable regions.
 - Optional free-response explanation about the overall system.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+LABEL_DIAGRAM template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Diagram Components**:
+   - **Main Diagram**: Single image or diagram (adapts to question context - anatomy, circuits, systems, etc.)
+   - **Label Zones**: Clickable/draggable regions on the diagram
+   - **Labels**: Draggable or selectable labels to match with zones
+
+2. **Interactive Elements**:
+   - **Draggable Labels**: Labels that can be dragged to zones
+   - **Clickable Zones**: Regions on diagram that can be clicked
+   - **Submit Button**: Button to submit answers
+   - **Reset Button**: Button to reset labels
+
+3. **Feedback Elements**:
+   - **Correct Placement Feedback**: Visual feedback when label is correctly placed
+   - **Incorrect Placement Feedback**: Visual feedback when label is incorrectly placed
+   - **Success Message**: Appears when all labels are correctly placed
+   - **Zone Highlighting**: Visual highlighting of zones
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Diagram Pane**: Main area for diagram display
+   - **Labels Pane**: Area for draggable labels (can be side or bottom)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Label Drag Animation**: Smooth dragging animation
+   - **Correct Placement Animation**: Glow, highlight, or success effect
+   - **Incorrect Placement Animation**: Shake, flash, or error effect
+   - **Zone Highlight Animation**: Subtle glow or highlight on zones
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Diagram Component Customization:
+- **Diagram Type**: Select appropriate diagram based on question context (anatomy for biology, circuit for electronics, system for engineering, etc.)
+- **Zone Configuration**: Customize number and positions of zones based on question
+- **Zone Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+- **Diagram Styling**: Extract dimensions, colors, borders from component_specifications
+
+### 2. Label Customization:
+- **Label Text**: Extract exact label text from component_specifications (e.g., "Heart", "Resistor", "CPU")
+- **Label Styling**: Extract colors, fonts, borders, shadows from component_specifications
+- **Label Count**: Extract number of labels from component_specifications
+- **Label Layout**: Extract positioning and arrangement from component_specifications
+
+### 3. Interactive Element Customization:
+- **Drag Behavior**: Customize drag animation, snap behavior, drop zones from component_specifications
+- **Click Behavior**: Customize click feedback, zone highlighting from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Answer")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Zone Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Label Drag**: Extract drag animation details from component_specifications (smooth movement, snap behavior)
+- **Correct Placement**: Extract success animation from component_specifications (glow, highlight, checkmark)
+- **Incorrect Placement**: Extract error animation from component_specifications (shake, flash, X)
+- **Zone Highlight**: Extract highlight animation from component_specifications (subtle glow, pulse)
+
+### 6. Game Logic Customization:
+- **Correctness Logic**: Extract matching logic from component_specifications (which label matches which zone)
+- **Win Condition**: Extract win condition from component_specifications (all labels correctly placed)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Ensure there is a clear central object/system suitable for a static diagram.
 - Visual elements should map to distinct regions or parts of that object.
 - Questions should involve identifying or labeling parts, then explaining the whole.
 - Animation cues should be simple: subtle glows, shakes, or highlight effects on regions.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

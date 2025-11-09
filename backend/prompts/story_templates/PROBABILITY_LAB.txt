@@ -5,9 +5,106 @@ The resulting visualization will be implemented as:
 - Experiments are runnable simulations.
 - Results are visualized in charts or graphs.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+PROBABILITY_LAB template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Experiment Components**:
+   - **Experiment Display**: Visual representation of experiment (adapts to question - coin flip, dice roll, spinner, etc.)
+   - **Experiment Parameters**: Parameters that can be adjusted (number of trials, probability, etc.)
+   - **Experiment Styling**: Colors, borders, shadows for experiment display
+
+2. **Parameter Controls**:
+   - **Parameter Sliders**: Sliders to adjust experiment parameters
+   - **Parameter Inputs**: Input fields for parameter values
+   - **Run Button**: Button to run experiment
+   - **Reset Button**: Button to reset experiment
+
+3. **Result Components**:
+   - **Result Charts**: Charts or graphs showing experiment results
+   - **Result Statistics**: Statistical measures (mean, variance, etc.)
+   - **Result Display**: Text or visual display of results
+   - **Result Styling**: Colors, fonts, borders for result display
+
+4. **Interactive Elements**:
+   - **Parameter Adjustment**: Adjust experiment parameters
+   - **Experiment Run**: Run experiment simulation
+   - **Result Visualization**: Visualize experiment results
+   - **Submit Button**: Button to submit answer
+
+5. **Feedback Elements**:
+   - **Correct Answer Feedback**: Visual feedback when answer is correct
+   - **Incorrect Answer Feedback**: Visual feedback when answer is incorrect
+   - **Success Message**: Appears when answer is correct
+   - **Result Highlighting**: Visual highlighting of results
+
+6. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Experiment Pane**: Main area for experiment display
+   - **Parameters Pane**: Area for parameter controls
+   - **Results Pane**: Area for result visualization
+   - **Controls Pane**: Bottom area for run/submit/reset buttons
+
+7. **Animation Components**:
+   - **Experiment Run Animation**: Visual feedback when experiment runs
+   - **Result Update Animation**: Visual feedback when results update
+   - **Statistical Visualization Animation**: Visual progression of statistical visualization
+   - **Answer Validation Animation**: Success/error animation on validation
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Experiment Component Customization:
+- **Experiment Type**: Select appropriate experiment based on question context (coin flip, dice roll, spinner, card draw, etc.)
+- **Experiment Display**: Extract experiment visualization from component_specifications (coins, dice, spinner, cards, etc.)
+- **Experiment Styling**: Extract colors, borders, shadows, animations from component_specifications
+- **Experiment Parameters**: Extract parameter types, ranges from component_specifications
+
+### 2. Parameter Control Customization:
+- **Parameter Types**: Extract parameter types from component_specifications (number of trials, probability, sample size, etc.)
+- **Parameter Controls**: Extract control types from component_specifications (sliders, inputs, dropdowns)
+- **Parameter Styling**: Extract colors, borders, shadows from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Run Experiment", "Reset", "Submit")
+
+### 3. Result Component Customization:
+- **Result Charts**: Extract chart types from component_specifications (bar chart, line chart, pie chart, histogram, etc.)
+- **Result Statistics**: Extract statistical measures from component_specifications (mean, variance, probability, etc.)
+- **Result Display**: Extract result display format from component_specifications (text, visual, table, etc.)
+- **Result Styling**: Extract colors, fonts, borders from component_specifications
+
+### 4. Interactive Element Customization:
+- **Parameter Adjustment**: Customize adjustment behavior, feedback from component_specifications
+- **Experiment Run**: Customize run behavior, animation from component_specifications
+- **Result Visualization**: Customize visualization behavior, animation from component_specifications
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 5. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Result Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 6. Animation Customization:
+- **Experiment Run**: Extract run animation details from component_specifications (coin flip, dice roll, spinner spin, etc.)
+- **Result Update**: Extract update animation from component_specifications (chart update, statistic update, etc.)
+- **Statistical Visualization**: Extract visualization animation from component_specifications (progressive reveal, animation, etc.)
+- **Answer Validation**: Extract validation animation from component_specifications (glow, checkmark, X)
+
+### 7. Game Logic Customization:
+- **Experiment Logic**: Extract experiment logic from component_specifications (probability calculations, random generation, etc.)
+- **Result Calculation**: Extract result calculation logic from component_specifications (statistics, probabilities, etc.)
+- **Win Condition**: Extract win condition from component_specifications (correct probability prediction, correct statistical measure, etc.)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on probability, statistics, and experimental outcomes.
 - Visual elements should represent experiments, parameters, and results.
 - Questions should involve predicting probabilities or understanding outcomes.
 - Animation cues should show experiment runs, result updates, and statistical visualization.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

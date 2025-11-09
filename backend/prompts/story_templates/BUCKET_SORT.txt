@@ -5,9 +5,91 @@ The resulting visualization will be implemented as:
 - Multiple buckets represent different categories.
 - Items belong to specific categories.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+BUCKET_SORT template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Bucket Components**:
+   - **Buckets**: Containers representing different categories
+   - **Bucket Labels**: Category names or labels on buckets
+   - **Bucket Styling**: Colors, borders, shadows for each category
+
+2. **Item Components**:
+   - **Items**: Draggable items to be categorized
+   - **Item Content**: Text or images on items
+   - **Item Styling**: Colors, borders, shadows for items
+
+3. **Interactive Elements**:
+   - **Item Drag**: Drag items to buckets
+   - **Drop Zones**: Bucket areas where items can be dropped
+   - **Submit Button**: Button to validate categorization
+   - **Reset Button**: Button to reset items
+
+4. **Feedback Elements**:
+   - **Correct Placement Feedback**: Visual feedback when item is in correct bucket
+   - **Incorrect Placement Feedback**: Visual feedback when item is in wrong bucket
+   - **Success Message**: Appears when all items are correctly categorized
+   - **Bucket Highlighting**: Visual highlighting of buckets
+
+5. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Items Pane**: Area for draggable items (unordered initially)
+   - **Buckets Pane**: Main area for bucket display
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+6. **Animation Components**:
+   - **Item Drag Animation**: Smooth dragging animation
+   - **Bucket Drop Animation**: Visual feedback when item is dropped
+   - **Correct Placement Animation**: Success effect when item is correctly placed
+   - **Incorrect Placement Animation**: Error effect when item is incorrectly placed
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Bucket Component Customization:
+- **Bucket Categories**: Extract category names from component_specifications (e.g., "Mammals", "Reptiles", "Birds")
+- **Bucket Count**: Extract number of buckets from component_specifications
+- **Bucket Styling**: Extract colors, borders, shadows, labels from component_specifications
+- **Bucket Layout**: Extract positioning, spacing, arrangement from component_specifications
+
+### 2. Item Component Customization:
+- **Item Content**: Extract text or image descriptions from component_specifications (e.g., "Dog", "Snake", "Eagle")
+- **Item Styling**: Extract colors, fonts, borders, shadows from component_specifications
+- **Item Count**: Extract number of items from component_specifications
+- **Item Layout**: Extract positioning, spacing, arrangement from component_specifications
+
+### 3. Interactive Element Customization:
+- **Drag Behavior**: Customize drag animation, snap behavior, drop zones from component_specifications
+- **Drop Zones**: Extract drop zone styling, positioning from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Categories")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Bucket Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Item Drag**: Extract drag animation details from component_specifications (smooth movement, snap behavior)
+- **Bucket Drop**: Extract drop animation from component_specifications (visual feedback on drop)
+- **Correct Placement**: Extract success animation from component_specifications (glow, highlight, checkmark)
+- **Incorrect Placement**: Extract error animation from component_specifications (shake, flash, X)
+
+### 6. Game Logic Customization:
+- **Categorization Logic**: Extract which items belong to which buckets from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (all items correctly categorized)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize categories, grouping, and classification.
 - Visual elements should represent distinct categories and items to classify.
 - Questions should involve categorization or grouping tasks.
 - Animation cues should show items moving to buckets and category validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

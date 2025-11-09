@@ -34,3 +34,106 @@ export interface ImageHotspotQABlueprint {
   };
 }
 
+---
+
+## IMAGE_HOTSPOT_QA Template Component Documentation
+
+### Available Template Components:
+
+1. **Image Components**:
+   - **Main Image**: Interactive image with clickable regions (adapts to question context - anatomy, geography, diagrams, etc.)
+   - **Hotspots**: Clickable regions on the image
+   - **Hotspot Labels**: Labels or markers on hotspots
+
+2. **Interactive Elements**:
+   - **Hotspot Click**: Click to reveal question
+   - **Modal/Dialog**: Popup for question display
+   - **Answer Input**: Input fields for answers (multiple choice or free response)
+   - **Submit Button**: Button to submit answer
+   - **Close Button**: Button to close modal
+
+3. **Feedback Elements**:
+   - **Correct Answer Feedback**: Visual feedback when answer is correct
+   - **Incorrect Answer Feedback**: Visual feedback when answer is incorrect
+   - **Hotspot Highlighting**: Visual highlighting of clicked hotspots
+   - **Completion Feedback**: Visual feedback when all hotspots are completed
+
+## Component Customization Instructions:
+
+### 1. Image Object - Customize for Question:
+
+**Extract from component_specifications.visual_components:**
+
+- **assetPrompt**: Extract detailed image description from component_specifications.visual_components:
+  - Include image type (e.g., "anatomy image", "geography map", "science diagram")
+  - Include dimensions, colors, styling details
+  - Include hotspot positions and labels
+  - Example: "Illustrate a detailed world map showing continents, oceans, and major landmarks. Include clear markers for each geographic region with distinct visual hotspots."
+
+- **assetUrl**: Extract image URL from component_specifications (if applicable)
+
+### 2. Hotspots Array - Customize for Question:
+
+**Extract from component_specifications.visual_components:**
+
+- **id**: Use descriptive ID based on question (e.g., "hotspot1", "hotspot2", "hotspot3")
+- **x, y**: Extract normalized positions (0-1) from component_specifications.visual_components.dimensions
+- **radius**: Extract normalized radius (0-1) from component_specifications.visual_components.dimensions
+- **label**: Extract hotspot label from component_specifications (e.g., "North America", "Pacific Ocean", "Mount Everest")
+
+### 3. Tasks Array - Customize for Question:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "hotspot_task1")
+- **hotspotId**: Extract hotspot ID from component_specifications (which hotspot this task belongs to)
+- **type**: Use "multiple_choice" for multiple choice questions, "free_response" for free response questions
+- **questionText**: Extract from question_flow or component_specifications (e.g., "What is the capital of this country?", "What is this landmark?")
+- **options**: Extract answer options from component_specifications (if multiple choice)
+- **correctAnswer**: Extract correct answer from component_specifications.game_logic
+- **feedback**: Extract feedback text from component_specifications:
+  - **correct**: Extract correct feedback text
+  - **incorrect**: Extract incorrect feedback text
+- **requiredToProceed**: Set to true if task must be completed
+
+### 4. AnimationCues Object - Customize for Question:
+
+**Extract from component_specifications.styling_details.animations:**
+
+- **hotspotClick**: Extract click animation from component_specifications:
+  - Describe animation when hotspot is clicked (e.g., "Pulse animation, glow effect")
+  - Include duration, easing, visual effects
+  - Example: "The hotspot pulses with a glow animation for 0.3 seconds when clicked."
+  
+- **modalOpen**: Extract modal transition from component_specifications:
+  - Describe animation when modal opens (e.g., "Fade-in, slide-up")
+  - Include duration, easing, visual effects
+  - Example: "The modal fades in and slides up over 0.5 seconds with ease-out easing when opened."
+  
+- **correctAnswer**: Extract success animation from component_specifications:
+  - Describe animation when answer is correct (e.g., "Green glow, checkmark")
+  - Include duration, easing, visual effects
+  - Example: "The hotspot glows green with a checkmark animation when the answer is correct."
+  
+- **incorrectAnswer**: Extract error animation from component_specifications:
+  - Describe animation when answer is incorrect (e.g., "Red shake, X mark")
+  - Include duration, easing, visual effects
+  - Example: "The hotspot shakes red with an X mark animation when the answer is incorrect."
+
+### 5. Title and NarrativeIntro - Customize for Question:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Geography Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+
+## Key Customization Guidelines:
+
+1. **Extract specific values** from component_specifications (hotspot positions, question text, animation details)
+2. **Customize image type** based on question context (anatomy for biology, map for geography, diagram for science, etc.)
+3. **Customize hotspot positions** from component_specifications.visual_components.dimensions
+4. **Customize question text** with exact text from component_specifications
+5. **Customize animations** with detailed descriptions from component_specifications.styling_details
+6. **Include production-quality details** that enable rendering a polished, interactive game
+7. **Adapt all components** to the specific question while using the template's component set
+

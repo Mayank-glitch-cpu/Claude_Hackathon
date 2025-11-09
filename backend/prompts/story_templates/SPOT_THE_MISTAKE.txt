@@ -5,9 +5,80 @@ The resulting visualization will be implemented as:
 - Content is displayed with clickable regions.
 - Mistakes are highlighted when identified.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+SPOT_THE_MISTAKE template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Content Components**:
+   - **Content Display**: Code, text, or diagram display area (adapts to question context)
+   - **Clickable Regions**: Regions that can be clicked to identify mistakes
+   - **Content Styling**: Colors, fonts, borders for content display
+
+2. **Interactive Elements**:
+   - **Region Click**: Click to identify mistake
+   - **Mistake Highlighting**: Visual highlighting of identified mistakes
+   - **Submit Button**: Button to submit identified mistakes
+   - **Reset Button**: Button to reset selections
+
+3. **Feedback Elements**:
+   - **Correct Identification Feedback**: Visual feedback when mistake is correctly identified
+   - **Incorrect Identification Feedback**: Visual feedback when non-mistake is clicked
+   - **Success Message**: Appears when all mistakes are identified
+   - **Mistake Highlighting**: Visual highlighting of mistakes
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Content Pane**: Main area for content display
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Region Click Animation**: Visual feedback when region is clicked
+   - **Mistake Highlight Animation**: Visual highlighting of mistakes
+   - **Correct Identification Animation**: Success animation when mistake is correctly identified
+   - **Incorrect Identification Animation**: Error animation when non-mistake is clicked
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Content Component Customization:
+- **Content Type**: Select appropriate content type based on question context (code for programming, text for grammar, diagram for science, etc.)
+- **Content Styling**: Extract colors, fonts, borders, syntax highlighting from component_specifications
+- **Clickable Regions**: Extract region configuration, styling from component_specifications
+- **Content Layout**: Extract positioning, spacing from component_specifications
+
+### 2. Interactive Element Customization:
+- **Click Behavior**: Customize click feedback, highlighting from component_specifications
+- **Mistake Highlighting**: Extract highlight color, animation, duration from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Mistakes")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Mistake Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Region Click**: Extract click animation details from component_specifications (pulse, glow, etc.)
+- **Mistake Highlight**: Extract highlight animation from component_specifications (underline, glow, etc.)
+- **Correct Identification**: Extract success animation from component_specifications (glow, checkmark, etc.)
+- **Incorrect Identification**: Extract error animation from component_specifications (shake, flash, X)
+
+### 5. Game Logic Customization:
+- **Mistake Locations**: Extract mistake locations from component_specifications (line numbers, regions, etc.)
+- **Mistake Types**: Extract mistake types from component_specifications (syntax error, logic error, typo, etc.)
+- **Win Condition**: Extract win condition from component_specifications (all mistakes correctly identified)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on error detection, debugging, and quality assurance.
 - Visual elements should represent content with potential errors.
 - Questions should involve finding and identifying mistakes.
 - Animation cues should show mistake highlighting and feedback.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

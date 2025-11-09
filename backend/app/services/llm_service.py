@@ -62,8 +62,12 @@ class LLMService:
         
         # Don't raise error here - check when actually using the service
 
-    def _call_openai(self, messages: list, model: str = "gpt-4", temperature: float = 0.7) -> str:
+    def _call_openai(self, messages: list, model: str = None, temperature: float = 0.7) -> str:
         """Call OpenAI API with retry logic"""
+        # Use environment variable or default to gpt-4o (more accessible than gpt-4)
+        if model is None:
+            model = os.getenv("OPENAI_MODEL", "gpt-4o")
+        
         if not self.openai_client:
             raise ValueError("OpenAI client not initialized")
         
@@ -154,7 +158,7 @@ class LLMService:
         if use_anthropic and self.anthropic_client:
             return self._call_anthropic(messages, model or "claude-3-opus-20240229")
         elif self.openai_client:
-            return self._call_openai(messages, model or "gpt-4")
+            return self._call_openai(messages, model or os.getenv("OPENAI_MODEL", "gpt-4o"))
         elif self.anthropic_client:
             return self._call_anthropic(messages, model or "claude-3-opus-20240229")
         else:

@@ -5,9 +5,83 @@ The resulting visualization will be implemented as:
 - Canvas allows drawing and editing graph structures.
 - Graph structure is validated on submission.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+GRAPH_SKETCHER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Graph Components**:
+   - **Canvas**: Drawing area for graph construction
+   - **Nodes**: Draggable nodes representing vertices
+   - **Edges**: Lines connecting nodes
+   - **Node Labels**: Text labels on nodes
+
+2. **Interactive Elements**:
+   - **Node Creation**: Click to create nodes
+   - **Node Drag**: Drag nodes to reposition
+   - **Edge Drawing**: Draw edges between nodes
+   - **Node/Edge Deletion**: Delete nodes or edges
+   - **Submit Button**: Button to validate graph
+   - **Reset Button**: Button to clear canvas
+
+3. **Feedback Elements**:
+   - **Correct Graph Feedback**: Visual feedback when graph is correct
+   - **Incorrect Graph Feedback**: Visual feedback when graph is incorrect
+   - **Success Message**: Appears when graph is correct
+   - **Node/Edge Highlighting**: Visual highlighting of nodes/edges
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Canvas Pane**: Main area for graph drawing
+   - **Tools Pane**: Area for drawing tools (if needed)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Node Creation Animation**: Visual feedback when node is created
+   - **Edge Drawing Animation**: Visual feedback when edge is drawn
+   - **Graph Validation Animation**: Success/error animation on validation
+   - **Node/Edge Highlight Animation**: Highlight animation for nodes/edges
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Graph Component Customization:
+- **Graph Type**: Select appropriate graph type based on question context (directed, undirected, weighted, etc.)
+- **Node Configuration**: Customize number, labels, styling of nodes based on question
+- **Edge Configuration**: Customize edge types, weights, styling based on question
+- **Graph Styling**: Extract colors, borders, shadows from component_specifications
+
+### 2. Interactive Element Customization:
+- **Drawing Tools**: Extract tool configurations from component_specifications (node tool, edge tool, etc.)
+- **Drag Behavior**: Customize drag animation, snap behavior from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Clear")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Node/Edge Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Node Creation**: Extract creation animation details from component_specifications (fade-in, scale, etc.)
+- **Edge Drawing**: Extract drawing animation from component_specifications (line drawing, connection animation)
+- **Graph Validation**: Extract validation animation from component_specifications (glow, highlight, checkmark)
+- **Node/Edge Highlight**: Extract highlight animation from component_specifications (pulse, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Graph Structure**: Extract required graph structure from component_specifications (nodes, edges, properties)
+- **Win Condition**: Extract win condition from component_specifications (correct graph structure)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Emphasize graph structures, networks, and relationships.
 - Visual elements should represent nodes and edges.
 - Questions should involve constructing or understanding graph structures.
 - Animation cues should show node/edge creation and graph validation.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

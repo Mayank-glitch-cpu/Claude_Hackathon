@@ -5,9 +5,82 @@ The resulting visualization will be implemented as:
 - Each hotspot reveals a question when clicked.
 - Questions test knowledge about specific regions or features of the image.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+IMAGE_HOTSPOT_QA template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Image Components**:
+   - **Main Image**: Interactive image with clickable regions (adapts to question context - anatomy, geography, diagrams, etc.)
+   - **Hotspots**: Clickable regions on the image
+   - **Hotspot Labels**: Labels or markers on hotspots
+
+2. **Interactive Elements**:
+   - **Hotspot Click**: Click to reveal question
+   - **Modal/Dialog**: Popup for question display
+   - **Answer Input**: Input fields for answers (multiple choice or free response)
+   - **Submit Button**: Button to submit answer
+   - **Close Button**: Button to close modal
+
+3. **Feedback Elements**:
+   - **Correct Answer Feedback**: Visual feedback when answer is correct
+   - **Incorrect Answer Feedback**: Visual feedback when answer is incorrect
+   - **Hotspot Highlighting**: Visual highlighting of clicked hotspots
+   - **Completion Feedback**: Visual feedback when all hotspots are completed
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Image Pane**: Main area for interactive image display
+   - **Modal/Dialog**: Overlay for question display
+   - **Controls Pane**: Bottom area for navigation buttons (if needed)
+
+5. **Animation Components**:
+   - **Hotspot Click Animation**: Visual feedback when hotspot is clicked
+   - **Modal Open Animation**: Smooth transition when modal opens
+   - **Correct Answer Animation**: Success animation when answer is correct
+   - **Incorrect Answer Animation**: Error animation when answer is incorrect
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Image Component Customization:
+- **Image Type**: Select appropriate image based on question context (anatomy for biology, map for geography, diagram for science, etc.)
+- **Hotspot Configuration**: Customize number and positions of hotspots based on question
+- **Hotspot Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+- **Image Styling**: Extract dimensions, colors, borders from component_specifications
+
+### 2. Interactive Element Customization:
+- **Hotspot Click**: Customize click feedback, highlighting from component_specifications
+- **Modal Styling**: Extract modal colors, borders, shadows, positioning from component_specifications
+- **Answer Input**: Extract input type, styling, options from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Close", "Next")
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Hotspot Highlighting**: Extract highlight color, animation, duration from component_specifications
+- **Completion Feedback**: Extract completion animation from component_specifications
+
+### 4. Animation Customization:
+- **Hotspot Click**: Extract click animation details from component_specifications (pulse, glow, etc.)
+- **Modal Open**: Extract modal transition from component_specifications (fade, slide, etc.)
+- **Correct Answer**: Extract success animation from component_specifications (glow, checkmark, etc.)
+- **Incorrect Answer**: Extract error animation from component_specifications (shake, flash, X)
+
+### 5. Game Logic Customization:
+- **Hotspot Questions**: Extract questions for each hotspot from component_specifications
+- **Answer Logic**: Extract correct answers from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (all hotspots completed correctly)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on a rich, detailed image with multiple points of interest.
 - Visual elements should highlight different regions or features.
 - Questions should be location-specific and test spatial knowledge.
 - Animation cues should include hotspot highlighting and modal transitions.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

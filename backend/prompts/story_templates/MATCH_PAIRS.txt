@@ -5,9 +5,79 @@ The resulting visualization will be implemented as:
 - Cards are flipped to reveal content.
 - Matching pairs are highlighted when found.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+MATCH_PAIRS template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Card Components**:
+   - **Card Pairs**: Left and right items that need to be matched
+   - **Card Content**: Text or images on cards
+   - **Card States**: Face-down (hidden) and face-up (revealed) states
+
+2. **Interactive Elements**:
+   - **Card Click**: Click to flip and reveal card content
+   - **Card Selection**: Select two cards to attempt a match
+   - **Match Connection**: Visual connection between matched pairs
+   - **Reset Button**: Button to reset game state
+
+3. **Feedback Elements**:
+   - **Match Feedback**: Visual feedback when pair is correctly matched
+   - **Mismatch Feedback**: Visual feedback when pair is incorrectly matched
+   - **Success Message**: Appears when all pairs are matched
+   - **Card Highlighting**: Visual highlighting of selected cards
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Cards Pane**: Main area for card display (left and right columns)
+   - **Controls Pane**: Bottom area for reset button (if needed)
+
+5. **Animation Components**:
+   - **Card Flip Animation**: Smooth flip animation when card is revealed
+   - **Match Animation**: Success animation when pair is matched (glow, connection line, etc.)
+   - **Mismatch Animation**: Error animation when pair is mismatched (shake, flash, etc.)
+   - **All Matched Animation**: Success animation when all pairs are matched
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Card Component Customization:
+- **Card Content**: Extract text or image descriptions from component_specifications (e.g., "Heart" and "Circulatory System", "2+2" and "4")
+- **Card Styling**: Extract colors, borders, shadows, fonts from component_specifications
+- **Card Layout**: Extract positioning, spacing, grid arrangement from component_specifications
+- **Card Count**: Extract number of pairs from component_specifications
+
+### 2. Interactive Element Customization:
+- **Flip Behavior**: Customize flip animation, duration, easing from component_specifications
+- **Selection Behavior**: Customize selection feedback, highlighting from component_specifications
+- **Match Connection**: Extract connection style from component_specifications (line, glow, etc.)
+- **Button Labels**: Extract button text from component_specifications (e.g., "Reset", "New Game")
+
+### 3. Feedback Element Customization:
+- **Match Feedback**: Extract success animation, color, duration from component_specifications (e.g., green glow, checkmark, connection line)
+- **Mismatch Feedback**: Extract error animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Card Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Card Flip**: Extract flip animation details from component_specifications (3D flip, duration, easing)
+- **Match**: Extract success animation from component_specifications (glow, connection line, checkmark)
+- **Mismatch**: Extract error animation from component_specifications (shake, flash, X)
+- **All Matched**: Extract completion animation from component_specifications (celebration, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Pairing Logic**: Extract matching rules from component_specifications (which left item matches which right item)
+- **Win Condition**: Extract win condition from component_specifications (all pairs correctly matched)
+- **Selection Logic**: Extract selection rules from component_specifications (two cards at a time, etc.)
+
+## Key Requirements:
+
 - Focus on relationships, associations, and pairings.
 - Visual elements should represent pairs that need to be matched.
 - Questions should involve finding relationships or connections.
 - Animation cues should include card flips, matches, and pair highlighting.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

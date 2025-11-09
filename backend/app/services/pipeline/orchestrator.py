@@ -13,7 +13,7 @@ from app.services.pipeline.layer1_input import DocumentParserService, QuestionEx
 from app.services.pipeline.layer2_classification import ClassificationOrchestrator
 from app.services.pipeline.layer2_template_router import TemplateRouter
 from app.services.pipeline.layer3_strategy import StrategyOrchestrator
-from app.services.pipeline.layer4_generation import GenerationOrchestrator
+from app.services.pipeline.layer4_generation import GenerationOrchestrator, AssetRequest
 from app.services.pipeline.validators import get_validator
 from app.services.pipeline.retry_handler import RetryHandler
 from app.utils.logger import setup_logger
@@ -53,10 +53,19 @@ class PipelineOrchestrator:
         process_id: str,
         question_id: str,
         file_content: bytes = None,
-        filename: str = None
+        filename: str = None,
+        force_fresh: bool = False
     ) -> Dict[str, Any]:
-        """Execute complete pipeline for a question"""
-        logger.info(f"Starting pipeline execution - Process: {process_id}, Question: {question_id}")
+        """Execute complete pipeline for a question
+        
+        Args:
+            process_id: Process ID
+            question_id: Question ID
+            file_content: Optional file content
+            filename: Optional filename
+            force_fresh: If True, start from step 1 regardless of existing steps
+        """
+        logger.info(f"Starting pipeline execution - Process: {process_id}, Question: {question_id}, Force Fresh: {force_fresh}")
         
         try:
             # Update process status
@@ -68,6 +77,11 @@ class PipelineOrchestrator:
             question = QuestionRepository.get_by_id(self.db, question_id)
             if not question:
                 raise ValueError(f"Question {question_id} not found")
+            
+            # If force_fresh is True, delete all existing steps for this process
+            if force_fresh:
+                deleted_count = PipelineStepRepository.delete_by_process_id(self.db, process_id)
+                logger.info(f"Force fresh run: Deleted {deleted_count} existing pipeline steps")
             
             # Track pipeline state
             pipeline_state = {
@@ -87,8 +101,12 @@ class PipelineOrchestrator:
             }
             
             # Execute each step
-            last_completed_step = PipelineStepRepository.get_last_completed_step(self.db, process_id)
-            start_from_step = (last_completed_step.step_number + 1) if last_completed_step else 1
+            # If force_fresh, always start from step 1
+            if force_fresh:
+                start_from_step = 1
+            else:
+                last_completed_step = PipelineStepRepository.get_last_completed_step(self.db, process_id)
+                start_from_step = (last_completed_step.step_number + 1) if last_completed_step else 1
             
             for step_def in self.PIPELINE_STEPS:
                 if step_def["number"] < start_from_step:
@@ -462,12 +480,27 @@ class PipelineOrchestrator:
     
     def _sanitize_for_storage(self, data: Any) -> Any:
         """Sanitize data for database storage (remove large binary data, etc.)"""
+        # Handle AssetRequest objects (convert to dict for JSON serialization)
+        if isinstance(data, AssetRequest):
+            return {
+                "type": data.type,
+                "purpose": data.purpose,
+                "prompt": data.prompt
+            }
+        
         if isinstance(data, dict):
             sanitized = {}
             for key, value in data.items():
                 if key in ["file_content"]:
                     # Don't store binary data
                     sanitized[key] = f"<binary data: {len(value) if value else 0} bytes>"
+                elif isinstance(value, AssetRequest):
+                    # Convert AssetRequest to dict
+                    sanitized[key] = {
+                        "type": value.type,
+                        "purpose": value.purpose,
+                        "prompt": value.prompt
+                    }
                 elif isinstance(value, (dict, list)):
                     sanitized[key] = self._sanitize_for_storage(value)
                 else:

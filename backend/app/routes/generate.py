@@ -18,14 +18,15 @@ router = APIRouter()
 
 async def process_pipeline_background(
     process_id: str,
-    question_id: str
+    question_id: str,
+    force_fresh: bool = True
 ):
     """Background task to process question through pipeline"""
     from app.db.database import SessionLocal
     db = SessionLocal()
     try:
         orchestrator = PipelineOrchestrator(db)
-        result = orchestrator.execute_pipeline(process_id, question_id)
+        result = orchestrator.execute_pipeline(process_id, question_id, force_fresh=force_fresh)
         logger.info(f"Background pipeline completed: {process_id}")
         return result
     except Exception as e:
@@ -38,10 +39,16 @@ async def process_pipeline_background(
 async def start_processing(
     question_id: str,
     background_tasks: BackgroundTasks,
+    force_fresh: bool = True,  # Default to True to always do fresh runs
     db: Session = Depends(get_db)
 ):
-    """Start processing pipeline for a question"""
-    logger.info(f"[API] /process/{question_id} - Request received")
+    """Start processing pipeline for a question
+    
+    Args:
+        question_id: Question ID to process
+        force_fresh: If True, start from step 1 regardless of existing steps (default: True)
+    """
+    logger.info(f"[API] /process/{question_id} - Request received (force_fresh={force_fresh})")
     
     # Check if question exists
     question = QuestionRepository.get_by_id(db, question_id)
@@ -53,15 +60,16 @@ async def start_processing(
     process = ProcessRepository.create(db, question_id, initial_status="pending")
     process_id = process.id
     
-    logger.info(f"[API] Starting processing pipeline - process_id={process_id}, question_id={question_id}")
+    logger.info(f"[API] Starting processing pipeline - process_id={process_id}, question_id={question_id}, force_fresh={force_fresh}")
     
     # Start background processing
-    background_tasks.add_task(process_pipeline_background, process_id, question_id)
+    background_tasks.add_task(process_pipeline_background, process_id, question_id, force_fresh)
     logger.info(f"[API] Background task added for process_id={process_id}")
     
     return {
         "process_id": process_id,
         "question_id": question_id,
+        "force_fresh": force_fresh,
         "message": "Processing started"
     }
 

@@ -5,9 +5,87 @@ The resulting visualization will be implemented as:
 - Events are placed at specific time points.
 - Timeline shows temporal relationships.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+TIMELINE_ORDER template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Timeline Components**:
+   - **Timeline Axis**: Horizontal or vertical timeline showing time progression
+   - **Event Markers**: Markers or cards representing events
+   - **Event Content**: Text or images on event markers
+   - **Time Labels**: Time points or dates on timeline
+
+2. **Interactive Elements**:
+   - **Event Drag**: Drag events to place on timeline
+   - **Event Click**: Click to view event details
+   - **Submit Button**: Button to validate timeline order
+   - **Reset Button**: Button to reset timeline
+
+3. **Feedback Elements**:
+   - **Correct Placement Feedback**: Visual feedback when event is in correct position
+   - **Incorrect Placement Feedback**: Visual feedback when event is in wrong position
+   - **Success Message**: Appears when timeline is correct
+   - **Event Highlighting**: Visual highlighting of events
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Timeline Pane**: Main area for timeline display
+   - **Events Pane**: Area for event markers (unordered initially)
+   - **Controls Pane**: Bottom area for submit/reset buttons
+
+5. **Animation Components**:
+   - **Event Drag Animation**: Smooth dragging animation
+   - **Timeline Progression Animation**: Visual progression along timeline
+   - **Correct Placement Animation**: Success effect when event is correctly placed
+   - **Incorrect Placement Animation**: Error effect when event is incorrectly placed
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Timeline Component Customization:
+- **Timeline Type**: Select appropriate timeline based on question context (historical events, process steps, chronological order, etc.)
+- **Event Configuration**: Customize number and content of events based on question
+- **Time Scale**: Extract time scale from component_specifications (dates, time points, steps, etc.)
+- **Timeline Styling**: Extract colors, borders, shadows from component_specifications
+
+### 2. Event Component Customization:
+- **Event Text**: Extract exact event text from component_specifications (e.g., "Battle of Hastings", "Mix ingredients", "Start process")
+- **Event Styling**: Extract colors, fonts, borders, shadows from component_specifications
+- **Event Count**: Extract number of events from component_specifications
+- **Event Order**: Extract correct chronological order from component_specifications
+
+### 3. Interactive Element Customization:
+- **Drag Behavior**: Customize drag animation, snap behavior, timeline positioning from component_specifications
+- **Timeline Interaction**: Customize timeline click, zoom, pan from component_specifications
+- **Button Labels**: Extract button text from component_specifications (e.g., "Submit", "Reset", "Check Order")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+
+### 4. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Event Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 5. Animation Customization:
+- **Event Drag**: Extract drag animation details from component_specifications (smooth movement, snap to timeline)
+- **Timeline Progression**: Extract progression animation from component_specifications (visual flow along timeline)
+- **Correct Placement**: Extract success animation from component_specifications (glow, highlight, checkmark)
+- **Incorrect Placement**: Extract error animation from component_specifications (shake, flash, X)
+
+### 6. Game Logic Customization:
+- **Chronological Logic**: Extract correct chronological order from component_specifications
+- **Win Condition**: Extract win condition from component_specifications (all events in correct chronological order)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on temporal sequences and historical or process timelines.
 - Visual elements should represent time progression and events.
 - Questions should involve chronological ordering or time-based relationships.
 - Animation cues should show timeline progression and event placement.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

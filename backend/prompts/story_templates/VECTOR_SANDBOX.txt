@@ -5,9 +5,83 @@ The resulting visualization will be implemented as:
 - Vectors are draggable and resizable.
 - Operations can be applied to vectors.
 
-When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+## Template Component Inventory
+
+VECTOR_SANDBOX template provides the following components that can be customized for any question:
+
+### Available Components:
+
+1. **Vector Components**:
+   - **Vectors**: Draggable/resizable arrows representing vectors
+   - **Vector Labels**: Labels showing vector names or values
+   - **Coordinate System**: Grid or axes for vector positioning
+   - **Vector Operations**: Visual representation of operations (addition, subtraction, etc.)
+
+2. **Interactive Elements**:
+   - **Vector Drag**: Drag vectors to reposition
+   - **Vector Resize**: Resize vectors to change magnitude
+   - **Vector Rotate**: Rotate vectors to change direction
+   - **Operation Buttons**: Buttons to apply vector operations
+   - **Submit Button**: Button to validate vector configuration
+   - **Reset Button**: Button to reset vectors
+
+3. **Feedback Elements**:
+   - **Correct Configuration Feedback**: Visual feedback when vector configuration is correct
+   - **Incorrect Configuration Feedback**: Visual feedback when vector configuration is incorrect
+   - **Success Message**: Appears when target is reached
+   - **Vector Highlighting**: Visual highlighting of vectors
+
+4. **Layout Structure**:
+   - **Question Container**: Top area for instructions/question text
+   - **Canvas Pane**: Main area for vector visualization
+   - **Controls Pane**: Bottom area for operation buttons and submit/reset
+
+5. **Animation Components**:
+   - **Vector Manipulation Animation**: Visual feedback when vector is moved/resized
+   - **Operation Animation**: Visual feedback when operation is applied
+   - **Result Animation**: Success/error animation on validation
+   - **Vector Highlight Animation**: Highlight animation for vectors
+
+## Customization Guidance
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, animation_cues, and component_specifications:
+
+### 1. Vector Component Customization:
+- **Vector Configuration**: Customize number, labels, initial positions of vectors based on question
+- **Coordinate System**: Extract coordinate system styling from component_specifications (grid, axes, etc.)
+- **Vector Styling**: Extract colors, borders, shadows, arrow styling from component_specifications
+- **Vector Operations**: Extract operation types from component_specifications (addition, subtraction, dot product, etc.)
+
+### 2. Interactive Element Customization:
+- **Manipulation Tools**: Extract tool configurations from component_specifications (drag, resize, rotate)
+- **Operation Buttons**: Extract button labels, actions from component_specifications (e.g., "Add Vectors", "Subtract Vectors")
+- **Button Styling**: Extract colors, borders, shadows, hover effects from component_specifications
+- **Interaction Behavior**: Customize drag, resize, rotate behavior from component_specifications
+
+### 3. Feedback Element Customization:
+- **Correct Feedback**: Extract animation, color, duration from component_specifications (e.g., green glow, checkmark)
+- **Incorrect Feedback**: Extract animation, color, duration from component_specifications (e.g., red shake, X mark)
+- **Success Message**: Extract text, styling, animation from component_specifications
+- **Vector Highlighting**: Extract highlight color, animation, duration from component_specifications
+
+### 4. Animation Customization:
+- **Vector Manipulation**: Extract manipulation animation details from component_specifications (smooth movement, resize, rotate)
+- **Operation**: Extract operation animation from component_specifications (visual operation result, connection lines)
+- **Result**: Extract result animation from component_specifications (glow, highlight, checkmark)
+- **Vector Highlight**: Extract highlight animation from component_specifications (pulse, glow, etc.)
+
+### 5. Game Logic Customization:
+- **Vector Configuration**: Extract required vector configuration from component_specifications (positions, magnitudes, directions)
+- **Operations**: Extract required operations from component_specifications (addition, subtraction, etc.)
+- **Win Condition**: Extract win condition from component_specifications (correct vector configuration or operation result)
+- **Validation Logic**: Extract validation rules from component_specifications
+
+## Key Requirements:
+
 - Focus on vector mathematics, physics, and spatial relationships.
 - Visual elements should represent vectors as arrows with magnitude and direction.
 - Questions should involve vector operations or understanding vector properties.
 - Animation cues should show vector manipulation and operation results.
+- **Extract detailed component specifications** that can be used to render a production-quality game.
+- **Customize all components** for the specific question while using the template's component set.
 

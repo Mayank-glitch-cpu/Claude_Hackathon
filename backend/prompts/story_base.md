@@ -48,6 +48,97 @@ Each output must include:
   "visual_elements": [
     "List visual features: colors, objects, animations, characters"
   ],
+  "component_specifications": {
+    "layout_structure": {
+      "question_container": "Describe the question/instruction area: dimensions, positioning, styling (colors, fonts, borders, shadows)",
+      "visual_pane": "Describe the main visualization area: dimensions, positioning, background, layout",
+      "controls_pane": "Describe the controls/interaction area: dimensions, positioning, button layout, styling"
+    },
+    "interactive_elements": {
+      "buttons": [
+        {
+          "label": "Exact button text",
+          "icon": "Icon/emoji to use (if any)",
+          "action": "What happens when clicked",
+          "styling": "Colors, borders, shadows, hover effects",
+          "position": "Where button appears (relative to container)"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "slider|input|dropdown",
+          "label": "Input label text",
+          "min": "Minimum value (if applicable)",
+          "max": "Maximum value (if applicable)",
+          "default": "Default value",
+          "unit": "Unit of measurement (if any)",
+          "styling": "Colors, borders, styling details"
+        }
+      ]
+    },
+    "visual_components": [
+      {
+        "name": "Component name (e.g., beaker, graph, diagram)",
+        "description": "Detailed description of component appearance",
+        "dimensions": "Width, height, positioning",
+        "styling": "Colors (hex codes), borders, shadows, opacity",
+        "animations": "Animation types, durations, easing functions",
+        "dynamic_properties": "What changes based on user interaction (e.g., liquid height, color opacity)"
+      }
+    ],
+    "feedback_elements": {
+      "success_message": {
+        "text": "Success message text",
+        "styling": "Colors, fonts, positioning, animation",
+        "trigger": "When it appears (win condition)"
+      },
+      "stats_display": {
+        "label": "Stats label text",
+        "value_display": "How values are shown",
+        "styling": "Colors, fonts, positioning",
+        "update_logic": "How stats update based on interactions"
+      },
+      "goal_display": {
+        "label": "Goal label text",
+        "target_value": "Target value to show",
+        "styling": "Colors, fonts, positioning"
+      }
+    },
+    "styling_details": {
+      "color_scheme": {
+        "primary": "Primary color (hex code)",
+        "secondary": "Secondary color (hex code)",
+        "success": "Success color (hex code)",
+        "error": "Error color (hex code)",
+        "background": "Background colors (hex codes)",
+        "text": "Text colors (hex codes)"
+      },
+      "animations": [
+        {
+          "name": "Animation name (e.g., pulse, shake, pour)",
+          "type": "keyframe|transition",
+          "duration": "Duration in seconds",
+          "easing": "Easing function (e.g., ease-out, ease-in-out)",
+          "trigger": "What triggers this animation",
+          "keyframes": "Keyframe descriptions (if keyframe animation)"
+        }
+      ],
+      "transitions": [
+        {
+          "property": "CSS property (e.g., height, background-color)",
+          "duration": "Duration in seconds",
+          "easing": "Easing function",
+          "trigger": "What triggers this transition"
+        }
+      ]
+    },
+    "game_logic": {
+      "calculations": "Mathematical formulas or calculations needed (describe in detail)",
+      "win_condition": "Exact condition for winning (e.g., concentration === 20.0%)",
+      "state_management": "What state variables are needed and how they change",
+      "update_logic": "How visual components update based on state changes"
+    }
+  },
   "question_flow": [
     {
       "question_number": 1,
@@ -103,6 +194,56 @@ When generating the visualization story, **MANDATORY requirements**:
    - Both should update the visualization to show the correct result
 
 5. **No passive viewing** - The visualization is not just for display; it's an interactive question-answer experience where the visual elements support understanding the question and provide feedback.
+
+---
+
+### 🎨 **Component Specification Requirements**
+
+When generating the story, you MUST extract detailed component specifications that will be used to render a production-quality game. These specifications should be **generic patterns** that adapt to the question context, not specific to any particular question type.
+
+**CRITICAL: Extract detailed specifications for:**
+
+1. **Layout Structure** - Describe the three main areas:
+   - **Question Container**: Dimensions, positioning, styling (colors, fonts, borders, shadows, padding)
+   - **Visual Pane**: Dimensions, positioning, background colors, layout structure
+   - **Controls Pane**: Dimensions, positioning, button layout, spacing, styling
+
+2. **Interactive Elements** - Specify every interactive component:
+   - **Buttons**: Exact label text, icons/emojis, actions, styling (colors, borders, shadows, hover effects), positioning
+   - **Inputs**: Type (slider/input/dropdown), label text, min/max values, default value, unit, styling details
+   - **Controls**: How controls are arranged, spacing, visual hierarchy
+
+3. **Visual Components** - Describe every visual element:
+   - **Component Name**: What the component represents (e.g., beaker, graph, diagram - adapts to question context)
+   - **Description**: Detailed appearance (dimensions, colors, borders, shadows, opacity)
+   - **Styling**: Specific hex codes, RGB values, border widths, shadow specifications
+   - **Animations**: Animation types, durations, easing functions, keyframe descriptions
+   - **Dynamic Properties**: What changes based on user interaction (e.g., liquid height, color opacity, graph values)
+
+4. **Feedback Elements** - Specify all feedback mechanisms:
+   - **Success Message**: Text, styling, positioning, animation, trigger condition
+   - **Stats Display**: Label text, value display format, styling, update logic
+   - **Goal Display**: Label text, target value, styling, positioning
+   - **Error Feedback**: Visual feedback for incorrect actions (shake, flash, etc.)
+
+5. **Styling Details** - Extract complete styling information:
+   - **Color Scheme**: Primary, secondary, success, error, background, text colors (hex codes)
+   - **Animations**: Keyframe animations with names, durations, easing, triggers, keyframe descriptions
+   - **Transitions**: CSS transitions with properties, durations, easing, triggers
+   - **Typography**: Font families, sizes, weights, line heights
+   - **Spacing**: Padding, margins, gaps between elements
+
+6. **Game Logic** - Specify the underlying logic:
+   - **Calculations**: Mathematical formulas or calculations needed (describe in detail)
+   - **Win Condition**: Exact condition for winning (e.g., concentration === 20.0%, value === target)
+   - **State Management**: What state variables are needed and how they change
+   - **Update Logic**: How visual components update based on state changes
+
+**Important Notes:**
+- These specifications should be **generic patterns** that work for any question type
+- Adapt component descriptions to question context (e.g., "beaker" for chemistry, "graph" for math)
+- Extract specific values (hex codes, dimensions, durations) rather than generic descriptions
+- Focus on production-quality details that enable rendering a polished, interactive game
 
 ---
 
