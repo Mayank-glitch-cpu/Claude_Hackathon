@@ -1,0 +1,40 @@
+{
+  "request_id": "20251108_193704_560133",
+  "timestamp": "2025-11-08T19:38:22.259310",
+  "concept": "Hash Tables",
+  "subject": "Computer Science",
+  "story_script": {
+    "title": "Hash Harbor: Dock the Data",
+    "background": "You’re the harbor master of a neon archipelago where every cargo ship carries a coded crate ID. The Tidal Indexer (your hash engine) tells ships which slip to dock in, but collisions cause traffic jams you must resolve with different docking rules. Keep the harbor efficient by choosing smart policies as storms (randomized keys and sizes) constantly change the tides.",
+    "learning_goal": "Students will accurately predict and explain how hash tables map keys to indices using a given hash function, handle collisions via chaining and open addressing (linear, quadratic, and double hashing), reason about load factor and expected probes, and trace/update table state across inserts, searches, and deletions (including tombstones).",
+    "visual_elements": [
+      "Slip Ring Grid: An SVG/CSS circular array or grid of m slips labeled 0..m-1; each slip changes color on fill, shows chains as vertical stacks (for chaining) or single slots with probe highlights (for open addressing).",
+      "Hash Engine Panel: A live formula display h(k) with sliders/inputs for parameters (e.g., a, b, m) and a strategy selector; updates animate in real time as students tweak values.",
+      "Boat Tokens: Draggable ship icons with key labels (numbers or short strings); on process, tokens follow animated arcs to target slips and bump along probe paths on collisions.",
+      "Probe Tracer Overlay: Dotted lines with numbered markers and a running probe counter; markers fade after a few seconds to discourage static screenshots and encourage active tracing.",
+      "Load & Cluster Gauge: A dynamic bar showing load factor and predicted average probes; adjacent mini-heatmap indicates clustering hotspots that update after each operation."
+    ],
+    "interactions": [
+      {
+        "type": "drag-drop",
+        "label": "Drop Boat onto Hash Engine",
+        "action": "Students drag a boat token to the Hash Engine intake or directly onto the slip they predict. The engine computes h(k) and animates the probe path; if the predicted slip matches the final placement, the token glows green; if not, the path shows where and why it moved (collisions, tombstones, or chains). Randomized keys/colors per session make static copying ineffective."
+      },
+      {
+        "type": "click",
+        "label": "Strategy Toggle & Slip Inspect",
+        "action": "Clicking strategy buttons (Chaining, Linear, Quadratic, Double Hashing) instantly replays the last few operations under the chosen policy, visualizing different probe paths. Clicking any slip opens a popover with chain contents or the probe history for that slot, teaching how different strategies change clustering and search termination conditions."
+      },
+      {
+        "type": "input",
+        "label": "Hash Parameters & Probe Prediction",
+        "action": "Before running an operation, students enter a prediction: index and expected probe count (and optionally a,b,m). The system validates by comparing against the animated trace (exact index, probe count, and reasoning prompts); near-miss probe counts (±1) get partial credit while incorrect termination at tombstones gets reduced credit. Seeds ensure each student’s keys/parameters are slightly different."
+      }
+    ],
+    "challenge_question": "Given m = 11 and Double Hashing with h1(k) = k mod 11 and h2(k) = 1 + (k mod 9), the current table has: slot 1: 34, slot 2: tombstone (deleted key 13), slot 3: 24, slot 5: 15, slot 7: 18, slot 9: 20; all other slots empty. 1) Insert key 46. What probe sequence occurs and in which slot does 46 finally reside under standard tombstone handling (record first tombstone, continue until empty or key found, then insert at first tombstone)? 2) Search for key 13 afterward. What probe sequence occurs and why must the search continue past the tombstone?",
+    "answer_validation": "Full credit requires: (A) Insertion of 46 probes [2, 4] and places 46 at slot 2 (first tombstone) with total probes = 2; (B) Search for 13 probes [2, 7, 1, 6] and stops at slot 6 (empty) with explanation that tombstones cannot terminate search because the key might reside later along the same probe sequence; (C) Clear reference to h1/h2 computation and double-hash stepping. Partial credit: +40% if final index for 46 is correct but probe count off by ±1; +30% if the 13 search sequence is correct but explanation is vague; +20% if student shows correct initial hash (h1) and step size (h2) even if later indices have a modular arithmetic slip; −50% if search stops at the tombstone (premature termination).",
+    "difficulty_level": "intermediate",
+    "estimated_time": "25"
+  },
+  "html_size": 10030
+}

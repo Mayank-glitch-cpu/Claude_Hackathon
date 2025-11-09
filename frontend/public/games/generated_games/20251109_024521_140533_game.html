@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rivers, Rails & Blockades: The Anaconda Sim</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --primary:#0F2027;
+        --secondary:#2C5364;
+        --accent:#FFD166;
+        --success:#06D6A0;
+        --danger:#EF476F;
+        --info:#118AB2;
+        --neutral:#F5F7FA;
+        --glass:rgba(255,255,255,0.12);
+        --text:#E9F1F5;
+        --muted:#C7D3DC;
+        --panel-radius:16px;
+        --shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+        font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        color:var(--text);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        overflow:hidden;
+    }
+    h1,h2,h3{font-family:'Merriweather',serif}
+    #app{
+        display:grid;
+        grid-template-rows: 72px 1fr 72px;
+        height:100vh;
+        gap:12px;
+        padding:16px;
+    }
+    /* Header */
+    #headerBar{
+        display:grid;
+        grid-template-columns: 1fr auto auto;
+        align-items:center;
+        gap:16px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        border-radius: var(--panel-radius);
+        padding: 10px 16px;
+        backdrop-filter: blur(12px);
+        box-shadow: var(--shadow);
+        border:1px solid rgba(255,255,255,0.15);
+        animation: fade-in 600ms ease;
+    }
+    #headerBar h1{
+        font-size: 1.25rem;
+        letter-spacing:0.3px;
+        background: linear-gradient(135deg, #fff 0%, #bfe9ff 100%);
+        -webkit-background-clip:text;
+        background-clip:text;
+        color:transparent;
+    }
+    .header-stats{display:flex;gap:12px;align-items:center}
+    .pill{
+        padding:8px 12px;
+        border-radius:999px;
+        background: rgba(255,255,255,0.08);
+        border:1px solid rgba(255,255,255,0.15);
+        color:var(--muted);
+        font-weight:600;
+        font-size:0.85rem;
+    }
+    .ring-timer{
+        position:relative;
+        width:44px;height:44px;
+        display:grid;place-items:center;
+    }
+    .ring-timer svg{transform:rotate(-90deg)}
+    .ring-timer .time-text{
+        position:absolute;font-weight:700;font-size:0.75rem;color:#fff;
+        text-shadow:0 2px 6px rgba(0,0,0,0.4)
+    }
+
+    /* Main grid */
+    #main{
+        display:grid;
+        grid-template-columns: 320px 1fr 360px;
+        gap:12px;
+        min-height:0;
+    }
+    .panel{
+        background: rgba(255,255,255,0.08);
+        border:1px solid rgba(255,255,255,0.15);
+        border-radius: var(--panel-radius);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        min-height:0;
+        overflow:hidden;
+    }
+    /* Left Panel */
+    #leftPanel{
+        display:flex;flex-direction:column;
+        animation: slide-in-left 500ms ease;
+    }
+    .section{
+        padding:14px 14px 8px 14px;
+        border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .section h3{
+        font-size:1.05rem;margin-bottom:8px;color:#fff;
+    }
+    .brief{
+        color:var(--muted);
+        line-height:1.3;
+        font-size:0.92rem;
+    }
+    .toggles{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .toggle-btn{
+        padding:8px 12px;border-radius:10px;border:2px solid rgba(255,255,255,0.2);
+        background: rgba(0,0,0,0.2);color:#fff;font-weight:700;font-size:0.85rem;
+        cursor:pointer;transition:all .2s ease;
+    }
+    .toggle-btn.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,209,102,0.18)}
+    .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:8px}
+    .legend-item{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:0.9rem}
+    .dot{width:14px;height:14px;border-radius:50%}
+    .dot.rail{background:#c7a77d;border:2px solid #7a5a2c}
+    .dot.river{background:#4fc3f7;border:2px solid #0ea5e9}
+    .dot.coast{background:#ddd;border:2px solid #6b7280;border-radius:3px;width:16px;height:10px}
+    .hint-btn{
+        margin-top:8px;padding:10px 12px;border-radius:10px;
+        background: linear-gradient(135deg, rgba(17,138,178,0.8), rgba(44,83,100,0.8));
+        border:0;color:#fff;font-weight:700;cursor:pointer;transition:all .3s ease;
+    }
+    .hint-btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,0,0,0.25)}
+
+    /* Map Stage */
+    #mapStage{
+        position:relative;display:grid;grid-template-rows:auto 1fr;min-height:0;
+        animation: fade-in 600ms ease;
+    }
+    #toolbar{
+        display:flex;gap:8px;align-items:center;justify-content:space-between;
+        padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.08);
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+    }
+    .toolbar-left,.toolbar-right{display:flex;gap:8px;align-items:center}
+    .btn{
+        padding:10px 14px;border-radius:10px;border:0;
+        background: linear-gradient(135deg, #1d4350, #a43931);
+        color:#fff;font-weight:700;cursor:pointer;transition:all .3s ease;font-size:0.95rem;
+    }
+    .btn.secondary{background: linear-gradient(135deg, #667eea, #764ba2)}
+    .btn.success{background: linear-gradient(135deg, #00c6a7, #1eae98)}
+    .btn.danger{background: linear-gradient(135deg, #ef476f, #d6405c)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,0,0,0.25)}
+    #baseWrap{
+        position:relative;overflow:hidden;min-height:0;
+    }
+    #baseMap{
+        width:100%;height:100%;
+        filter: drop-shadow(0 10px 30px rgba(0,0,0,0.25));
+        transition: transform 300ms ease;
+    }
+    canvas#paintLayer,canvas#flowLayer{
+        position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;
+    }
+    .token{
+        position:absolute;z-index:5;width:42px;height:42px;border-radius:50%;
+        display:grid;place-items:center;color:#fff;font-weight:800;font-size:0.9rem;
+        box-shadow:0 12px 20px rgba(0,0,0,0.35);cursor:grab;user-select:none;
+        transition: transform 200ms ease;
+    }
+    .token:active{cursor:grabbing;transform:scale(1.05)}
+    .token.flotilla{background: linear-gradient(135deg, #118AB2, #2C5364); border:2px solid #4fc3f7}
+    .token.seizure{background: linear-gradient(135deg, #FFD166, #f4a261); color:#222; border:2px solid #e9c46a}
+    .node{
+        fill:#e2e8f0;stroke:#334155;stroke-width:2;cursor:pointer;
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+        transition: transform .2s ease;
+    }
+    .node.union{fill:#06D6A0}
+    .node.confed{fill:#EF476F}
+    .node.critical{stroke:#FFD166;stroke-width:3}
+    .node:hover{transform:scale(1.08)}
+    .edge{fill:none;stroke-linecap:round}
+    .edge.rail{stroke:#c7a77d;stroke-width:3;opacity:0.9}
+    .edge.river{stroke:#48cae4;stroke-width:4;opacity:0.9}
+    .edge.coast{stroke:#d1d5db;stroke-width:2;opacity:0.6}
+    .edge.glow{filter: drop-shadow(0 0 8px rgba(255,209,102,0.7))}
+    .label{
+        font-size:10px;fill:#e5e7eb;paint-order:stroke;stroke:#0f172a;stroke-width:2px;stroke-linejoin:round;
+        text-shadow:0 2px 6px rgba(0,0,0,0.5)
+    }
+    .tooltip{
+        position:absolute;background:rgba(0,0,0,0.75);color:#fff;padding:8px 10px;border-radius:8px;
+        pointer-events:none;font-size:0.85rem;opacity:0;transform:translate(-50%,-140%) scale(.95);
+        transition:opacity .15s ease, transform .15s ease;white-space:nowrap;z-index:20
+    }
+
+    /* Right Panel */
+    #rightPanel{display:flex;flex-direction:column;animation: slide-in-right 500ms ease}
+    #objectivePanel{padding:12px}
+    #objList{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:4px}
+    .obj-item{
+        background: rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);
+        border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:space-between;
+    }
+    .meter{height:8px;border-radius:8px;background:rgba(255,255,255,0.12);overflow:hidden;margin-top:8px}
+    .meter .bar{height:100%;width:0%;background:linear-gradient(90deg,#06D6A0,#118AB2);transition:width .35s ease}
+    #scorePanel{padding:12px;border-top:1px solid rgba(255,255,255,0.08)}
+    #scoreTotal{font-size:1.8rem;font-weight:900;letter-spacing:0.5px}
+    #badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .badge{
+        background:linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+        border:1px solid rgba(255,255,255,0.2); padding:6px 10px;border-radius:999px;color:#fff;font-weight:700;font-size:0.8rem
+    }
+    #chainPanel{padding:12px;border-top:1px solid rgba(255,255,255,0.08);min-height:220px;display:grid;grid-template-rows:auto 1fr}
+    #chainBoard{
+        position:relative;border:1px dashed rgba(255,255,255,0.2); border-radius:12px; margin-top:8px;overflow:hidden;min-height:180px;background:rgba(0,0,0,0.15)
+    }
+    .tile{
+        position:absolute;min-width:140px;max-width:200px;padding:10px 12px;border-radius:12px;
+        background: rgba(255,255,255,0.12);backdrop-filter: blur(8px);
+        border:2px solid rgba(255,255,255,0.25); color:#fff;font-weight:700;font-size:0.9rem;cursor:grab;user-select:none;
+        box-shadow:0 10px 20px rgba(0,0,0,0.25);transition:transform .2s ease
+    }
+    .tile:active{cursor:grabbing;transform:scale(1.02)}
+    .tile.required{border-color:#FFD166}
+    #chainLinks{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+    .submit-btn{margin-top:10px}
+
+    /* Footer timeline */
+    #footerTimeline{
+        display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;
+        background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+        border-radius: var(--panel-radius); box-shadow: var(--shadow); backdrop-filter: blur(12px);
+    }
+    #simControls{display:flex;gap:8px;align-items:center}
+    .speed{display:flex;gap:6px}
+    .speed button{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;cursor:pointer}
+    .speed button.active{border-color:#FFD166;background:rgba(255,209,102,0.15)}
+    .timeline{
+        flex:1;height:10px;border-radius:8px;background:rgba(255,255,255,0.15);overflow:hidden;margin:0 12px;position:relative
+    }
+    .timeline .tickbar{position:absolute;left:0;top:0;height:100%;width:0%;background:linear-gradient(90deg, #06D6A0, #118AB2);transition:width .2s ease}
+
+    /* Toasts */
+    #toastContainer{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:100}
+    .toast{
+        background: rgba(0,0,0,0.85);color:#fff;padding:10px 12px;border-radius:10px;box-shadow:0 10px 20px rgba(0,0,0,0.3);
+        animation: fade-in 200ms ease, fade-out 200ms ease 3.2s forwards
+    }
+    .toast.success{border-left:4px solid var(--success)}
+    .toast.error{border-left:4px solid var(--danger)}
+    .toast.info{border-left:4px solid var(--info)}
+
+    /* Animations */
+    @keyframes slide-in-left{from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes slide-in-right{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes fade-in{from{opacity:0}to{opacity:1}}
+    @keyframes fade-out{to{opacity:0;transform:translateY(10px)}}
+    @keyframes pulse-correct{0%{box-shadow:0 0 0 0 rgba(6,214,160,0.7)}70%{box-shadow:0 0 0 12px rgba(6,214,160,0)}100%{box-shadow:0 0 0 0 rgba(6,214,160,0)}}
+    @keyframes shake-wrong{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+    @keyframes glow-path{0%{filter:drop-shadow(0 0 0 rgba(255,209,102,0))}50%{filter:drop-shadow(0 0 10px rgba(255,209,102,0.8))}100%{filter:drop-shadow(0 0 0 rgba(255,209,102,0))}}
+    @keyframes water-flow{0%{stroke-dashoffset:0}100%{stroke-dashoffset:60}}
+    @keyframes pin-drop{0%{transform:translateY(-20px);opacity:0}100%{transform:translateY(0);opacity:1}}
+    @keyframes coastline-sweep{0%{opacity:.4}50%{opacity:1}100%{opacity:.4}}
+
+    /* Mobile/Responsive */
+    @media (max-width:1200px){
+        #main{grid-template-columns: 280px 1fr 320px}
+    }
+    @media (max-width:980px){
+        #main{grid-template-columns: 1fr}
+        #leftPanel, #rightPanel{position:relative;max-height:40vh;overflow:auto}
+        #mapStage{min-height:60vh}
+    }
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite">
+    <div id="headerBar" role="banner">
+        <h1>Rivers, Rails & Blockades: The Anaconda Sim</h1>
+        <div class="header-stats">
+            <div class="pill" id="missionCode" aria-label="Mission Code">Mission: —</div>
+            <div class="pill" id="seedDisplay" aria-label="Seed">Seed: —</div>
+            <div class="pill" id="objectiveType">Objective: —</div>
+        </div>
+        <div class="ring-timer" title="Timer">
+            <svg width="44" height="44" viewBox="0 0 44 44">
+                <circle cx="22" cy="22" r="20" stroke="rgba(255,255,255,0.2)" stroke-width="4" fill="none"/>
+                <circle id="timerRing" cx="22" cy="22" r="20" stroke="#FFD166" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="125.6" stroke-dashoffset="0"/>
+            </svg>
+            <div class="time-text" id="timerText">00:00</div>
+        </div>
+    </div>
+
+    <div id="main" role="main">
+        <aside id="leftPanel" class="panel" aria-label="Mission and Layers">
+            <div class="section">
+                <h3>Mission Brief</h3>
+                <div class="brief" id="missionBrief">
+                    You are a wartime analyst in 1863. Exploit rivers, rails, ports, and terrain to cut supply lines. Deploy a naval blockade, seize pivotal rail hubs, and control a river segment. Run the simulation and meet objectives.
+                </div>
+            </div>
+            <div class="section">
+                <h3>Layers</h3>
+                <div class="toggles">
+                    <button class="toggle-btn active" data-layer="rails" id="toggleRails">Rails (R)</button>
+                    <button class="toggle-btn active" data-layer="rivers" id="toggleRivers">Rivers (V)</button>
+                    <button class="toggle-btn active" data-layer="coast" id="toggleCoast">Coast (B)</button>
+                </div>
+            </div>
+            <div class="section">
+                <h3>Legend</h3>
+                <div class="legend">
+                    <div class="legend-item"><span class="dot rail"></span>Rail Line</div>
+                    <div class="legend-item"><span class="dot river"></span>River Path</div>
+                    <div class="legend-item"><span class="dot coast"></span>Coastline</div>
+                    <div class="legend-item"><span class="dot" style="background:#06D6A0;border:2px solid #0ea5e9"></span>Union Control</div>
+                    <div class="legend-item"><span class="dot" style="background:#EF476F;border:2px solid #b91c1c"></span>Confed Control</div>
+                    <div class="legend-item"><span class="dot" style="background:#FFD166;border:2px solid #d97706"></span>Critical Hub</div>
+                </div>
+                <button class="hint-btn" id="hintBtn">Show Hint</button>
+            </div>
+            <div class="section">
+                <h3>Story & Learning Goal</h3>
+                <div class="brief">
+                    Analyze how geography and infrastructure influenced Civil War strategy. Reduce your target's supply inflow and justify the outcome via a causal chain.
+                </div>
+            </div>
+        </aside>
+
+        <section id="mapStage" class="panel" aria-label="Map Stage">
+            <div id="toolbar">
+                <div class="toolbar-left">
+                    <button class="btn secondary" id="blockadeModeBtn" title="Paint Blockade (B)">Toggle Blockade Paint</button>
+                    <button class="btn" id="resetPaintBtn">Clear Blockade</button>
+                    <div class="pill" id="coverageReadout" title="Blockade Coverage">Blockade: 0%</div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="pill" id="actionPoints">AP: 6</div>
+                    <div class="pill" id="weatherInfo">Weather: —</div>
+                </div>
+            </div>
+            <div id="baseWrap">
+                <svg id="baseMap" viewBox="0 0 1000 700" aria-label="Operations Map">
+                    <defs>
+                        <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+                            <path d="M0,0 L6,3 L0,6 z" fill="#FFD166"></path>
+                        </marker>
+                        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <g id="edgesCoast"></g>
+                    <g id="edgesRiver"></g>
+                    <g id="edgesRail"></g>
+                    <g id="nodes"></g>
+                    <g id="labels"></g>
+                </svg>
+                <canvas id="paintLayer"></canvas>
+                <canvas id="flowLayer"></canvas>
+                <div class="token flotilla" id="flotillaToken" draggable="false" title="River Flotilla" aria-label="River Flotilla">🚢</div>
+                <div class="token seizure" id="seizureToken1" draggable="false" title="Rail Seizure Team" aria-label="Rail Seizure Team">⚔️</div>
+                <div class="token seizure" id="seizureToken2" draggable="false" title="Rail Seizure Team" aria-label="Rail Seizure Team">⚔️</div>
+                <div class="tooltip" id="tooltip"></div>
+            </div>
+        </section>
+
+        <aside id="rightPanel" class="panel" aria-label="Objectives and Scoring">
+            <div id="objectivePanel">
+                <h3>Objectives</h3>
+                <ul id="objList"></ul>
+                <div class="meter"><div class="bar" id="objProgress"></div></div>
+            </div>
+            <div id="scorePanel">
+                <h3>Score</h3>
+                <div id="scoreTotal">0</div>
+                <div id="badges"></div>
+            </div>
+            <div id="chainPanel">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                    <h3>Causal Chain</h3>
+                    <button class="btn secondary" id="validateChainBtn">Validate Chain</button>
+                </div>
+                <div id="chainBoard">
+                    <svg id="chainLinks"></svg>
+                    <!-- Tiles will be positioned via JS -->
+                </div>
+                <button class="btn success submit-btn" id="submitBtn">Submit Plan</button>
+            </div>
+        </aside>
+    </div>
+
+    <div id="footerTimeline" role="contentinfo">
+        <div id="simControls">
+            <button class="btn success" id="runBtn" title="Run/Pause (Space)">Run</button>
+            <button class="btn" id="stepBtn" title="Step (→)">Step</button>
+            <button class="btn danger" id="resetSimBtn">Reset</button>
+            <div class="speed" aria-label="Speed">
+                <button data-speed="0.5">0.5x</button>
+                <button data-speed="1" class="active">1x</button>
+                <button data-speed="2">2x</button>
+            </div>
+        </div>
+        <div class="timeline" aria-label="Simulation Progress">
+            <div class="tickbar" id="tickbar"></div>
+        </div>
+        <div class="pill" id="simStatus">Paused</div>
+    </div>
+
+    <div id="toastContainer" aria-live="assertive"></div>
+</div>
+
+<script>
+/* Utility: Seeded PRNG (mulberry32) */
+function mulberry32(a){return function(){var t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296;};}
+function hashString(str){let h=0; for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0;} return (h>>>0);}
+function choice(rand, arr){return arr[Math.floor(rand()*arr.length)]}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n))}
+function lerp(a,b,t){return a+(b-a)*t}
+
+/* Audio cues via WebAudio */
+const AudioFX = (()=> {
+    let ctx;
+    function get(){ if(!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
+    function beep(freq=880, dur=0.12, type='sine', vol=0.2){
+        const c=get(), o=c.createOscillator(), g=c.createGain();
+        o.type=type; o.frequency.value=freq; g.gain.value=vol;
+        o.connect(g).connect(c.destination);
+        o.start(); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime+dur);
+        o.stop(c.currentTime+dur);
+    }
+    return {
+        chime:()=>{beep(880,0.1,'sine',0.2); setTimeout(()=>beep(1320,0.08,'sine',0.18),90)},
+        thud:()=>{beep(120,0.18,'triangle',0.25)},
+        tick:()=>{beep(640,0.05,'sine',0.12)},
+    }
+})();
+
+/* Toasts */
+function showToast(message, type='info', t=3400){
+    const c=document.getElementById('toastContainer');
+    const el=document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    c.appendChild(el);
+    setTimeout(()=>{el.remove()}, t+300);
+}
+
+/* Global State */
+const GameState = {
+    seed: 0,
+    rng: null,
+    missionCode: '',
+    objective: null,
+    objectiveProgress: 0,
+    timeStart: null,
+    elapsedSec: 0,
+    timerInterval: null,
+    running:false,
+    tick:0,
+    maxTicks:300,
+    speed:1,
+    runsCount:0,
+    simHistory:[],
+    actions:[],
+    actionPoints:6,
+    score:0,
+    badges: new Set(),
+    blockade: {
+        enabled:false,
+        strokes:[],
+        coveragePct:0,
+        segmentsCovered: new Set(),
+        contiguousScore: 0
+    },
+    map: {
+        nodes:[],
+        edges:[],
+        coastPath:[], // array of points for coastline polyline
+        riverSegments:[], // segments along Mississippi
+        rotation:0,
+        jitter:6
+    },
+    layers:{rails:true,rivers:true,coast:true},
+    control:{}, // nodeId: 'Union'|'Confederate'
+    weather:{
+        riverDepth:'normal', // 'high'|'low'
+        stormIndex:0
+    },
+    ports:[],
+    criticalNodes:[],
+    tokens: {
+        flotilla: {x:40,y:120,held:false,attachedSegment:null},
+        seizure1: {x:40,y:180,held:false,attachedNode:null},
+        seizure2: {x:40,y:240,held:false,attachedNode:null},
+    },
+    ui:{
+        hoverNode:null,
+        tooltip:document.getElementById('tooltip')
+    },
+    inflow:{
+        target:'',
+        current:0,
+        history:[]
+    }
+};
+
+/* Map and Graph Definition (abstracted US Civil War simplified) */
+const BaseNodes = [
+    {id:'Richmond', x:820, y:250, type:'city'},
+    {id:'Norfolk', x:860, y:300, type:'port'},
+    {id:'Wilmington', x:860, y:360, type:'port'},
+    {id:'Charleston', x:830, y:420, type:'port'},
+    {id:'Savannah', x:800, y:470, type:'port'},
+    {id:'Mobile', x:640, y:560, type:'port'},
+    {id:'NewOrleans', x:560, y:620, type:'port'},
+    {id:'Vicksburg', x:520, y:500, type:'fort'},
+    {id:'Memphis', x:500, y:430, type:'city'},
+    {id:'Chattanooga', x:720, y:420, type:'junction'},
+    {id:'Atlanta', x:740, y:480, type:'city'},
+    {id:'Nashville', x:680, y:390, type:'city'},
+    {id:'Louisville', x:660, y:330, type:'city'},
+    {id:'Cairo', x:600, y:340, type:'city'},
+    {id:'StLouis', x:540, y:300, type:'city'},
+    {id:'LittleRock', x:460, y:480, type:'city'},
+    {id:'Houston', x:380, y:600, type:'port'},
+    {id:'NewBern', x:860, y:330, type:'port'}, // coastal
+];
+const BaseEdges = [
+    // Rails
+    {id:'Rail_Richmond_Chatt', a:'Richmond', b:'Chattanooga', type:'rail'},
+    {id:'Rail_Atlanta_Chatt', a:'Atlanta', b:'Chattanooga', type:'rail'},
+    {id:'Rail_Atlanta_Sav', a:'Atlanta', b:'Savannah', type:'rail'},
+    {id:'Rail_Nashville_Chatt', a:'Nashville', b:'Chattanooga', type:'rail'},
+    {id:'Rail_Louisville_Nash', a:'Louisville', b:'Nashville', type:'rail'},
+    {id:'Rail_Louisville_Cairo', a:'Louisville', b:'Cairo', type:'rail'},
+    {id:'Rail_Cairo_Memphis', a:'Cairo', b:'Memphis', type:'rail'},
+    {id:'Rail_Memphis_Vicks', a:'Memphis', b:'Vicksburg', type:'rail'},
+    {id:'Rail_Vicksburg_NewOrleans', a:'Vicksburg', b:'NewOrleans', type:'rail'},
+    {id:'Rail_LittleRock_Memphis', a:'LittleRock', b:'Memphis', type:'rail'},
+    {id:'Rail_StLouis_Cairo', a:'StLouis', b:'Cairo', type:'rail'},
+    {id:'Rail_Richmond_Norfolk', a:'Richmond', b:'Norfolk', type:'rail'},
+    {id:'Rail_Richmond_Wilm', a:'Richmond', b:'Wilmington', type:'rail'},
+    // Rivers (Mississippi + others simplified)
+    {id:'River_StLouis_Cairo', a:'StLouis', b:'Cairo', type:'river'},
+    {id:'River_Cairo_Memphis', a:'Cairo', b:'Memphis', type:'river'},
+    {id:'River_Memphis_Vicksburg', a:'Memphis', b:'Vicksburg', type:'river'},
+    {id:'River_Vicksburg_NewOrleans', a:'Vicksburg', b:'NewOrleans', type:'river'},
+    // Ports (coast supply edges from SEA pseudo-node)
+    {id:'Sea_Norfolk', a:'SEA', b:'Norfolk', type:'coast'},
+    {id:'Sea_Wilmington', a:'SEA', b:'Wilmington', type:'coast'},
+    {id:'Sea_Charleston', a:'SEA', b:'Charleston', type:'coast'},
+    {id:'Sea_Savannah', a:'SEA', b:'Savannah', type:'coast'},
+    {id:'Sea_Mobile', a:'SEA', b:'Mobile', type:'coast'},
+    {id:'Sea_NewOrleans', a:'SEA', b:'NewOrleans', type:'coast'},
+    {id:'Sea_Houston', a:'SEA', b:'Houston', type:'coast'},
+];
+
+/* Initialize */
+window.addEventListener('load', init);
+
+function init(){
+    // Seed selection: URL param ?seed= or ?id=
+    const params=new URLSearchParams(location.search);
+    const userId = params.get('id') || '';
+    const providedSeed = params.get('seed');
+    const deviceFP = navigator.userAgent + '|' + screen.width + 'x' + screen.height + '|' + Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const seedBase = providedSeed ? providedSeed : (userId ? userId : deviceFP);
+    GameState.seed = hashString(seedBase);
+    GameState.rng = mulberry32(GameState.seed);
+    GameState.missionCode = genMissionCode(GameState.seed);
+    // Weather randomization
+    GameState.weather.riverDepth = choice(GameState.rng, ['high','low','normal']);
+    GameState.weather.stormIndex = Math.floor(GameState.rng()*3);
+    // Objective randomization
+    const objectiveTypes=['Split the Confederacy at the Mississippi','Isolate Richmond','Defend critical rail corridor'];
+    const objType=choice(GameState.rng, objectiveTypes);
+    let target='Richmond';
+    if(objType==='Isolate Richmond'){target='Richmond'}
+    if(objType==='Split the Confederacy at the Mississippi'){target='Atlanta'}
+    if(objType==='Defend critical rail corridor'){target=choice(GameState.rng,['Atlanta','Chattanooga','Richmond'])}
+    GameState.objective={
+        type:objType,
+        target,
+        thresholds:{
+            inflow: 65, // target inflow percent
+            blockadeCoverage: 60, // percent
+            hubsToCapture: 2
+        },
+        met:false,
+        metTicks:0
+    };
+    // Critical nodes randomization
+    const candidates=['Vicksburg','Chattanooga','Atlanta','NewOrleans','Richmond'];
+    shuffleInPlace(candidates, GameState.rng);
+    GameState.criticalNodes = candidates.slice(0,3);
+
+    // Ports weighting randomization
+    GameState.ports=['Norfolk','Wilmington','Charleston','Savannah','Mobile','NewOrleans','Houston'].map(p=>({
+        id:p,
+        weight: Math.round(10 + GameState.rng()*40) // 10–50
+    }));
+
+    // Control setup with border state variation
+    const borderUnion = GameState.rng() > 0.5;
+    BaseNodes.forEach(n=>{
+        GameState.control[n.id] = ['Richmond','Norfolk','Wilmington','Charleston','Savannah','Mobile','NewOrleans','Memphis','Vicksburg','Atlanta','Chattanooga','LittleRock','Houston'].includes(n.id) ? 'Confederate' : 'Union';
+    });
+    if(borderUnion){
+        GameState.control['Louisville']='Union';
+        GameState.control['Nashville']='Union';
+        GameState.control['Cairo']='Union';
+        GameState.control['StLouis']='Union';
+    }
+
+    // Build map with jitter & rotation
+    buildMap();
+
+    // UI render
+    document.getElementById('missionCode').textContent = `Mission: ${GameState.missionCode}`;
+    document.getElementById('seedDisplay').textContent = `Seed: ${GameState.seed.toString(16)}`;
+    document.getElementById('objectiveType').textContent = `Objective: ${GameState.objective.type}`;
+    document.getElementById('weatherInfo').textContent = `River: ${GameState.weather.riverDepth} • Storms: ${GameState.weather.stormIndex}`;
+    renderObjectives();
+    startTimer();
+
+    // Tokens initial placement animation
+    placeTokens();
+    // Resize canvases
+    resizeCanvases();
+    window.addEventListener('resize', resizeCanvases);
+
+    // Interactions
+    setupLayerToggles();
+    setupBlockadePainter();
+    setupHotkeys();
+    setupSimControls();
+    setupChainBuilder();
+    setupHint();
+
+    // Anti-cheat: rotate map slightly
+    const rot = (GameState.rng()*6 - 3); // -3°..+3°
+    GameState.map.rotation = rot;
+    document.getElementById('baseMap').style.transform = `rotate(${rot}deg)`;
+
+    showToast('Orientation: Read the mission and explore layers.', 'info', 4200);
+}
+
+/* Timer */
+function startTimer(){
+    GameState.timeStart = Date.now();
+    GameState.timerInterval = setInterval(()=>{
+        GameState.elapsedSec = Math.floor((Date.now()-GameState.timeStart)/1000);
+        const m = String(Math.floor(GameState.elapsedSec/60)).padStart(2,'0');
+        const s = String(GameState.elapsedSec%60).padStart(2,'0');
+        document.getElementById('timerText').textContent = `${m}:${s}`;
+        const ring = document.getElementById('timerRing');
+        const period = 300; // 5 min cycle
+        const pct = (GameState.elapsedSec % period)/period;
+        ring.style.strokeDashoffset = String(125.6*(1-pct));
+    }, 1000);
+}
+
+/* Mission Code */
+function genMissionCode(seed){
+    const alpha='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const rng=mulberry32(seed);
+    let code='ANAC-';
+    for(let i=0;i<6;i++) code+=alpha[Math.floor(rng()*alpha.length)];
+    return code;
+}
+
+/* Build Map SVG */
+function buildMap(){
+    const rng = GameState.rng;
+    // coast polyline (rough east+gulf outline simplified)
+    const coast = [
+        [880,140],[900,160],[920,200],[930,260],[920,320],[900,360],[880,420],[860,440],[840,460],[820,480],[780,520],[740,540],[700,560],[660,580],[620,600],[580,620],[540,630],[500,640],[460,650],[420,652]
+    ];
+    // Add tiny jitter to coast
+    const coastJ = coast.map(([x,y])=>[x+(rng()*6-3), y+(rng()*6-3)]);
+    GameState.map.coastPath = coastJ;
+
+    // River path (Mississippi polyline from StLouis to NewOrleans through Cairo, Memphis, Vicksburg)
+    const river = [
+        [540,300],[600,340],[500,430],[520,500],[560,620]
+    ];
+    GameState.map.riverSegments = [[0,1],[1,2],[2,3],[3,4]];
+
+    // Nodes with jitter
+    const nodes=BaseNodes.map(n=>{
+        return {
+            id:n.id,
+            x: n.x + (rng()*2*GameState.map.jitter - GameState.map.jitter),
+            y: n.y + (rng()*2*GameState.map.jitter - GameState.map.jitter),
+            type:n.type,
+            fortified: Math.round(30 + rng()*70) // 30-100
+        }
+    });
+    GameState.map.nodes = nodes;
+
+    // Edges with type
+    GameState.map.edges = BaseEdges.map(e=>({ ...e, weight:1 }));
+
+    // Render to SVG
+    const gCoast = document.getElementById('edgesCoast');
+    gCoast.innerHTML='';
+    const coastPath = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    coastPath.setAttribute('points', coastJ.map(p=>p.join(',')).join(' '));
+    coastPath.setAttribute('class','edge coast');
+    coastPath.setAttribute('id','coastline');
+    coastPath.style.animation='coastline-sweep 3s infinite linear';
+    gCoast.appendChild(coastPath);
+
+    // Rivers
+    const gRiver = document.getElementById('edgesRiver'); gRiver.innerHTML='';
+    const riverPath = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    riverPath.setAttribute('points', river.map(p=>p.join(',')).join(' '));
+    riverPath.setAttribute('class','edge river');
+    riverPath.setAttribute('id','mississippi');
+    riverPath.setAttribute('stroke-dasharray','12 8');
+    riverPath.style.animation = 'water-flow 3s linear infinite';
+    gRiver.appendChild(riverPath);
+
+    // Rails and coast/port edges
+    const gRail = document.getElementById('edgesRail'); gRail.innerHTML='';
+    const nodeMap = Object.fromEntries(nodes.map(n=>[n.id,n]));
+    GameState.map.edges.forEach(e=>{
+        if(e.type==='rail' || e.type==='river'){
+            const a=nodeMap[e.a], b=nodeMap[e.b];
+            const path = document.createElementNS('http://www.w3.org/2000/svg','line');
+            path.setAttribute('x1',a.x); path.setAttribute('y1',a.y);
+            path.setAttribute('x2',b.x); path.setAttribute('y2',b.y);
+            path.setAttribute('class','edge ' + e.type);
+            path.setAttribute('data-id', e.id);
+            gRail.appendChild(path);
+        }
+        if(e.type==='coast'){
+            // from SEA to port -> draw small line from coast to port as hint
+            const b=nodeMap[e.b];
+            const path = document.createElementNS('http://www.w3.org/2000/svg','line');
+            // find nearest coast point
+            const nearest = nearestPoint(GameState.map.coastPath, [b.x,b.y]);
+            path.setAttribute('x1', nearest[0]); path.setAttribute('y1', nearest[1]);
+            path.setAttribute('x2', b.x); path.setAttribute('y2', b.y);
+            path.setAttribute('class','edge coast');
+            path.setAttribute('data-id', e.id);
+            gCoast.appendChild(path);
+        }
+    });
+
+    // Nodes
+    const gNodes = document.getElementById('nodes'); gNodes.innerHTML='';
+    const gLabels = document.getElementById('labels'); gLabels.innerHTML='';
+    nodes.forEach(n=>{
+        const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', 8);
+        circle.setAttribute('class', `node ${GameState.control[n.id]==='Union'?'union':'confed'} ${GameState.criticalNodes.includes(n.id)?'critical':''}`);
+        circle.setAttribute('data-id', n.id);
+        circle.addEventListener('mouseenter', e=>showNodeTooltip(n, e));
+        circle.addEventListener('mouseleave', hideTooltip);
+        circle.addEventListener('click', ()=>handleMapClick(n.id));
+        gNodes.appendChild(circle);
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+        label.setAttribute('x', n.x+10); label.setAttribute('y', n.y-10);
+        label.setAttribute('class','label');
+        label.textContent = n.id;
+        gLabels.appendChild(label);
+    });
+
+    // Save coastline index mapping to ports
+    GameState.ports.forEach(p=>{
+        const portNode = nodeMap[p.id];
+        const nearestIdx = nearestIndex(GameState.map.coastPath, [portNode.x, portNode.y]);
+        p.coastIndex = nearestIdx;
+    });
+
+    // Set tokens to staged area
+    positionTokenEl('flotillaToken', GameState.tokens.flotilla.x, GameState.tokens.flotilla.y);
+    positionTokenEl('seizureToken1', GameState.tokens.seizure1.x, GameState.tokens.seizure1.y);
+    positionTokenEl('seizureToken2', GameState.tokens.seizure2.x, GameState.tokens.seizure2.y);
+
+    // Node drag drop snapping guides not visible but we can compute on drop
+    setupTokenDrag();
+}
+
+/* Position tokens with animation */
+function placeTokens(){
+    ['flotilla','seizure1','seizure2'].forEach((k,i)=>{
+        const elId = k==='flotilla'?'flotillaToken':(k==='seizure1'?'seizureToken1':'seizureToken2');
+        const el = document.getElementById(elId);
+        el.style.animation='pin-drop 600ms ease';
+        el.style.left = (20)+'px';
+        el.style.top = (120 + i*60)+'px';
+    });
+}
+
+/* Resize canvases to SVG bounding box */
+function resizeCanvases(){
+    const wrap = document.getElementById('baseWrap');
+    const rect = wrap.getBoundingClientRect();
+    const canvases = [document.getElementById('paintLayer'), document.getElementById('flowLayer')];
+    canvases.forEach(cv=>{
+        cv.width = rect.width;
+        cv.height = rect.height;
+        cv.style.width = rect.width+'px';
+        cv.style.height = rect.height+'px';
+    });
+}
+
+/* Layer toggles and hotkeys */
+function setupLayerToggles(){
+    document.getElementById('toggleRails').addEventListener('click',()=>toggleLayer('rails'));
+    document.getElementById('toggleRivers').addEventListener('click',()=>toggleLayer('rivers'));
+    document.getElementById('toggleCoast').addEventListener('click',()=>toggleLayer('coast'));
+}
+function toggleLayer(layer){
+    GameState.layers[layer] = !GameState.layers[layer];
+    const elMap = {
+        rails: document.getElementById('edgesRail'),
+        rivers: document.getElementById('edgesRiver'),
+        coast: document.getElementById('edgesCoast')
+    };
+    elMap[layer].style.display = GameState.layers[layer] ? 'block':'none';
+    const btnId = layer==='rails'?'toggleRails':layer==='rivers'?'toggleRivers':'toggleCoast';
+    document.getElementById(btnId).classList.toggle('active', GameState.layers[layer]);
+}
+function setupHotkeys(){
+    window.addEventListener('keydown', (e)=>{
+        if(e.target && ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+        if(e.key.toLowerCase()==='b'){document.getElementById('blockadeModeBtn').click(); e.preventDefault();}
+        if(e.key.toLowerCase()==='r'){toggleLayer('rails'); e.preventDefault();}
+        if(e.key.toLowerCase()==='v'){toggleLayer('rivers'); e.preventDefault();}
+        if(e.code==='Space'){toggleRun(); e.preventDefault();}
+        if(e.key==='ArrowRight'){stepTick(); e.preventDefault();}
+        if(e.key==='ArrowLeft'){GameState.tick=Math.max(0,GameState.tick-1); renderTickbar(); e.preventDefault();}
+    });
+}
+
+/* Map Click interaction */
+function handleMapClick(nodeId){
+    const node = GameState.map.nodes.find(n=>n.id===nodeId);
+    if(!node) return;
+    if(GameState.actionPoints<=0){feedbackWrong('No action points remaining'); return;}
+
+    // Validate target: if Confederate and not too fortified
+    if(GameState.control[nodeId]==='Confederate'){
+        const threshold = 50 + Math.floor(GameState.rng()*30); // randomized fort threshold
+        if(node.fortified > threshold && !GameState.criticalNodes.includes(nodeId)){
+            feedbackWrong(`${nodeId} is too fortified right now.`);
+            return;
+        }
+        GameState.control[nodeId]='Union';
+        GameState.actionPoints--;
+        GameState.actions.push({t:Date.now(),type:'capture',node:nodeId});
+        updateAP();
+        pulseNode(nodeId, true);
+        showToast(`Captured ${nodeId}`, 'success');
+        AudioFX.chime();
+    } else {
+        // recapture planning mode toggles back
+        GameState.control[nodeId]='Confederate';
+        GameState.actionPoints--;
+        updateAP();
+        GameState.actions.push({t:Date.now(),type:'release',node:nodeId});
+        pulseNode(nodeId, false);
+        showToast(`Released ${nodeId}`, 'info');
+        AudioFX.tick();
+    }
+    // Update node color
+    const circle = [...document.querySelectorAll('#nodes circle')].find(c=>c.getAttribute('data-id')===nodeId);
+    circle.classList.toggle('union', GameState.control[nodeId]==='Union');
+    circle.classList.toggle('confed', GameState.control[nodeId]==='Confederate');
+}
+
+/* Visual feedback */
+function pulseNode(id, positive=true){
+    const circle = [...document.querySelectorAll('#nodes circle')].find(c=>c.getAttribute('data-id')===id);
+    if(!circle) return;
+    if(positive){
+        circle.style.animation = 'pulse-correct 800ms ease';
+    }else{
+        circle.style.animation = 'shake-wrong 600ms ease';
+    }
+    setTimeout(()=>circle.style.animation='', 820);
+}
+function feedbackWrong(msg){ showToast(msg,'error'); AudioFX.thud(); }
+
+/* Blockade Painter */
+function setupBlockadePainter(){
+    const paintBtn=document.getElementById('blockadeModeBtn');
+    const clearBtn=document.getElementById('resetPaintBtn');
+    const coverage=document.getElementById('coverageReadout');
+    const paintCanvas=document.getElementById('paintLayer');
+    let drawing=false, currentStroke=[];
+    function setEnabled(){
+        GameState.blockade.enabled = !GameState.blockade.enabled;
+        paintBtn.textContent = GameState.blockade.enabled ? 'Blockade Painting: ON' : 'Toggle Blockade Paint';
+        paintCanvas.style.pointerEvents = GameState.blockade.enabled ? 'auto':'none';
+        paintCanvas.style.cursor = GameState.blockade.enabled ? 'crosshair':'default';
+    }
+    paintBtn.addEventListener('click', ()=>{setEnabled()});
+
+    clearBtn.addEventListener('click', ()=>{
+        GameState.blockade.strokes=[];
+        GameState.blockade.segmentsCovered.clear();
+        GameState.blockade.coveragePct=0;
+        GameState.blockade.contiguousScore=0;
+        renderPaint();
+        coverage.textContent='Blockade: 0%';
+        showToast('Cleared blockade paint','info');
+    });
+
+    function cvToMapCoords(ev){
+        const rect = paintCanvas.getBoundingClientRect();
+        return [ev.clientX - rect.left, ev.clientY - rect.top];
+    }
+    paintCanvas.addEventListener('pointerdown', (e)=>{
+        if(!GameState.blockade.enabled) return;
+        drawing=true; currentStroke=[];
+        const p=cvToMapCoords(e);
+        currentStroke.push(p);
+    });
+    paintCanvas.addEventListener('pointermove', (e)=>{
+        if(!drawing) return;
+        const p=cvToMapCoords(e);
+        const last = currentStroke[currentStroke.length-1];
+        if(!last || Math.hypot(p[0]-last[0], p[1]-last[1])>4){
+            currentStroke.push(p);
+            renderPaint();
+        }
+    });
+    paintCanvas.addEventListener('pointerup', ()=>{
+        if(!drawing) return;
+        drawing=false;
+        if(currentStroke.length>2){
+            GameState.blockade.strokes.push(currentStroke);
+            computeCoverage();
+            renderPaint();
+            document.getElementById('coverageReadout').textContent = `Blockade: ${Math.round(GameState.blockade.coveragePct)}%`;
+            AudioFX.tick();
+        }
+        currentStroke=[];
+    });
+}
+
+/* Compute coast coverage */
+function computeCoverage(){
+    const coast = GameState.map.coastPath;
+    const covered = new Set();
+    const threshold=16; // px distance to count as covered
+    // Build segments
+    for(let i=0;i<coast.length-1;i++){
+        const a=coast[i], b=coast[i+1];
+        // Check any painted point close to segment
+        let cover=false;
+        for(const stroke of GameState.blockade.strokes){
+            for(const p of stroke){
+                const d = pointToSegmentDistance(p, a, b);
+                if(d<threshold){cover=true;break;}
+            }
+            if(cover) break;
+        }
+        if(cover) covered.add(i);
+    }
+    GameState.blockade.segmentsCovered = covered;
+    const pct = (covered.size/(coast.length-1))*100;
+    // contiguity: longest consecutive run percentage
+    const longest = longestRun(covered, coast.length-1);
+    GameState.blockade.coveragePct = pct;
+    GameState.blockade.contiguousScore = (longest/(coast.length-1))*100;
+}
+
+/* Render paint shimmer and coverage highlights */
+function renderPaint(){
+    const cv=document.getElementById('paintLayer');
+    const ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // Draw strokes
+    ctx.lineJoin='round'; ctx.lineCap='round';
+    for(const stroke of GameState.blockade.strokes){
+        if(stroke.length<2) continue;
+        ctx.strokeStyle='rgba(17,138,178,0.9)';
+        ctx.lineWidth=10; ctx.shadowColor='rgba(255,255,255,0.3)'; ctx.shadowBlur=6;
+        ctx.beginPath();
+        ctx.moveTo(stroke[0][0], stroke[0][1]);
+        for(let i=1;i<stroke.length;i++) ctx.lineTo(stroke[i][0], stroke[i][1]);
+        ctx.stroke();
+    }
+    // Highlight covered coastline segments
+    const coast = GameState.map.coastPath;
+    ctx.lineWidth=6; ctx.shadowBlur=12; ctx.strokeStyle='rgba(79,195,247,0.9)';
+    ctx.beginPath();
+    for(let i=0;i<coast.length-1;i++){
+        if(GameState.blockade.segmentsCovered.has(i)){
+            const a=coast[i], b=coast[i+1];
+            ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]);
+        }
+    }
+    ctx.stroke();
+}
+
+/* Token drag/drop */
+function setupTokenDrag(){
+    const wrap=document.getElementById('baseWrap');
+    function dragFor(tokenKey, elId){
+        const el = document.getElementById(elId);
+        let offset=[0,0], dragging=false;
+        el.addEventListener('pointerdown', (e)=>{
+            dragging=true; el.setPointerCapture(e.pointerId);
+            const rect = el.getBoundingClientRect();
+            offset=[e.clientX-rect.left, e.clientY-rect.top];
+        });
+        window.addEventListener('pointermove', (e)=>{
+            if(!dragging) return;
+            const wrect=wrap.getBoundingClientRect();
+            const x=clamp(e.clientX-wrect.left - offset[0] + 21, 0, wrect.width-42);
+            const y=clamp(e.clientY-wrect.top - offset[1] + 21, 0, wrect.height-42);
+            positionTokenEl(elId, x, y);
+        });
+        window.addEventListener('pointerup', (e)=>{
+            if(!dragging) return; dragging=false;
+            // Snap to node/segment
+            handleUnitDrop(tokenKey, elId);
+        });
+    }
+    dragFor('flotilla', 'flotillaToken');
+    dragFor('seizure1', 'seizureToken1');
+    dragFor('seizure2', 'seizureToken2');
+}
+function positionTokenEl(id, x, y){
+    const el=document.getElementById(id);
+    el.style.left = `${x}px`; el.style.top = `${y}px`;
+}
+function handleUnitDrop(tokenKey, elId){
+    const wrap=document.getElementById('baseWrap');
+    const el=document.getElementById(elId);
+    const rect=el.getBoundingClientRect(), wrect=wrap.getBoundingClientRect();
+    const cx = rect.left - wrect.left + rect.width/2;
+    const cy = rect.top - wrect.top + rect.height/2;
+
+    // Snap to nearest node if seizure team; snap to river segment if flotilla
+    if(tokenKey==='flotilla'){
+        const seg = nearestRiverSegment([cx,cy]);
+        GameState.tokens.flotilla.attachedSegment = seg;
+        showToast(`Flotilla patrolling river segment ${seg}`, 'success');
+        AudioFX.chime();
+    } else {
+        const node = nearestNode([cx,cy], 30);
+        if(!node){ feedbackWrong('No valid hub nearby'); return; }
+        if(GameState.actionPoints<=0){ feedbackWrong('No action points'); return; }
+        // Validation: capturable and approach path exists (simple: node is Confederate and on rail or fort)
+        if(GameState.control[node.id]==='Union'){ feedbackWrong('Already under Union'); return; }
+        const capturable = node.fortified < 85 || GameState.criticalNodes.includes(node.id);
+        if(!capturable){ feedbackWrong(`${node.id} too fortified`); return; }
+        GameState.control[node.id]='Union';
+        GameState.actionPoints--;
+        updateAP();
+        pulseNode(node.id, true);
+        showToast(`Seized ${node.id}`, 'success');
+        AudioFX.chime();
+        if(tokenKey==='seizure1') GameState.tokens.seizure1.attachedNode = node.id;
+        else GameState.tokens.seizure2.attachedNode = node.id;
+        // Snap token to node location visually
+        const svgToScreen = svgPointToScreen(node.x, node.y);
+        positionTokenEl(elId, svgToScreen.x-21, svgToScreen.y-21);
+        // Glow adjacent rails
+        glowAdjEdges(node.id, 'rail');
+    }
+}
+
+/* Helpers for snapping */
+function nearestNode(p, radius=40){
+    let best=null, bestD=Infinity;
+    for(const n of GameState.map.nodes){
+        const pt=svgPointToScreen(n.x, n.y);
+        const d=Math.hypot(p[0]-pt.x,p[1]-pt.y);
+        if(d<bestD && d<=radius){best=n;bestD=d;}
+    }
+    return best;
+}
+function nearestRiverSegment(p){
+    // Compare to midpoints of Mississippi segments in screen coords
+    const river = document.getElementById('mississippi').getAttribute('points').split(' ').map(x=>x.split(',').map(Number));
+    let bestI=0, bestD=Infinity;
+    for(let i=0;i<river.length-1;i++){
+        const a=svgPointToScreen(river[i][0], river[i][1]);
+        const b=svgPointToScreen(river[i+1][0], river[i+1][1]);
+        const mid=[(a.x+b.x)/2,(a.y+b.y)/2];
+        const d=Math.hypot(p[0]-mid[0],p[1]-mid[1]);
+        if(d<bestD){bestD=d;bestI=i;}
+    }
+    return bestI;
+}
+function svgPointToScreen(x,y){
+    const svg=document.getElementById('baseMap'), wrap=document.getElementById('baseWrap');
+    const pt=svg.createSVGPoint(); pt.x=x; pt.y=y;
+    const ctm=svg.getScreenCTM();
+    const spt=pt.matrixTransform(ctm);
+    return {x: spt.x - wrap.getBoundingClientRect().left, y: spt.y - wrap.getBoundingClientRect().top};
+}
+
+/* Edge glow for adjacency */
+function glowAdjEdges(nodeId, type){
+    const edges = GameState.map.edges.filter(e=>e.type===type && (e.a===nodeId || e.b===nodeId));
+    edges.forEach(e=>{
+        const line = document.querySelector(`[data-id="${e.id}"]`);
+        if(line){
+            line.classList.add('glow');
+            line.style.animation='glow-path 1200ms ease';
+            setTimeout(()=>{line.classList.remove('glow'); line.style.animation=''}, 1200);
+        }
+    });
+}
+
+/* Tooltips */
+function showNodeTooltip(n, ev){
+    const t=GameState.ui.tooltip;
+    t.innerHTML = `<strong>${n.id}</strong><br>Control: ${GameState.control[n.id]}<br>Fortified: ${n.fortified}<br>${GameState.criticalNodes.includes(n.id)?'Critical Hub':''}`;
+    const pt=svgPointToScreen(n.x,n.y);
+    t.style.left = pt.x+'px';
+    t.style.top = pt.y+'px';
+    t.style.opacity=1;
+    t.style.transform='translate(-50%,-140%) scale(1)';
+}
+function hideTooltip(){
+    const t=GameState.ui.tooltip;
+    t.style.opacity=0;
+    t.style.transform='translate(-50%,-140%) scale(.95)';
+}
+
+/* Objectives render */
+function renderObjectives(){
+    const list=document.getElementById('objList');
+    list.innerHTML='';
+    const o=GameState.objective;
+    const items=[];
+    if(o.type==='Split the Confederacy at the Mississippi'){
+        items.push({id:'obj_split', text:'Split Trans-Mississippi via river control'});
+        items.push({id:'obj_hubs', text:'Capture 2 critical rail hubs'});
+        items.push({id:'obj_block', text:`Achieve ${o.thresholds.blockadeCoverage}% blockade coverage`});
+    } else if(o.type==='Isolate Richmond'){
+        items.push({id:'obj_inflow', text:`Reduce Richmond inflow below ${o.thresholds.inflow}% for 2 ticks`});
+        items.push({id:'obj_block', text:`Achieve ${o.thresholds.blockadeCoverage}% blockade coverage`});
+        items.push({id:'obj_hubs', text:'Capture 2 critical rail hubs'});
+    } else {
+        items.push({id:'obj_corridor', text:'Keep Louisville–Chattanooga corridor under Union control'});
+        items.push({id:'obj_hubs', text:'Capture 2 critical rail hubs'});
+        items.push({id:'obj_inflow', text:`Reduce ${o.target} inflow below ${o.thresholds.inflow}%`});
+    }
+    items.forEach(it=>{
+        const li=document.createElement('li');
+        li.className='obj-item'; li.id=it.id;
+        li.innerHTML=`<span>${it.text}</span><span class="pill" id="${it.id}_status">0%</span>`;
+        list.appendChild(li);
+    });
+}
+
+/* Action points UI */
+function updateAP(){
+    const ap=document.getElementById('actionPoints');
+    ap.textContent = `AP: ${GameState.actionPoints}`;
+}
+
+/* Simulation and Flow */
+function setupSimControls(){
+    document.getElementById('runBtn').addEventListener('click', toggleRun);
+    document.getElementById('stepBtn').addEventListener('click', stepTick);
+    document.getElementById('resetSimBtn').addEventListener('click', resetSimulation);
+    document.querySelectorAll('.speed button').forEach(b=>{
+        b.addEventListener('click',()=>{
+            document.querySelectorAll('.speed button').forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+            GameState.speed = parseFloat(b.dataset.speed||'1');
+        })
+    });
+}
+function toggleRun(){
+    GameState.running = !GameState.running;
+    document.getElementById('runBtn').textContent = GameState.running ? 'Pause':'Run';
+    document.getElementById('simStatus').textContent = GameState.running ? 'Running':'Paused';
+    if(GameState.running){
+        AudioFX.tick();
+        if(GameState.tick===0) GameState.runsCount++;
+        runLoop();
+    }
+}
+function stepTick(){
+    if(GameState.running) return;
+    simulateTick();
+    renderTickbar();
+}
+function resetSimulation(){
+    GameState.tick=0; GameState.simHistory=[]; GameState.inflow.history=[]; GameState.inflow.current=0;
+    document.getElementById('tickbar').style.width='0%';
+    const ctx=document.getElementById('flowLayer').getContext('2d'); ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    GameState.running=false; document.getElementById('runBtn').textContent='Run'; document.getElementById('simStatus').textContent='Paused';
+    showToast('Simulation reset','info');
+}
+function runLoop(){
+    if(!GameState.running) return;
+    simulateTick();
+    renderTickbar();
+    const delay = 220/ GameState.speed;
+    setTimeout(runLoop, delay);
+}
+function renderTickbar(){
+    const pct = (GameState.tick/GameState.maxTicks)*100;
+    document.getElementById('tickbar').style.width = `${pct}%`;
+}
+
+/* Simulation tick: recompute inflow and animate particles */
+function simulateTick(){
+    GameState.tick = Math.min(GameState.maxTicks, GameState.tick+1);
+    // Compute graph connectivity with modifications from control and flotilla and blockade
+    const graph = buildEffectiveGraph();
+    const inflow = computeInflow(graph, GameState.objective.target);
+    GameState.inflow.current = inflow;
+    GameState.inflow.history.push(inflow);
+    if(GameState.inflow.history.length>120) GameState.inflow.history.shift();
+    // Update objectives progress meters
+    updateObjectives(inflow, graph);
+    // Draw particles
+    drawParticles(graph);
+    // Update score
+    computeScore();
+}
+
+/* Build effective graph given current controls, blockade, flotilla */
+function buildEffectiveGraph(){
+    const g={nodes:new Set(), adj: new Map(), edges:[]};
+    GameState.map.nodes.forEach(n=>g.nodes.add(n.id));
+    function addEdge(a,b,w,type,id){
+        if(!g.adj.has(a)) g.adj.set(a,[]); if(!g.adj.has(b)) g.adj.set(b,[]);
+        g.adj.get(a).push({to:b,w,type,id});
+        g.adj.get(b).push({to:a,w,type,id});
+        g.edges.push({a,b,w,type,id});
+    }
+
+    // Base edges
+    for(const e of GameState.map.edges){
+        let a=e.a, b=e.b, w=1, type=e.type;
+        // Coast edge: weight is port traffic modified by blockade coverage near port
+        if(type==='coast'){
+            const portId=e.b;
+            const portMeta = GameState.ports.find(p=>p.id===portId);
+            let coverageLocal = portCoverageAt(portMeta);
+            // Storms reduce sea supply
+            const stormPenalty = GameState.weather.stormIndex*5;
+            const weight = clamp(portMeta.weight * (coverageLocal<30 ? 1 : (1 - coverageLocal/100)) - stormPenalty, 0, 50);
+            w = weight/10;
+            if(w<=0.1) continue; // effectively blocked
+        }
+        if(type==='river'){
+            // River depth influences weight
+            if(GameState.weather.riverDepth==='low') w*=0.8;
+            if(GameState.weather.riverDepth==='high') w*=1.2;
+            // If flotilla controls segment intersecting this edge, reduce weight
+            const seg = GameState.tokens.flotilla.attachedSegment;
+            if(seg!=null){
+                if( (e.id==='River_Memphis_Vicksburg' && (seg===2)) ||
+                    (e.id==='River_Cairo_Memphis' && (seg===1)) ||
+                    (e.id==='River_Vicksburg_NewOrleans' && (seg===3)) ){
+                    w=0.05; // nearly blocked
+                }
+            }
+        }
+        if(type==='rail'){
+            // If either node under Union -> edge weight for Confederate supply reduced
+            const unionFactor = (GameState.control[a]==='Union' || GameState.control[b]==='Union') ? 0.4 : 1.0;
+            w *= unionFactor;
+        }
+        if(w<=0) continue;
+        addEdge(a,b,w,type,e.id);
+    }
+    // Add SEA node implicitly for coast edges
+    g.nodes.add('SEA');
+    if(!g.adj.has('SEA')) g.adj.set('SEA',[]);
+    // Already added via coast edges above
+    return g;
+}
+
+/* Port coverage near port based on nearest coast segments */
+function portCoverageAt(portMeta){
+    if(!portMeta || portMeta.coastIndex==null) return GameState.blockade.coveragePct;
+    // Determine fraction of covered segments in window around coastIndex
+    const window=4;
+    let covered=0, total=0;
+    for(let i=portMeta.coastIndex-window;i<=portMeta.coastIndex+window;i++){
+        if(i<0||i>=GameState.map.coastPath.length-1) continue;
+        total++;
+        if(GameState.blockade.segmentsCovered.has(i)) covered++;
+    }
+    const local = total? (covered/total)*100 : 0;
+    return (local*0.7 + GameState.blockade.contiguousScore*0.3); // blend local + contiguity
+}
+
+/* Compute inflow to target as percentage of max baseline */
+function computeInflow(graph, target){
+    // Supply sources: industrial nodes (StLouis, Louisville, SEA via ports, Houston, LittleRock) simplified
+    const sources=[
+        {id:'StLouis', base:30},
+        {id:'Louisville', base:25},
+        {id:'LittleRock', base:10},
+        {id:'SEA', base: Math.round(GameState.ports.reduce((a,p)=>a+p.weight,0)/5)} // aggregated sea supply scaled
+    ];
+    const baseline = sources.reduce((a,s)=>a+s.base,0);
+    // Explore connectivity with effective weights
+    function reachable(from, to){
+        // BFS ignoring weights but respecting w>0.1
+        const q=[from], seen=new Set([from]);
+        while(q.length){
+            const u=q.shift();
+            if(u===to) return true;
+            const adj=graph.adj.get(u)||[];
+            for(const v of adj){
+                if(v.w<=0.1) continue;
+                if(!seen.has(v.to)){
+                    seen.add(v.to); q.push(v.to);
+                }
+            }
+        }
+        return false;
+    }
+    let flow=0;
+    for(const s of sources){
+        if(reachable(s.id, target)) flow += s.base;
+    }
+    // Scale to percent of baseline (100% when all connected)
+    const percent = baseline? (flow/baseline)*100 : 0;
+    return Math.round(percent);
+}
+
+/* Particles along active edges to visualize supply */
+let particleT=0;
+function drawParticles(graph){
+    const cv=document.getElementById('flowLayer');
+    const ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,cv.width,cv.height);
+    particleT+=0.02*GameState.speed;
+
+    function screenPt(nodeId){
+        const n=GameState.map.nodes.find(x=>x.id===nodeId);
+        if(!n) return null;
+        return svgPointToScreen(n.x, n.y);
+    }
+    for(const e of graph.edges){
+        if(e.w<=0.1) continue;
+        const a=screenPt(e.a), b=screenPt(e.b);
+        if(!a||!b) continue;
+        const count = Math.ceil(e.w*2);
+        for(let i=0;i<count;i++){
+            const t = (particleT + i*0.35)%1;
+            const x=lerp(a.x,b.x,t), y=lerp(a.y,b.y,t);
+            const grad=ctx.createRadialGradient(x,y,0,x,y,6);
+            grad.addColorStop(0, e.type==='river'?'rgba(72,202,228,0.9)':'rgba(255,209,102,0.9)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle=grad;
+            ctx.beginPath(); ctx.arc(x,y,3+e.w,0,Math.PI*2); ctx.fill();
+        }
+    }
+}
+
+/* Objectives update */
+function updateObjectives(inflow, graph){
+    const o=GameState.objective;
+    // Inflow to target
+    setStatus('obj_inflow', inflow ? `${inflow}%`:'—');
+    // Blockade
+    const blk=Math.round(GameState.blockade.coveragePct);
+    setStatus('obj_block', `${blk}%`);
+    // Hubs captured
+    const hubsCaptured = GameState.criticalNodes.filter(n=>GameState.control[n]==='Union').length;
+    setStatus('obj_hubs', `${hubsCaptured}/${o.thresholds.hubsToCapture}`);
+    // Corridor
+    const corridorOK = (GameState.control['Louisville']==='Union' && GameState.control['Chattanooga']==='Union');
+    setStatus('obj_corridor', corridorOK?'Secured':'At risk');
+
+    // Determine overall progress
+    let progress=0, goals=0;
+    if(o.type==='Isolate Richmond'){
+        goals=3;
+        if(inflow<=o.thresholds.inflow){o.metTicks++; if(o.metTicks>=2) progress+=34}else{o.metTicks=0}
+        if(blk>=o.thresholds.blockadeCoverage) progress+=33;
+        if(hubsCaptured>=o.thresholds.hubsToCapture) progress+=33;
+    } else if(o.type==='Split the Confederacy at the Mississippi'){
+        goals=3;
+        // Check split: nodes west of Mississippi not connected to Richmond
+        const west=['Houston','LittleRock','Memphis','Vicksburg','NewOrleans','StLouis'];
+        const split = west.every(w=>!pathExists(graph, w, 'Richmond'));
+        if(split) progress+=40;
+        if(hubsCaptured>=o.thresholds.hubsToCapture) progress+=30;
+        if(blk>=o.thresholds.blockadeCoverage) progress+=30;
+        setStatus('obj_split', split?'Split':'Linked');
+    } else {
+        goals=3;
+        if(corridorOK) progress+=34;
+        if(hubsCaptured>=o.thresholds.hubsToCapture) progress+=33;
+        if(inflow<=o.thresholds.inflow) progress+=33;
+    }
+    GameState.objectiveProgress = progress;
+    document.getElementById('objProgress').style.width = `${progress}%`;
+}
+
+/* Path existence helper */
+function pathExists(graph, from, to){
+    const q=[from], seen=new Set([from]);
+    while(q.length){
+        const u=q.shift();
+        if(u===to) return true;
+        const adj=graph.adj.get(u)||[];
+        for(const v of adj){
+            if(v.w<=0.1) continue;
+            if(!seen.has(v.to)){seen.add(v.to); q.push(v.to);}
+        }
+    }
+    return false;
+}
+
+/* Score computation */
+function computeScore(){
+    const o=GameState.objective;
+    let score=0;
+    // Objective completion up to 50
+    score += (GameState.objectiveProgress/100)*50;
+    // Efficiency: remaining AP
+    score += clamp(GameState.actionPoints/6,0,1)*20;
+    // Blockade quality
+    const blkQ = (GameState.blockade.coveragePct*0.6 + GameState.blockade.contiguousScore*0.4)/100;
+    score += blkQ*15;
+    // Causal chain placeholder correctness (revalidated on submit)
+    const chainScore = validateChainGraph(false) ? 15 : 0;
+    score += chainScore;
+    GameState.score = Math.round(score);
+    document.getElementById('scoreTotal').textContent = GameState.score;
+
+    // Badges
+    const badges=document.getElementById('badges');
+    badges.innerHTML='';
+    if(GameState.blockade.coveragePct>=70) GameState.badges.add('Blockade Architect');
+    if(GameState.tokens.flotilla.attachedSegment!=null) GameState.badges.add('River Commander');
+    if(GameState.criticalNodes.filter(n=>GameState.control[n]==='Union').length>=2) GameState.badges.add('Rail Cutter');
+    for(const b of GameState.badges){
+        const el=document.createElement('div'); el.className='badge'; el.textContent=b; badges.appendChild(el);
+    }
+}
+
+/* Objectives UI helper */
+function setStatus(id, txt){
+    const el=document.getElementById(id+'_status');
+    if(el) el.textContent = txt;
+}
+
+/* Causal Chain Builder */
+const ChainState = {
+    tiles:[],
+    links:[], // {from,to}
+    startLink:null
+};
+const TileDefs = [
+    {id:'blockade', label:'Blockade Coverage'},
+    {id:'riverControl', label:'Mississippi Segment Secured', required:true},
+    {id:'railHub', label:'Critical Rail Hub Captured', required:true},
+    {id:'portDown', label:'Port Inflow Reduced'},
+    {id:'transSplit', label:'Trans-Mississippi Disconnected'},
+    {id:'reroute', label:'Rail Re-routing Inefficient'},
+    {id:'inflowDown', label:`${GameState.objective.target} Inflow Down`}
+];
+function setupChainBuilder(){
+    const board=document.getElementById('chainBoard');
+    const links=document.getElementById('chainLinks');
+    const W=board.clientWidth, H=board.clientHeight;
+    links.setAttribute('width', W); links.setAttribute('height', H);
+    // Place tiles
+    ChainState.tiles = TileDefs.map((t,i)=>({
+        ...t,
+        x: 14 + (i%3)* (W/3 - 10),
+        y: 14 + Math.floor(i/3)* 70
+    }));
+    renderTiles();
+
+    // Linking by shift-drag
+    board.addEventListener('pointerdown', (e)=>{
+        const target = e.target.closest('.tile');
+        if(target && e.shiftKey){
+            ChainState.startLink = target.dataset.id;
+        }
+    });
+    board.addEventListener('pointerup', (e)=>{
+        if(!ChainState.startLink) return;
+        const end = e.target.closest('.tile');
+        if(end && end.dataset.id!==ChainState.startLink){
+            ChainState.links.push({from:ChainState.startLink, to:end.dataset.id});
+            renderLinks();
+            AudioFX.tick();
+        } else {
+            feedbackWrong('Invalid link');
+        }
+        ChainState.startLink=null;
+    });
+
+    // Drag tiles
+    board.querySelectorAll('.tile').forEach(t=>{
+        let dragging=false, offx=0, offy=0;
+        t.addEventListener('pointerdown', (e)=>{
+            dragging=true; t.setPointerCapture(e.pointerId);
+            offx=e.offsetX; offy=e.offsetY;
+        });
+        window.addEventListener('pointermove', (e)=>{
+            if(!dragging) return;
+            const r=board.getBoundingClientRect();
+            const x=clamp(e.clientX-r.left-offx, 0, r.width-120);
+            const y=clamp(e.clientY-r.top-offy, 0, r.height-40);
+            t.style.left=x+'px'; t.style.top=y+'px';
+            const tile=ChainState.tiles.find(z=>z.id===t.dataset.id); tile.x=x; tile.y=y;
+            renderLinks();
+        });
+        window.addEventListener('pointerup', ()=>{dragging=false});
+    });
+
+    document.getElementById('validateChainBtn').addEventListener('click', ()=>{
+        const ok=validateChainGraph(true);
+        if(ok){ showToast('Causal chain looks valid!', 'success'); AudioFX.chime();}
+        else { feedbackWrong('Chain does not match your sim results.');}
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', submitPlan);
+}
+function renderTiles(){
+    const board=document.getElementById('chainBoard');
+    // remove existing tiles
+    [...board.querySelectorAll('.tile')].forEach(n=>n.remove());
+    ChainState.tiles.forEach(t=>{
+        const el=document.createElement('div');
+        el.className='tile'+(t.required?' required':'');
+        el.textContent=t.label;
+        el.style.left=t.x+'px'; el.style.top=t.y+'px';
+        el.dataset.id=t.id;
+        board.appendChild(el);
+    });
+    renderLinks();
+}
+function renderLinks(){
+    const svg=document.getElementById('chainLinks');
+    const board=document.getElementById('chainBoard');
+    const r=board.getBoundingClientRect();
+    svg.innerHTML='';
+    ChainState.links.forEach(l=>{
+        const a=ChainState.tiles.find(t=>t.id===l.from);
+        const b=ChainState.tiles.find(t=>t.id===l.to);
+        if(!a||!b) return;
+        const x1=a.x+110, y1=a.y+20, x2=b.x+10, y2=b.y+20;
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        const d=`M${x1},${y1} C ${x1+40},${y1} ${x2-40},${y2} ${x2},${y2}`;
+        path.setAttribute('d', d);
+        path.setAttribute('stroke','#FFD166'); path.setAttribute('fill','none'); path.setAttribute('stroke-width','2');
+        path.setAttribute('marker-end','url(#arrowHead)');
+        svg.appendChild(path);
+    });
+}
+
+/* Validate chain graph against metrics */
+function validateChainGraph(showFeedback){
+    // metrics we need:
+    const hubsCaptured = GameState.criticalNodes.filter(n=>GameState.control[n]==='Union').length>=2;
+    const seg = GameState.tokens.flotilla.attachedSegment!=null;
+    const inflowOK = GameState.inflow.history.slice(-2).every(v=>v<=GameState.objective.thresholds.inflow);
+    const blockadeOK = GameState.blockade.coveragePct>=GameState.objective.thresholds.blockadeCoverage;
+
+    const have = id=> ChainState.tiles.some(t=>t.id===id) && (ChainState.links.some(l=>l.from===id || l.to===id));
+    const pathValid = (start,end)=>{
+        // check if path sequence exists via DFS along links
+        const adj= new Map();
+        ChainState.links.forEach(l=>{
+            if(!adj.has(l.from)) adj.set(l.from,[]);
+            adj.get(l.from).push(l.to);
+        });
+        const seen=new Set(); let ok=false;
+        function dfs(u){
+            if(u===end){ok=true;return;}
+            (adj.get(u)||[]).forEach(v=>{if(!seen.has(v)){seen.add(v); dfs(v)}})
+        }
+        dfs(start);
+        return ok;
+    }
+
+    let ok=true;
+    if(GameState.objective.type==='Isolate Richmond'){
+        ok = hubsCaptured && blockadeOK && inflowOK && pathValid('blockade','portDown') && pathValid('railHub','reroute') && pathValid('reroute','inflowDown');
+    } else if(GameState.objective.type==='Split the Confederacy at the Mississippi'){
+        ok = seg && hubsCaptured && pathValid('riverControl','transSplit') && pathValid('transSplit','inflowDown');
+    } else {
+        ok = hubsCaptured && (inflowOK || blockadeOK);
+    }
+    if(showFeedback && !ok){
+        if(!hubsCaptured) showToast('Chain invalid: capture at least 2 critical hubs.', 'error');
+        if(GameState.objective.type!=='Defend critical rail corridor' && !blockadeOK) showToast('Chain invalid: insufficient blockade coverage.', 'error');
+    }
+    return ok;
+}
+
+/* Submit Plan */
+async function submitPlan(){
+    // Anti-cheat: must run at least 2 simulations and have >12s elapsed
+    if(GameState.runsCount<2){ feedbackWrong('Run at least two simulations before submitting.'); return; }
+    if(GameState.elapsedSec<12){ feedbackWrong('Spend more time exploring the map before submitting.'); return; }
+    const objMet = GameState.objectiveProgress>=100 || (GameState.objective.type==='Isolate Richmond' && GameState.inflow.history.slice(-2).every(v=>v<=GameState.objective.thresholds.inflow));
+    const chainOK = validateChainGraph(true);
+    let verdict='Not yet: Your plan did not reduce target inflow sufficiently.';
+    if(objMet && chainOK){ verdict='Excellent: You severed the network and justified the outcome.'; }
+    else if(!objMet && chainOK){ verdict='Almost there: Improve blockade contiguity or seize a higher-degree rail hub.'; }
+    showToast(verdict, objMet&&chainOK?'success':(chainOK?'info':'error'));
+}
+
+/* UI: hint */
+function setupHint(){
+    document.getElementById('hintBtn').addEventListener('click', ()=>{
+        showToast('Hint: Focus on Vicksburg for river control and seize Chattanooga/Atlanta to disrupt rails.', 'info', 5200);
+    });
+}
+
+/* Utility geometry */
+function nearestPoint(poly, p){
+    // returns closest vertex for simplicity
+    let best=poly[0], d=Infinity;
+    for(const q of poly){ const dd=Math.hypot(p[0]-q[0], p[1]-q[1]); if(dd<d){d=dd; best=q;} }
+    return best;
+}
+function nearestIndex(poly, p){
+    let best=0, d=Infinity;
+    for(let i=0;i<poly.length;i++){ const q=poly[i]; const dd=Math.hypot(p[0]-q[0], p[1]-q[1]); if(dd<d){d=dd; best=i;} }
+    return best;
+}
+function pointToSegmentDistance(p, a, b){
+    const x=p[0], y=p[1], x1=a[0], y1=a[1], x2=b[0], y2=b[1];
+    const A=x-x1, B=y-y1, C=x2-x1, D=y2-y1;
+    const dot = A*C + B*D;
+    const len_sq = C*C + D*D;
+    let t = len_sq !==0 ? dot / len_sq : -1;
+    t = Math.max(0, Math.min(1, t));
+    const xx = x1 + t*C, yy = y1 + t*D;
+    const dx = x - xx, dy = y - yy;
+    return Math.hypot(dx,dy);
+}
+function longestRun(set, length){
+    let longest=0, cur=0;
+    for(let i=0;i<length;i++){
+        if(set.has(i)){cur++; longest=Math.max(longest,cur);} else cur=0;
+    }
+    return longest;
+}
+function shuffleInPlace(arr, rng){
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(rng()* (i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+}
+
+/* Map helpers specific */
+function glowEdgeById(id){
+    const el=document.querySelector(`[data-id="${id}"]`);
+    if(el){ el.classList.add('glow'); setTimeout(()=>el.classList.remove('glow'), 1000); }
+}
+
+/* Footer interactions: already set */
+
+/* Anti-cheat action log hashing (local) */
+async function hashActions(){
+    const enc = new TextEncoder();
+    const data = enc.encode(JSON.stringify(GameState.actions));
+    const dig = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(dig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* Causal chain initial positions after board laid out */
+window.addEventListener('resize', ()=>{
+    const board=document.getElementById('chainBoard');
+    const links=document.getElementById('chainLinks');
+    links.setAttribute('width', board.clientWidth);
+    links.setAttribute('height', board.clientHeight);
+    renderLinks();
+});
+
+/* END of code */
+</script>
+</body>
+</html>

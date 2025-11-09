@@ -1,0 +1,237 @@
+{
+  "request_id": "20251109_031702_443915",
+  "timestamp": "2025-11-09T03:21:46.759704",
+  "concept": "how to cook ramen instant",
+  "subject": "Other",
+  "story_script": {
+    "story": {
+      "title": "Boilpoint: Night Market Ramen Lab",
+      "narrative": "You’ve been recruited as the closing chef at a neon-lit night market, where every bowl must match a customer’s precise flavor and texture expectations. Order tickets slide in fast, each with unique constraints like noodle thickness, soup vs. dry style, and special add-ins. The crowd judges with their eyes first—steam, simmer, and swirl must look perfect. Your task: read the visual cues, control heat and water, and finish at the exact moment for peak ramen bliss.",
+      "background": "Set under holographic lanterns and chrome food stalls, the lab-stall blends science and street food. Transparent pots reveal boiling bubbles, noodle coils softening, and season packets dissolving in shimmering gradients. A scoreboard flickers above, while an order rail feeds randomized tickets with different altitudes, pot sizes, and noodle types.",
+      "learning_goal": "Students will sequence and execute the core steps for instant ramen by: measuring water within ±10%, maintaining an appropriate simmer for the target time ±10 s, choosing correct seasoning timing based on style (soup vs dry), and plating with required add-ins in the correct order.",
+      "challenge_description": "Each student receives a unique Order Ticket with noodle type, cooking style, target firmness, and add-ins. They must pour water, control heat to reach a boil, time and stir the noodles, add seasoning at the correct visual moment, strain if required, and plate. Success is judged by visual state (bubble intensity, noodle coil looseness, broth turbidity), not just text inputs."
+    },
+    "technical_plan": {
+      "html_structure": {
+        "layout": "CSS Grid with three main columns: left (Order + HUD), center (Stage with pot and stove), right (Controls + Ingredients). A fixed bottom row hosts the timeline/progress bar. Flexbox within each column for alignment.",
+        "main_containers": [
+          "#app (root grid wrapper)",
+          "#hud (score, timer, order rail)",
+          "#orderCard (current randomized ticket with icons)",
+          "#stage (SVG/canvas pot, steam, stove, visual cues)",
+          "#controls (heat knob, water pitcher slider, strainer button, seasoning packets)",
+          "#ingredients (draggable add-ins: egg, scallions, corn, tofu)",
+          "#timeline (animated progress and doneness ring)",
+          "#scoreModal (end-of-round summary and challenge question)"
+        ],
+        "responsive_design": "On desktop: 3-column grid (25%/50%/25%). On tablet: 2-column with stage full width on top, controls and order stacked beneath. On mobile: single column stacking (Order -> Stage -> Controls -> Ingredients -> Timeline), larger touch targets, simplified hover effects, and reduced animation density for performance."
+      },
+      "css_design": {
+        "color_scheme": "Primary: #0EA5E9 (sky-blue), Secondary: #22D3EE (cyan), Accent: #F59E0B (amber), Success: #10B981 (emerald), Danger: #EF4444 (red), Background: #0F172A (slate-900), Surface: rgba(15, 23, 42, 0.6) glass panels.",
+        "typography": "Headings: 'Inter', 700 weight; Body: 'Nunito', 400-600; Numeric displays (timer/score): 'Roboto Mono', 500. Base font-size 16px; scale up to 18px on desktop.",
+        "animations": [
+          "steamRise (keyframes translateY + fade for steam particles)",
+          "bubblePulse (scale and opacity pulses in pot water)",
+          "knobTurn (smooth rotation on heat knob)",
+          "pourWater (arc path particle animation for pour)",
+          "sprinkleSeason (confetti-like dissolve into broth)",
+          "noodleSoften (morph path + color warm shift)",
+          "successGlow (outer ring pulse green)",
+          "errorShake (short horizontal shake on mistakes)",
+          "cardSlideIn (order ticket entry)",
+          "tickFlash (timer tick accent)",
+          "hoverLift (subtle translateY and shadow increase)"
+        ],
+        "visual_effects": [
+          "Background gradient: linear-gradient(135deg, #0EA5E9 0%, #22D3EE 40%, #0F172A 100%)",
+          "Glassmorphism panels with backdrop-filter: blur(12px) and soft borders",
+          "Soft drop-shadows and inner-shadows for depth",
+          "SVG filters for steam blur and specular lighting on pot",
+          "Smooth transitions (200-300ms) on hover/active",
+          "Parallax steam layers for depth illusion"
+        ]
+      },
+      "javascript_functionality": {
+        "game_state": "A single source of truth object: { seed, studentId, recipe: { style, noodleThickness, targetFirmness, altitude, potSize, waterTargetMl, cookTimeSec, addInsOrder }, pot: { waterMl, tempC, heatLevel, isBoiling, bubbleIntensity }, noodle: { state: 'dry|softening|springy|soft|mushy', doneness0to1 }, seasoning: { addedAtSec, type, isAdded }, actions: [], time: { elapsedSec, running }, scoring: { waterScore, heatScore, timingScore, seasoningScore, platingScore, total }, ui: { locked, phase } }.",
+        "interactions": [
+          {
+            "type": "drag-drop",
+            "element": "#ingredients .item -> #stage #potArea",
+            "handler": "handleDropIngredient(e) — Validates correct add-in and order, animates drop-in with splash, logs action.",
+            "validation": "Checks if current phase allows add-in; awards points only when noodle doneness is within allowed window and the add-in matches the ticket sequence."
+          },
+          {
+            "type": "drag-drop",
+            "element": "#controls #seasonPacket -> #stage #potArea",
+            "handler": "handleSeasoningDrop(e) — Dissolves packet; updates broth turbidity/color; logs timestamp; locks further seasoning.",
+            "validation": "If style is 'soup', seasoning must be added after boil resumes and before 30% over target time; if 'dry', seasoning after straining with residual water present. Visual cues must match (bubbles + broth opacity)."
+          },
+          {
+            "type": "drag-drop",
+            "element": "#controls #waterPitcher",
+            "handler": "startPour(e), updatePour(delta), stopPour(e) — Press/drag to pour along an arc; increases pot water level with splash particles.",
+            "validation": "Target within ±10% of required ml; overfill triggers boil-over risk and score penalty; underfill affects doneness curve."
+          },
+          {
+            "type": "click",
+            "element": "#controls #strainerBtn",
+            "handler": "toggleStrain() — If style is 'dry', drains water via animated stream; if 'soup', disallowed until seasoning dissolves.",
+            "validation": "For 'dry' style, strain only when noodles reached doneness window; early/late strain affects texture score."
+          },
+          {
+            "type": "drag-drop",
+            "element": "#controls #heatKnob",
+            "handler": "rotateHeat(e) — Rotational drag maps to heatLevel 0-10; updates pot temp curve, bubbleIntensity, and steam.",
+            "validation": "Maintains simmer band (bubbleIntensity medium) during cookTimeSec; deviations reduce heatScore; spikes cause boil-over warnings."
+          },
+          {
+            "type": "keyboard",
+            "element": "document",
+            "handler": "onKey(e) — ArrowUp/Down adjusts heat ±1; Space toggles timer; S strains if allowed.",
+            "validation": "Same as knob; keyboard actions are logged and scored identically."
+          },
+          {
+            "type": "click|drag",
+            "element": "#stage #potArea",
+            "handler": "stirMotion(e) — Detects circular gesture; prevents clumping, improves uniform cook; shows swirl animation.",
+            "validation": "Requires at least N consistent clockwise swirls during the first 40% of cook time to maximize timingScore."
+          }
+        ],
+        "randomization": "Seeded RNG via mulberry32(seedFrom(studentId || time)) to generate unique ticket: noodleThickness (thin/standard/thick), style (soup/dry), altitude (0-2000m adjusts boiling point), potSize (small/medium), waterTargetMl, cookTimeSec, seasoning salinity factor, addInsOrder (subset of 6). Also randomizes initial knob angle, pitcher starting fill, and subtle hue shift to prevent visual copying.",
+        "feedback_system": "Real-time: color-coded ring around pot (green = optimal simmer), bubble intensity linked to heat, steam density increases with heat, broth turbidity increases after seasoning. Audio: soft tick per second, gentle chime on correct action, muted buzzer on violation. Tooltips and micro-toasts guide next steps. End-of-round modal shows visual diff vs. target states.",
+        "scoring": "Scores computed at finish: waterScore (25): deviation from target ml; heatScore (20): time within simmer band; timingScore (25): noodle doneness at finish relative to targetFirmness; seasoningScore (20): timing vs style rules and visual state; platingScore (10): correct add-ins and order. Total = sum; stars and badge tiers display with animated progress."
+      },
+      "anti_cheating_measures": [
+        "Stateful, time-bound visual interactions (heat modulation, pour arcs, stirring gestures) required to reach the correct noodle visual state—cannot be answered with a static screenshot.",
+        "Seeded per-student randomization of recipe parameters, visuals (hue shifts), and add-in order produces unique outcomes.",
+        "Ephemeral visual cues (bubble intensity, steam density, noodle coil shape) drive correctness; they change continuously with player input.",
+        "Input path logging (gesture vectors, knob rotation timeline, pour rate curve) must align with acceptable ranges; replay verified on submission.",
+        "Timed phases (boil-up, cook window, seasoning window, strain window) invalidate answers if skipped or rushed.",
+        "UI control random offset (position jitter within bounds) and packet icon variants make exact screenshot replication non-transferable.",
+        "Server-side seed echo and checksum on action log (if connected) to detect spoofing or pasted sequences."
+      ],
+      "components": [
+        {
+          "name": "StageCanvas",
+          "type": "visual",
+          "description": "SVG/canvas rendering of pot, bubbles, steam, noodle coils, and broth color/turbidity.",
+          "implementation": "HTML: <svg id='stageCanvas'></svg>. CSS: #stageCanvas { width:100%; height:100%; filter:url(#steamBlur); } JS: drawPot(), drawBubbles(intensity), drawSteam(level), drawNoodles(doneness), drawBroth(opacityHue); update at 60fps via requestAnimationFrame tied to state."
+        },
+        {
+          "name": "Pot & Stove",
+          "type": "interactive",
+          "description": "Clickable/drag-responsive pot area with heat indicator ring and boil-over guard.",
+          "implementation": "HTML: <div id='potArea'><div id='heatRing'></div></div>. CSS: radial-gradient ring, inner-shadows. JS: heatRing color maps to heatLevel and bubbleIntensity; boil-over triggers errorShake and red glow."
+        },
+        {
+          "name": "Heat Knob",
+          "type": "interactive",
+          "description": "Rotary control to set heat 0-10 with tactile rotation animation.",
+          "implementation": "HTML: <div id='heatKnob' aria-label='Heat control'></div>. CSS: circular knob with shadow, active state. JS: pointerdown->track rotation; set heatLevel; animate knobTurn; keyboard support via onKey()."
+        },
+        {
+          "name": "Water Pitcher",
+          "type": "interactive",
+          "description": "Press/drag to pour water into pot; shows pour path and water level.",
+          "implementation": "HTML: <div id='waterPitcher'><input type='range' id='pourControl' min='0' max='100'></div>. CSS: pitcher icon with animated spout particles. JS: startPour(), updatePour() increases pot.waterMl; render pourWater particles."
+        },
+        {
+          "name": "Seasoning Packet",
+          "type": "interactive",
+          "description": "Draggable packet that dissolves into broth with visual color/turbidity change.",
+          "implementation": "HTML: <div id='seasonPacket' draggable='true'></div>. CSS: packet with accent color and hoverLift. JS: dragstart/dragend; on drop -> sprinkleSeason animation; update seasoning.isAdded and broth properties."
+        },
+        {
+          "name": "Strainer Button",
+          "type": "interactive",
+          "description": "One-tap action to drain water with animated stream; required for 'dry' style.",
+          "implementation": "HTML: <button id='strainerBtn'>Strain</button>. CSS: glowing border state when available. JS: toggleStrain() animates water stream SVG mask and reduces pot.waterMl to residual."
+        },
+        {
+          "name": "Order Card",
+          "type": "container",
+          "description": "Displays randomized ticket: noodle thickness, style, target firmness, water target, cook time, add-ins order.",
+          "implementation": "HTML: <section id='orderCard'></section>. CSS: glass panel with iconography and cardSlideIn. JS: renderOrderCard(recipe) with icons and minimal text; includes pictograms for steps."
+        },
+        {
+          "name": "Timeline & Doneness Meter",
+          "type": "visual",
+          "description": "Bottom progress bar with a moving indicator; circular doneness ring around pot.",
+          "implementation": "HTML: <div id='timeline'><div id='progress'></div></div>. CSS: gradient progress with tickFlash each second. JS: updateProgress(elapsedSec/cookTimeSec); doneness ring turns green within target window."
+        },
+        {
+          "name": "Score Modal",
+          "type": "container",
+          "description": "End-of-round summary, replay scrubber, and challenge question input.",
+          "implementation": "HTML: <div id='scoreModal' hidden><div id='summary'></div><div id='challenge'></div><input id='challengeInput'></div>. CSS: modal with successGlow on good score. JS: openModal(scores), renderReplay(actions), postChallenge() for validation."
+        }
+      ]
+    },
+    "gameplay_flow": {
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Receive a unique Order Card with icons for style, noodle thickness, target firmness, water amount, cook time, and add-in order.",
+          "user_action": "Scan the pictograms to understand requirements.",
+          "visual_feedback": "Card slides in with icon highlights; HUD flashes key targets (ml, seconds)."
+        },
+        {
+          "step_number": 2,
+          "description": "Fill the pot.",
+          "user_action": "Press/drag the Water Pitcher to pour to the target volume.",
+          "visual_feedback": "Rising water level, splash particles, water ml display glows green when within ±10%."
+        },
+        {
+          "step_number": 3,
+          "description": "Bring to a boil and stabilize.",
+          "user_action": "Rotate the Heat Knob (or use Arrow keys) to reach a steady simmer.",
+          "visual_feedback": "Bubble intensity ramps up; heat ring turns green in the simmer band; steam layers increase."
+        },
+        {
+          "step_number": 4,
+          "description": "Cook noodles to target firmness.",
+          "user_action": "Drop noodles (auto at start) and stir in circular motions during the early phase.",
+          "visual_feedback": "Noodle coils loosen and color warms; doneness ring fills; swirl trails appear when stirring correctly."
+        },
+        {
+          "step_number": 5,
+          "description": "Season correctly based on style.",
+          "user_action": "Drag the seasoning packet into the pot at the correct visual moment.",
+          "visual_feedback": "Seasoning dissolves with a confetti-like effect; broth turns more opaque; ring flashes green if timed well."
+        },
+        {
+          "step_number": 6,
+          "description": "Strain if dry style.",
+          "user_action": "Tap the Strainer Button when noodles reach the target doneness window.",
+          "visual_feedback": "Animated water stream drains; residual sheen remains if correct; errorShake if strained at wrong time."
+        },
+        {
+          "step_number": 7,
+          "description": "Add toppings in the required order.",
+          "user_action": "Drag add-ins from the tray to the pot/bowl following the order icons.",
+          "visual_feedback": "Each correct add-in lands with a soft chime and checkmark; incorrect order shows a brief red pulse."
+        },
+        {
+          "step_number": 8,
+          "description": "Plate and submit.",
+          "user_action": "Press Submit to see the score, replay, and answer the challenge question.",
+          "visual_feedback": "Score modal with animated bars for each rubric, side-by-side visual diff vs. target, and a scrubber replay of your actions."
+        }
+      ],
+      "challenge_question": "Based on your bowl’s visuals at submission (bubble intensity, noodle coil looseness, and broth turbidity), identify the earliest correct moment to add seasoning for YOUR ticket style and explain why adding earlier or later would reduce quality. Provide: the timestamp (±3 s), the visible cues you relied on, and the consequence of mistiming.",
+      "answer_validation": {
+        "correct_criteria": "Timestamp is within the allowed seasoning window derived from the run (soup: after boil returns post-noodle submersion and before noodle doneness exceeds target by 30%; dry: within 10 s after straining with residual water present). The explanation references at least two correct visual cues (e.g., medium bubble band, noodle coil partially relaxed, broth clarity pre/post). The consequence reasoning matches style (soup: muted flavor if too early or salty broth if too late; dry: uneven coating if too early, clumping if too late).",
+        "partial_credit": "Award 50-80% if timestamp is within extended window (±6 s) or if only one correct cue is cited but the consequence is accurate. Minimal credit (20-40%) for correct timestamp without valid reasoning or valid reasoning with off-window timestamp.",
+        "feedback_messages": [
+          "Perfect timing and reasoning—your visual read of simmer and coil softness was spot on!",
+          "Close! Your timing was nearly correct; mention both bubble intensity and noodle coil state for full credit.",
+          "Not quite—your timestamp missed the seasoning window. Rewatch the replay and look for simmer returning before seasoning.",
+          "Good reasoning about consequences, but you missed a key visual cue. Identify both bubble level and broth change."
+        ]
+      }
+    },
+    "difficulty_level": "beginner",
+    "estimated_time": "10-15 minutes"
+  },
+  "html_size": 68771
+}

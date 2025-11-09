@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Explorer: The Enchanted Forest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .game-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .map-container, .list-operation-panel, .feedback-section {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #ddd;
+            min-width: 300px;
+        }
+        .map-container {
+            border-color: #CDDC39;
+        }
+        .list-operation-panel {
+            border-color: #8BC34A;
+        }
+        .feedback-section {
+            border-color: #4CAF50;
+        }
+        .visualization {
+            min-height: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            border: 2px dashed #ddd;
+            position: relative;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌲 List Explorer: The Enchanted Forest</h1>
+        <p class="subtitle">Navigate through the mystical forest by mastering list operations</p>
+
+        <div class="game-area">
+            <div class="map-container">
+                <h2>Forest Map</h2>
+                <div class="visualization" id="forestMap"></div>
+            </div>
+
+            <div class="list-operation-panel">
+                <h2>List Operations</h2>
+                <div class="controls">
+                    <button onclick="addNode()">Add Node</button>
+                    <button onclick="removeNode()">Remove Node</button>
+                    <button onclick="shuffleNodes()">Shuffle Nodes</button>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <h2>Feedback</h2>
+                <div id="feedback"></div>
+            </div>
+        </div>
+
+        <div class="challenge">
+            <h3>🎯 Challenge: How does rearranging elements in a list affect the traversal path in the forest?</h3>
+        </div>
+    </div>
+
+    <script>
+        const forestPaths = [];
+        let currentPath = [];
+        const feedbackElement = document.getElementById('feedback');
+
+        function addNode() {
+            const newNode = Math.floor(Math.random() * 100);
+            currentPath.push(newNode);
+            renderMap();
+            provideFeedback('Node added: ' + newNode);
+        }
+
+        function removeNode() {
+            if (currentPath.length > 0) {
+                const removedNode = currentPath.pop();
+                renderMap();
+                provideFeedback('Node removed: ' + removedNode);
+            } else {
+                provideFeedback('No nodes to remove');
+            }
+        }
+
+        function shuffleNodes() {
+            currentPath.sort(() => Math.random() - 0.5);
+            renderMap();
+            provideFeedback('Nodes shuffled');
+        }
+
+        function renderMap() {
+            const mapElement = document.getElementById('forestMap');
+            mapElement.innerHTML = '';
+            currentPath.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'block';
+                nodeElement.textContent = node;
+                mapElement.appendChild(nodeElement);
+            });
+        }
+
+        function provideFeedback(message) {
+            feedbackElement.textContent = message;
+        }
+    </script>
+</body>
+</html>

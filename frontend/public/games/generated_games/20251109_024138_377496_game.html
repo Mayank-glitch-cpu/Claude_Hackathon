@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Chronicles: The Strategy Showdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #0D47A1 0%, #4CAF50 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #0D47A1;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .game-arena {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #ddd;
+            position: relative;
+            min-height: 400px;
+        }
+
+        .instructions-sidebar {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #FFC107;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .footer-navigation {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-navigation button {
+            background: linear-gradient(135deg, #0D47A1, #4CAF50);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .footer-navigation button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .fielder-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #FFC107;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .fielder-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .strategy-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .strategy-buttons button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .strategy-buttons button:hover {
+            background: #388E3C;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            .instructions-sidebar {
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cricket Chronicles: The Strategy Showdown</h1>
+        <p class="subtitle">Lead Arjun's team to victory by mastering cricket strategies!</p>
+
+        <div class="game-area">
+            <div class="game-arena" id="gameArena">
+                <!-- Fielder icons will be dynamically placed here -->
+            </div>
+            <div class="instructions-sidebar">
+                <h2>Instructions</h2>
+                <p>Drag and drop the fielders to strategic positions on the field to counter the batting style.</p>
+                <div class="strategy-buttons">
+                    <button onclick="selectStrategy('aggressive')">Aggressive</button>
+                    <button onclick="selectStrategy('defensive')">Defensive</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-navigation">
+            <button onclick="confirmStrategy()">Confirm Strategy</button>
+        </div>
+    </div>
+
+    <script>
+        const fielderPositions = [];
+        const strategies = {
+            aggressive: [],
+            defensive: []
+        };
+
+        function placeFielder(event) {
+            const fielder = event.target;
+            fielder.style.left = `${event.clientX - 20}px`;
+            fielder.style.top = `${event.clientY - 20}px`;
+            fielderPositions.push({ x: event.clientX, y: event.clientY });
+        }
+
+        function selectStrategy(type) {
+            // Logic to handle strategy selection
+            console.log(`Strategy selected: ${type}`);
+        }
+
+        function confirmStrategy() {
+            // Logic to confirm and validate strategy
+            console.log('Strategy confirmed');
+        }
+
+        function initGame() {
+            const gameArena = document.getElementById('gameArena');
+            for (let i = 0; i < 11; i++) {
+                const fielder = document.createElement('div');
+                fielder.className = 'fielder-icon';
+                fielder.style.left = `${Math.random() * 300}px`;
+                fielder.style.top = `${Math.random() * 300}px`;
+                fielder.draggable = true;
+                fielder.ondragend = placeFielder;
+                gameArena.appendChild(fielder);
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>

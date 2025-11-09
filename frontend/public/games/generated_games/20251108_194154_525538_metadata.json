@@ -1,0 +1,40 @@
+{
+  "request_id": "20251108_194154_525538",
+  "timestamp": "2025-11-08T19:43:17.984834",
+  "concept": "lstm",
+  "subject": "Computer Science",
+  "story_script": {
+    "title": "River of Time: The LSTM Gatekeeper",
+    "background": "You are the keeper of a time-traveling canal whose locks decide what memories flow downstream. Each boat carries a signal from the past, and your job is to tune the locks so the right memories reach the lighthouse at the delta. Mastering the canal’s gates is the only way to guide ships safely through storms of noise and distractions.",
+    "learning_goal": "Students will be able to explain and manipulate how LSTM input, forget, and output gates control the cell state and hidden state over time, predict the effects of different gate values on long-range dependencies, and justify outcomes using the LSTM update logic.",
+    "visual_elements": [
+      "Lock Canal Timeline: A horizontal row of 6–10 lock chambers (time steps) with animated boats (inputs) entering from the left; each chamber shows the cell state as a water column whose height and hue (blue for positive, red for negative) represent C_t.",
+      "Gate Wheels: Three circular sliders per chamber labeled i (input), f (forget), and o (output); arcs fill from 0 to 1 with color (i=green, f=purple, o=gold) and tooltips show the current numeric value on drag.",
+      "Signal Boats: Boats carry tokens (numbers or words) with color-coded importance; special trigger boats are yellow stars, noise is gray, positive signals are blue, negative signals are red; hovering reveals x_t value.",
+      "Hidden State Beacons: Small lamps above each chamber show h_t as brightness and tint; a lighthouse at the far right displays the final prediction intensity.",
+      "Gradient Trace Overlay: A thin line graph above the canal that updates live to show the cumulative product of forget gates from any past step to the current step, visualizing memory decay or persistence."
+    ],
+    "interactions": [
+      {
+        "type": "drag-drop",
+        "label": "Gate Valve Handles",
+        "action": "Drag each chamber’s i/f/o circular sliders to set values in [0,1]. On release, the simulation animates C_t and h_t updates for that and subsequent steps (C_t = f_t*C_{t-1} + i_t*g_t, h_t = o_t*tanh(C_t)). Boats pass through visibly faster/slower based on gate values, teaching how each gate modulates writing, keeping, and revealing information."
+      },
+      {
+        "type": "click",
+        "label": "Step/Auto-Play/Randomize",
+        "action": "Click any chamber to ‘Peek Inside’ and step the simulation one time step with slow-motion overlays that label contributions f_t*C_{t-1} and i_t*g_t. Click Auto-Play to flow through all steps. Click New River to generate a slightly randomized sequence (length 6–10, trigger position, noise, and x_t values seeded by student ID), making screenshots insufficient to solve future runs."
+      },
+      {
+        "type": "input",
+        "label": "Final Prediction and Gate Justification",
+        "action": "Enter a numeric prediction for the final lighthouse value in [-1,1] to two decimals and a short justification referencing at least two gates (e.g., ‘high f at t=3 retains the trigger, low i at t=4 blocks noise’). The system checks numeric tolerance (±0.1 for full credit, ±0.25 for partial) and scans the text for correct gate-function pairs, awarding partial credit for qualitative but accurate reasoning."
+      }
+    ],
+    "challenge_question": "In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.",
+    "answer_validation": "Full credit requires: (1) stating that the trigger’s contribution scales by the product of the post-trigger forget gates, i.e., multiplies by Π_{k=t*+1..T} f_k, and thus would become approximately 0.40^(T−t*) under the hypothetical; (2) linking this to the recurrence C_t = f_t*C_{t-1} + i_t*g_t (additive carry with multiplicative keep), and (3) noting that the final hidden state depends on h_T = o_T*tanh(C_T), so diminished C_T reduces |h_T| if o_T is unchanged. Partial credit options: +2 if they correctly say ‘exponential decay’ or ‘product of forget gates’ without quantifying; +1 if they correctly connect reduced C_T to a weaker h_T via o_T*tanh(C_T) but omit the product logic; 0 if they confuse gate roles (e.g., claim input gate controls decay) or describe GRU/vanilla RNN mechanisms instead.",
+    "difficulty_level": "intermediate",
+    "estimated_time": "20"
+  },
+  "html_size": 9044
+}

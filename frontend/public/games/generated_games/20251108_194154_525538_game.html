@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>River of Time: The LSTM Gatekeeper</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .game-area {
+            min-height: 400px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .challenge {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 3px solid #667eea;
+        }
+        .challenge h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>River of Time: The LSTM Gatekeeper</h1>
+        <p class="subtitle">Interactive Learning Game</p>
+        <div class="info-box">
+            <strong>📚 Learning Goal:</strong> Students will be able to explain and manipulate how LSTM input, forget, and output gates control the cell state and hidden state over time, predict the effects of different gate values on long-range dependencies, and justify outcomes using the LSTM update logic.
+        </div>
+        <div class="game-area">
+            <p>You are the keeper of a time-traveling canal whose locks decide what memories flow downstream. Each boat carries a signal from the past, and your job is to tune the locks so the right memories reach the lighthouse at the delta. Mastering the canal’s gates is the only way to guide ships safely through storms of noise and distractions.</p>
+            
+        </div>
+        <div class="challenge">
+            <h3>🎯 Challenge</h3>
+            <p>In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.</p>
+        </div>
+    </div>
+    <script>
+        function handleAction(action) {
+            alert('Game interaction: ' + action);
+        }
+    </script>
+
+    <script>
+        // Inject LLM-generated story content after page loads
+        (function() {
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', injectStoryContent);
+            } else {
+                injectStoryContent();
+            }
+            
+            function injectStoryContent() {
+                // Update learning goal using the span with ID
+                const learningGoalSpan = document.getElementById('learning-goal-text');
+                if (learningGoalSpan && 'Students will be able to explain and manipulate how LSTM input, forget, and output gates control the cell state and hidden state over time, predict the effects of different gate values on long-range dependencies, and justify outcomes using the LSTM update logic.') {
+                    learningGoalSpan.textContent = 'Students will be able to explain and manipulate how LSTM input, forget, and output gates control the cell state and hidden state over time, predict the effects of different gate values on long-range dependencies, and justify outcomes using the LSTM update logic.';
+                }
+                
+                // Update challenge question using the paragraph with ID
+                const challengeQuestionP = document.getElementById('challenge-question-text');
+                if (challengeQuestionP && 'In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.') {
+                    challengeQuestionP.innerHTML = 'In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.';
+                }
+                
+                // Also update challenge question in BFS template
+                const challengeQuestionSpan = document.querySelector('#challenge-question-text');
+                if (challengeQuestionSpan && 'In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.') {
+                    challengeQuestionSpan.innerHTML = 'In your current run, identify the time step t* where a yellow star (trigger) entered. If all forget gates after t* were set to 0.40 while your input and output gates stayed the same, how would the trigger’s contribution to the final cell state scale relative to your current configuration with forget values f_{t*+1..T}? Explain using the LSTM cell-state recurrence and how this affects the final hidden state.';
+                }
+                
+                // Update subtitle if it exists and seems generic
+                const subtitle = document.querySelector('.subtitle');
+                if (subtitle && 'You are the keeper of a time-traveling canal whose locks decide what memories flow downstream. Each boat carries a signal from the past, and your job is to tune the locks so the right memories reach the lighthouse at the delta. Mastering the canal’s gates is the only way to guide ships safely through storms of noise and distractions.') {
+                    const currentSubtitle = subtitle.textContent || '';
+                    if (currentSubtitle.includes('Master') || currentSubtitle.includes('interactive') || currentSubtitle.length < 50) {
+                        subtitle.textContent = 'You are the keeper of a time-traveling canal whose locks decide what memories flow downstream. Each boat carries a signal from the past, and your job is to tune the locks so the right memories reach the lighthouse at the delta. Mastering the canal’s gates is the only way to guide ships safely through storms of noise and distractions.';
+                    }
+                }
+                
+                // Update title if h1 exists
+                const h1Title = document.querySelector('h1');
+                if (h1Title && 'River of Time: The LSTM Gatekeeper') {
+                    // Only update if title seems generic
+                    const currentTitle = h1Title.textContent || '';
+                    if (currentTitle.includes('Arena') || currentTitle.includes('Game') || currentTitle.length < 20) {
+                        h1Title.textContent = 'River of Time: The LSTM Gatekeeper';
+                    }
+                }
+            }
+        })();
+    </script>
+    </body>
+</html>

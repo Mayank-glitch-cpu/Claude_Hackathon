@@ -1,0 +1,40 @@
+{
+  "request_id": "20251109_022416_295105",
+  "timestamp": "2025-11-09T02:26:13.049253",
+  "concept": "Stacks and Queues",
+  "subject": "Computer Science",
+  "story_script": {
+    "title": "Harbor of Order: The Stack & Queue Dockyard",
+    "background": "In a bustling seaside port, ships demand cargo in exact orders to keep global trade flowing. You’re the dockmaster, routing crates onto a towering Stack crane or a rolling Queue belt and dispatching them just in time. Master the flow rules to fulfill tricky manifests without jamming the harbor.",
+    "learning_goal": "Students will accurately predict and construct output sequences produced by stack (LIFO) and queue (FIFO) operations, choose the appropriate structure for a given ordering constraint, and compose mixed operations (routing + dispatch) to realize a target output from a fixed input stream.",
+    "visual_elements": [
+      "Dual conveyor rigs: a vertical Stack tower with visible top slot and a horizontal Queue belt with labeled head/tail; crates animate into place with CSS transforms.",
+      "Crates as colored tiles with unique icon + short ID (e.g., J3, K7) rendered as SVGs; hover reveals subtle glow to indicate top-of-stack or front-of-queue.",
+      "Incoming chute with countdown and a ghost preview of the next crate; a randomized seed displays in a small badge corner to ensure unique sets per session.",
+      "Dispatch dock timeline: empty slots fill left-to-right as crates are released; mismatches pulse red and corrects pulse green.",
+      "Peek lens button that temporarily highlights the stack top and queue front with an outline and subtle bounce, reinforcing LIFO/FIFO positions."
+    ],
+    "interactions": [
+      {
+        "type": "drag-drop",
+        "label": "Route Crane",
+        "action": "Drag each arriving crate from the incoming chute onto either the Stack tower or the Queue belt. On drop, the crate snaps into the top of the Stack (push) or the tail of the Queue (enqueue) with a short animation; the system logs the operation and updates the visible top/front indicators."
+      },
+      {
+        "type": "click",
+        "label": "Dispatch Controls",
+        "action": "Click the highlighted Stack top to pop or the Queue front to dequeue and send that crate to the dispatch timeline. This reinforces LIFO vs FIFO behavior by only allowing the legal removal point to be clickable; the Peek lens button can be clicked to momentarily highlight what is eligible to dispatch, teaching access constraints."
+      },
+      {
+        "type": "input",
+        "label": "Operations Script",
+        "action": "Type a sequence like 'route(B1->S), pop, route(M4->Q), route(T2->S), pop, pop, pop, deq' and press Validate. The engine simulates the script against the current randomized crate set, shows the resulting dispatch order, flags illegal steps (e.g., popping an empty stack), and compares to the target manifest to confirm understanding."
+      }
+    ],
+    "challenge_question": "Incoming crates arrive in order [J3, K7, B1, M4, T2]. You control one Stack S and one Queue Q. For each arriving crate, immediately choose S or Q to place it, and you may dispatch from S (pop) or Q (dequeue) at any time. Can you produce the outgoing order [B1, T2, K7, J3, M4]? If yes, enter a valid operation sequence using route(X->S/Q), pop, and deq. If no, explain which LIFO/FIFO constraint prevents it.",
+    "answer_validation": "Full credit: A legal operation sequence that, when simulated, yields the exact target order and obeys timing constraints (no dispatching items before their arrival, no popping/dequeuing from empty structures). Partial credit: (1) Correctly achieves the first two target outputs (40%) even if later items are out of order; (2) Uses only legal operations with a single mismatch in final order (30%); (3) A clear, structurally correct impossibility argument referencing the relative order forced by LIFO/FIFO (up to 50%) if the provided sequence is not correct. No credit for sequences that violate core rules (e.g., removing from the middle, reordering within a structure) or ignore arrival order. Equivalent sequences are accepted; validation is by deterministic simulation of the submitted script.",
+    "difficulty_level": "intermediate",
+    "estimated_time": "20"
+  },
+  "html_size": 21399
+}

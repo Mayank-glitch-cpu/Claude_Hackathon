@@ -1,0 +1,226 @@
+{
+  "request_id": "20251109_024521_140533",
+  "timestamp": "2025-11-09T03:03:00.932739",
+  "concept": "CIVIL WAR AMERICA MAP BASED",
+  "subject": "History",
+  "story_script": {
+    "story": {
+      "title": "Rivers, Rails & Blockades: The Anaconda Sim",
+      "narrative": "You are a wartime analyst in 1863 tasked with advising national leadership using a live operations map. Rail hubs thrum, rivers surge, and ports flicker with activity as resources flow across a divided nation. Your mission is to design and test a campaign plan that exploits geography—rivers, rails, ports, and terrain—to split forces and starve supply lines. Every action you take runs a short simulation, revealing how geography reshapes strategy and outcomes.",
+      "background": "Set in a war room overlooking a luminous, data-rich map of Civil War America, the interface blends historical cartography with modern analytics. Nodes represent industrial centers, ports, and key forts; edges represent rail lines, navigable rivers, and roads. You can deploy blockades, seize rail junctions, and push flotillas along the Mississippi to sever supply networks. Weather and control of border states vary between playthroughs, ensuring a unique tactical environment each time.",
+      "learning_goal": "Analyze how geography and infrastructure influenced Civil War strategy by severing Confederate supply connectivity and justifying chosen nodes; demonstrate understanding by achieving objective metrics (e.g., reducing Richmond’s supply inflow below threshold) and constructing a correct causal chain explaining outcomes.",
+      "challenge_description": "Given a randomized strategic objective (e.g., split the Confederacy at the Mississippi, isolate Richmond, or defend critical rail corridors), you must draw a naval blockade, deploy river control, and capture 2–3 pivotal rail hubs. Run the simulation to see supply flow animate along rivers and rails. Iterate to meet the mission criteria, then assemble a cause-and-effect argument by linking visual tiles that explain how your geographic actions produced the outcome."
+    },
+    "technical_plan": {
+      "html_structure": {
+        "layout": "A full-viewport CSS Grid: header (top), main (middle) with three columns, footer timeline (bottom). The center column hosts a layered map stage (SVG + Canvas) and a top toolbar; left is the mission and layer toggles panel; right is objectives, scoring, and feedback.",
+        "main_containers": [
+          "headerBar: Title, seed/mission code display, timer",
+          "leftPanel: Mission brief, layer toggles, legend, hint button",
+          "mapStage: Layered container with SVG base map, Canvas overlays (blockade paint, flow animation), and interactive markers",
+          "rightPanel: Objectives, score meter, run simulation button, causal chain builder, submit",
+          "footerTimeline: Simulation tick controls, playback, step indicators"
+        ],
+        "responsive_design": "On desktop, three-column layout with persistent panels. On tablet, left and right panels become collapsible drawers. On mobile, a single-column stack with swipeable panels; the mapStage remains full-width and at least 60vh with floating toolbar buttons."
+      },
+      "css_design": {
+        "color_scheme": "Primary: #0F2027; Secondary: #2C5364; Accent: #FFD166; Success: #06D6A0; Danger: #EF476F; Info: #118AB2; Neutral: #F5F7FA",
+        "typography": "Titles: 'Merriweather', serif, 700; Body/UI: 'Inter', sans-serif, 400/600. Base font-size 16px with responsive scaling to 18px on large screens.",
+        "animations": [
+          "slide-in-left",
+          "slide-in-right",
+          "fade-in",
+          "pulse-correct",
+          "shake-wrong",
+          "glow-path",
+          "water-flow",
+          "pin-drop",
+          "coastline-sweep"
+        ],
+        "visual_effects": [
+          "Glassmorphism panels with backdrop-filter: blur(12px) and rgba(255,255,255,0.12)",
+          "Gradient backgrounds (linear-gradient(135deg, #0F2027, #2C5364))",
+          "Soft drop-shadows (0 12px 24px rgba(0,0,0,0.25))",
+          "Smooth transitions (all 200ms ease, 400ms on hover states)",
+          "SVG stroke glow via filter: drop-shadow for selected paths",
+          "Canvas particle effects for supply flow and blockade shimmer"
+        ]
+      },
+      "javascript_functionality": {
+        "game_state": "A singleton state object stores seed, mapGraph (nodes, edges with type: rail|river|road|coast), control (Union/Confederate per node), weather (riverDepth, stormIndex), objectives, actions[], simulationTicks[], score, and ui flags. A seeded PRNG generates per-student variations.",
+        "interactions": [
+          {
+            "type": "drag-drop",
+            "element": "Draggable unit tokens (River Flotilla, Rail Seizure Teams)",
+            "handler": "handleUnitDrag(event): snaps tokens to valid nodes; on drop, updates control and triggers adjacency highlight",
+            "validation": "Checks if dropped node is capturable (not fortified beyond random threshold) and connected to a valid approach path"
+          },
+          {
+            "type": "click",
+            "element": "Map nodes (cities, forts, ports) and edges (rails/rivers) via SVG",
+            "handler": "handleMapClick(targetId): toggles selection, opens info tooltip, allows rapid capture/recapture simulation in planning mode",
+            "validation": "Verifies legal targeting and deducts limited action points"
+          },
+          {
+            "type": "input",
+            "element": "Blockade painter on Canvas (press and drag along coastline)",
+            "handler": "handlePaintBlockade(pathPoints): converts painted polyline to coastline coverage segments",
+            "validation": "Computes contiguous coverage percentage vs. randomized required coastline sectors; must meet coverage to reduce port inflow"
+          },
+          {
+            "type": "keyboard",
+            "element": "Global hotkeys (B=toggle blockade layer, R=toggle rails, V=toggle rivers, Space=run/pause sim, Arrow keys=step ticks)",
+            "handler": "handleHotkey(e): updates UI layers and simulation state",
+            "validation": "None content-wise; enforced use encourages visual reasoning pace and interaction"
+          },
+          {
+            "type": "drag-drop",
+            "element": "Causal chain tiles in the rightPanel (e.g., 'Control of Mississippi' -> 'Split Trans-Mississippi' -> 'Rail Re-routing' -> 'Richmond Inflow↓')",
+            "handler": "handleChainLink(startTile, endTile): draws SVG connector and updates chain graph",
+            "validation": "Validates chain against simulation metrics (e.g., disconnected components, inflow delta); must match causal logic for credit"
+          }
+        ],
+        "randomization": "initSeed(studentId || URLParam || device fingerprint) with mulberry32/xorshift to pick: weather profile (riverDepth high/low), border state control variations (KY/MO), initial fort strengths, which three 'critical nodes' are eligible (e.g., Vicksburg, Chattanooga, Atlanta, New Orleans, Richmond rail junction), port traffic weights, and objective type. Map rendering slightly rotates (±3°) and jitters node positions (±6px) to defeat screenshot-sharing.",
+        "feedback_system": "Immediate visual cues: correct actions pulse green, invalid shake red; supply flow animates as glowing particles along edges; blockade coverage shows shimmering coast overlay; tooltips summarize delta to objective. Subtle audio cues (chimes for progress, muted thud for invalid). Toasts and progress ring update real-time.",
+        "scoring": "Base score from objective completion (50%), efficiency (actions used vs. allowed, 20%), blockade coverage quality (contiguity and key port impact, 15%), causal chain correctness (15%). Score updates each tick; end-screen shows breakdown and time bonus."
+      },
+      "anti_cheating_measures": [
+        "Requiring continuous blockade painting with coverage thresholds rather than single clicks prevents static screenshot answering",
+        "Seeded per-student randomization alters weather, control of border states, critical nodes, and objective types",
+        "Dynamic, animated flow and rotating/jittered map positions make screenshot answers non-transferable",
+        "Causal chain construction tied to actual simulation metrics prevents memorized textual answers",
+        "Action-point budget and tick-based simulation require interactive planning, not copying",
+        "Hotkey-triggered overlays and layered evidence views necessitate exploration",
+        "Server-signed seed token and action log hashing (optional) to verify genuine interaction sequences",
+        "Time-gated steps (e.g., must run at least two simulations) to ensure engagement with visuals"
+      ],
+      "components": [
+        {
+          "name": "HeaderBar",
+          "type": "container",
+          "description": "Displays title, mission code, seed, and timer with progress ring",
+          "implementation": "HTML: <div id='headerBar'><h1>...</h1><div id='missionCode'></div><div id='timer'></div></div>; CSS: gradient text, glass panel; JS: startTimer(), renderMissionCode(seed)"
+        },
+        {
+          "name": "LeftPanel",
+          "type": "container",
+          "description": "Mission brief, layer toggles, legend, hints",
+          "implementation": "HTML: <aside id='leftPanel'>...</aside>; CSS: backdrop-filter blur; JS: toggleLayer('rails'|'rivers'|'coast'), showLegend()"
+        },
+        {
+          "name": "MapStage",
+          "type": "visual",
+          "description": "Layered map (SVG for nodes/edges; Canvas for painting and particle flow)",
+          "implementation": "HTML: <section id='mapStage'><svg id='baseMap'></svg><canvas id='paintLayer'></canvas><canvas id='flowLayer'></canvas></section>; JS: drawMapGraph(), drawParticles(), resizeCanvases()"
+        },
+        {
+          "name": "UnitTokens",
+          "type": "interactive",
+          "description": "Draggable flotillas and rail seizure teams",
+          "implementation": "HTML: <div class='token flotilla'></div>; CSS: glossy badges with shadows; JS: handleUnitDrag(), snapToNode()"
+        },
+        {
+          "name": "BlockadePainter",
+          "type": "interactive",
+          "description": "Press-drag along coastline to create contiguous naval blockade",
+          "implementation": "HTML: uses #paintLayer canvas; JS: handlePaintBlockade(points), computeCoverage(segments), renderShimmer()"
+        },
+        {
+          "name": "ObjectivePanel",
+          "type": "container",
+          "description": "Shows dynamic objectives and progress meters",
+          "implementation": "HTML: <div id='objectivePanel'><ul id='objList'></ul><div id='progressMeters'></div></div>; JS: renderObjectives(), updateMeters(delta)"
+        },
+        {
+          "name": "SimControls",
+          "type": "interactive",
+          "description": "Run/pause, step, and playback speed",
+          "implementation": "HTML: <div id='simControls'><button id='runBtn'>Run</button>...</div>; JS: runSimulation(), stepTick(), setSpeed(multiplier)"
+        },
+        {
+          "name": "CausalChainBuilder",
+          "type": "interactive",
+          "description": "Drag tiles and connect arrows to explain outcomes",
+          "implementation": "HTML: <div id='chainBoard'><div class='tile' data-id='riverControl'>...</div></div><svg id='chainLinks'></svg>; JS: handleChainLink(), validateChainGraph()"
+        },
+        {
+          "name": "ScorePanel",
+          "type": "visual",
+          "description": "Score breakdown and badges",
+          "implementation": "HTML: <div id='scorePanel'><div id='scoreTotal'></div><div id='badges'></div></div>; JS: computeScore(), animateScorePulse()"
+        },
+        {
+          "name": "ToastFeedback",
+          "type": "visual",
+          "description": "Transient messages for actions and errors",
+          "implementation": "HTML: <div id='toastContainer'></div>; JS: showToast(message, type)"
+        }
+      ]
+    },
+    "gameplay_flow": {
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Orientation: the mission brief and randomized objective are revealed.",
+          "user_action": "Read objective and toggle layers (rails/rivers/coast) to inspect geography.",
+          "visual_feedback": "Panels slide in; map nodes glow softly; objective meters initialize to 0%."
+        },
+        {
+          "step_number": 2,
+          "description": "Deploy a naval blockade along the Gulf/Atlantic coast.",
+          "user_action": "Click and drag along the coastline to paint a contiguous blockade.",
+          "visual_feedback": "A shimmering belt appears; key ports show reduced inflow with animated counters."
+        },
+        {
+          "step_number": 3,
+          "description": "Seize critical rail junctions or forts as designated by the mission.",
+          "user_action": "Drag rail seizure tokens to eligible nodes (e.g., Chattanooga, Atlanta).",
+          "visual_feedback": "Captured nodes pulse green; adjacent rails glow to reflect control change."
+        },
+        {
+          "step_number": 4,
+          "description": "Control a river segment to split the map.",
+          "user_action": "Drag a flotilla token onto the Mississippi and select a segment to patrol.",
+          "visual_feedback": "River segment glows blue; upstream/downstream flow recalculates and animates."
+        },
+        {
+          "step_number": 5,
+          "description": "Run the simulation to test your plan.",
+          "user_action": "Press Space or click Run; optionally step tick-by-tick.",
+          "visual_feedback": "Supply particles move; inflow to major cities updates; disconnections flash subtly."
+        },
+        {
+          "step_number": 6,
+          "description": "Iterate and refine until objective thresholds are met.",
+          "user_action": "Adjust blockade coverage, redeploy tokens, re-run simulation.",
+          "visual_feedback": "Progress meters climb with pulses; incorrect actions shake and revert."
+        },
+        {
+          "step_number": 7,
+          "description": "Construct the causal chain based on your simulation results.",
+          "user_action": "Drag and connect cause-effect tiles to form a valid explanation.",
+          "visual_feedback": "Linked tiles snap with glowing connectors; invalid links flash red and break."
+        },
+        {
+          "step_number": 8,
+          "description": "Submit your plan and explanation.",
+          "user_action": "Click Submit; confirm on the modal.",
+          "visual_feedback": "End screen displays scores, badges, and a replay timeline."
+        }
+      ],
+      "challenge_question": "Build a causal chain that explains how your specific actions (blockade coverage, river control, and captured rail hubs) produced the observed reduction in Confederate supply to your target city/region. Connect tiles to show a valid path from geographic control to logistical outcome (e.g., 'Mississippi Segment Secured' → 'Trans-Mississippi Disconnected' → 'Rail Re-routing Inefficient' → 'Richmond Inflow -35%').",
+      "answer_validation": {
+        "correct_criteria": "1) Objective metrics met: target supply inflow below threshold for at least 2 consecutive ticks, or network split at mandated river segment; 2) Causal chain graph includes required nodes relevant to the student's randomized objective and matches simulation events (e.g., an edge removal that created two disconnected components including target); 3) No contradictory links (e.g., claiming port inflow reduction without sufficient blockade coverage).",
+        "partial_credit": "Award partial credit for near-threshold outcomes (within 10% of inflow target), capturing 2 of 3 designated hubs, or causal chains missing one correct intermediate but still linking initial action to outcome.",
+        "feedback_messages": [
+          "Excellent: You severed the network and justified the outcome with a valid causal chain.",
+          "Almost there: Your inflow reduction is close—improve blockade contiguity or seize a higher-degree rail hub.",
+          "Not yet: Your plan did not reduce target inflow sufficiently; check river depth and choose a segment less affected by low water."
+        ]
+      }
+    },
+    "difficulty_level": "intermediate",
+    "estimated_time": "15 minutes"
+  },
+  "html_size": 72926
+}

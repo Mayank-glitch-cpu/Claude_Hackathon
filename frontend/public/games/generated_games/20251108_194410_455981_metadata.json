@@ -1,0 +1,40 @@
+{
+  "request_id": "20251108_194410_455981",
+  "timestamp": "2025-11-08T19:45:19.913711",
+  "concept": "Stacks",
+  "subject": "Computer Science",
+  "story_script": {
+    "title": "Skyport Stackkeepers: LIFO Liftoff",
+    "background": "You’re the cargo master at a floating skyport where airships can only load or unload from the top of a narrow lift shaft. Saboteurs randomize crate arrivals, and your crew must use precise push/pop operations to launch flights on time. Master the LIFO rule to route crates correctly and avoid overflow disasters.",
+    "learning_goal": "Students will accurately simulate and design stack operations (push/pop) under capacity limits, predict final stack state (top, contents, size), and determine feasibility of target output orders while identifying underflow/overflow conditions.",
+    "visual_elements": [
+      "Vertical lift shaft (HTML div column) with 4–8 slotted cells; the top slot has a glowing border and the current top item animates in/out.",
+      "Conveyor belt (CSS animated row) spawning randomized crates (unique color + icon + label) seeded per student via query param or user ID.",
+      "Operation tape (flex row of draggable cards) representing push(label) and pop actions; cards can be reordered before playback.",
+      "State dashboard (fixed panel) showing live size, capacity, top label preview, and underflow/overflow alert lights with subtle CSS pulse.",
+      "Timeline scrub bar (range input) that scrubs simulation frames and previews the stack at each step with ghosted crate positions."
+    ],
+    "interactions": [
+      {
+        "type": "drag-drop",
+        "label": "Crate to Push Gate",
+        "action": "Drag a conveyor crate onto the glowing Push Gate; on drop, the crate slides into the top slot if space remains, otherwise the gate flashes red (overflow) and the crate bounces back. Each crate’s icon is revealed only on hover to deter screenshots and encourage direct interaction."
+      },
+      {
+        "type": "click",
+        "label": "Pop Lever and Step Controls",
+        "action": "Click Pop to remove only the top crate and send it to the dispatch chute while logging a pop card on the operation tape. Step Forward/Back buttons advance or rewind one operation, showing that only the top changes and reinforcing LIFO accessibility."
+      },
+      {
+        "type": "input",
+        "label": "Predict Final State Fields",
+        "action": "Before playback, enter: (1) predicted top label, (2) full stack order top→bottom as comma-separated labels, and (3) error status (none/underflow/overflow). On Play, the system simulates the tape and compares each field, highlighting mismatches and awarding partial credit per correctly predicted component."
+      }
+    ],
+    "challenge_question": "With capacity 3 and incoming stream A, B, C, D (in that fixed order), can the outgoing order C, D, B, A be produced using a single stack? If yes, provide a valid minimal push/pop sequence; if no, explain precisely where capacity or LIFO prevents it.",
+    "answer_validation": "Correct if a simulated sequence produces the target outflow without exceeding size 3 at any time. One valid minimal sequence is: push A, push B, push C, pop, push D, pop, pop, pop. Validation criteria: (1) Feasibility judgment (correct yes/no), (2) No underflow and max size ≤ 3, (3) Output sequence matches exactly, (4) Final stack state is empty. Partial credit: +40% for correct feasibility, +20% for respecting capacity at all steps, +20% if the first two outputs (C, D) are correctly produced in order, +20% if final state (empty and top undefined) is correct even if the middle is imperfect.",
+    "difficulty_level": "intermediate",
+    "estimated_time": "15"
+  },
+  "html_size": 20691
+}

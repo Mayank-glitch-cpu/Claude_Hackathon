@@ -1,0 +1,222 @@
+{
+  "request_id": "20251109_033150_285098",
+  "timestamp": "2025-11-09T03:37:39.220204",
+  "concept": "alphago",
+  "subject": "Other",
+  "story_script": {
+    "story": {
+      "title": "Inside the Silver Mind: The AlphaGo Lab",
+      "narrative": "You are a trainee inside the AlphaGo Lab, an immersive simulator where policy heatmaps, value predictions, and search trees come alive as glowing, interactive holograms. Your mission is to guide the AI’s focus: tune exploration, expand promising moves, and watch the board breathe with shifting confidence. Each puzzle is a new, unique Go position—your decisions sculpt the search tree and ultimately determine which move the AI will play. Beat the lab by consistently predicting AlphaGo’s choice, not by memorizing answers, but by reading the visuals and steering the search.",
+      "background": "A neon-lit research chamber with glass panels and floating UI orbs. The 9x9 Go board sits center stage, surrounded by a shimmering policy heatmap. To the right, a branching MCTS tree glows with visit counts and average values; to the left, control dials for c_puct and rollout budget hum with light. Subtle particles drift across a deep indigo gradient, and every action you take ripples across the interface.",
+      "learning_goal": "Students will correctly apply AlphaGo’s core decision process—policy priors, value evaluation, and PUCT-guided MCTS—to select the predicted best move on three unique 9x9 positions, achieving at least 2 of 3 correct and one round with a visit distribution where N_best >= 1.5 * N_second.",
+      "challenge_description": "Across three rounds, you must drive an MCTS exploration that mirrors AlphaGo’s logic on a randomized 9x9 position. Use the policy heatmap to seed promising candidates, expand the tree via click-and-hold rollouts, tune c_puct to balance exploration vs exploitation, and watch visit counts and Q-values evolve. When the timer hits zero or you are confident, drag the glowing selection ring onto the board coordinate you believe AlphaGo would choose under the PUCT rule."
+    },
+    "technical_plan": {
+      "html_structure": {
+        "layout": "CSS Grid with three columns on desktop (left controls 20%, center board 60%, right analysis 20%) and a fixed bottom status bar. On tablets, two rows: top row board (full width), bottom row split controls and analysis in tabs. On mobile, stacked vertical with tabbed panels for controls and analysis.",
+        "main_containers": [
+          "app-root: wraps all UI, contains background gradient and particle canvas",
+          "top-bar: title, round indicator, seed hash badge",
+          "left-panel: c_puct slider, rollout budget selector, heatmap toggle, dirichlet noise toggle, hint meter",
+          "board-area: 9x9 Go board canvas/SVG with policy heatmap overlay and drag-select ring",
+          "tree-panel: scrollable MCTS tree visualization with nodes showing N, Q, P, U and edges",
+          "bottom-bar: timer, score, progress ring, submit button, feedback toast stack",
+          "modal-overlay: intro, tutorial, end-of-round summary, accessibility options"
+        ],
+        "responsive_design": "Breakpoint at 1200px switches to 2-row layout; 768px switches to stacked layout with horizontal tabs (Controls | Tree | Hints). Board scales fluidly using max-width and viewport units. Touch targets increase on mobile, tooltips convert to popovers, and animations reduce if prefers-reduced-motion is enabled."
+      },
+      "css_design": {
+        "color_scheme": "Primary #1B1F3B (deep indigo), Secondary #0A84FF (electric blue), Accent A #FF3D77 (magenta), Accent B #00E5A8 (teal), Heatmap low-to-high: #223355 -> #00B3FF -> #FFDD00 -> #FF3D00.",
+        "typography": "Headings: Inter, 700; Body: Inter, 400-500; Code/Stats: JetBrains Mono 500. Base font-size 16px desktop, 15px tablet, 14px mobile.",
+        "animations": [
+          "slide-in-left for panels",
+          "fade-up for tooltips and modals",
+          "pulse-on-correct for selected move highlight",
+          "shake-on-error for invalid actions",
+          "heatmap-bloom on policy updates",
+          "node-pop when new tree node is added",
+          "glow-trace along edges during rollouts",
+          "progress-spin for timers"
+        ],
+        "visual_effects": [
+          "glassmorphism cards with backdrop-filter blur(12px) and semi-transparent backgrounds",
+          "soft shadows (0 12px 30px rgba(0,0,0,0.25))",
+          "gradient strokes on buttons (linear-gradient 135deg #0A84FF -> #FF3D77)",
+          "hover lift transforms (translateY(-4px), scale(1.02)) with 180ms ease",
+          "neon focus rings for interactive elements",
+          "subtle background particle field with slow parallax",
+          "heatmap overlay with additive blend and smooth 250ms transitions"
+        ]
+      },
+      "javascript_functionality": {
+        "game_state": "Single global store (e.g., window.Game) with reactive properties: seed (string), rng (seeded PRNG), roundIndex (0..2), board (2D array of 9x9 with -1 empty, 0 black, 1 white), toPlay (0|1), komi, candidates (array of coordinates with P from policy), tree (nodes by id: {id, move, parent, children[], N, W, Q, P, U}), settings (c_puct, rolloutBudget, heatmapOn, dirichletOn), visitTimeline (array), interactionsLog (array), score, timer, submittedMove, requiredMinExpansions.",
+        "interactions": [
+          {
+            "type": "click",
+            "element": "tree-node elements in #tree-panel",
+            "handler": "handleNodeExpand(nodeId): expands child nodes using policy priors, updates N/W/Q/U; animates node-pop and glow-trace.",
+            "validation": "Checks legal children and updates U per PUCT and parent N; requires at least X expansions before submit."
+          },
+          {
+            "type": "drag-drop",
+            "element": "selection-ring over #board-area",
+            "handler": "handleMoveSelect(coord): snaps ring to valid intersections and previews P, Q, and N overlay on hover.",
+            "validation": "Ensures drop is on a legal, empty intersection and not self-capture (ko simplified off for assessment)."
+          },
+          {
+            "type": "input",
+            "element": "c_puct range slider in #left-panel",
+            "handler": "handleCPuctChange(value): recalculates U = c_puct * P * sqrt(N_parent) / (1+N_child), updates sort order and heatmap bloom.",
+            "validation": "Requires at least one re-calc applied before submit; logs parameter tuning for scoring."
+          },
+          {
+            "type": "click",
+            "element": "rollout button or long-press on board",
+            "handler": "handleRollout(targetCoord): simulates rollout(s) from selected node using fast value model; animates path and updates W/Q/N.",
+            "validation": "Debounces per 300ms; blocks if budget exhausted; ensures student actively drives value discovery."
+          },
+          {
+            "type": "keyboard",
+            "element": "document",
+            "handler": "handleKeyShortcuts(e): R rotates board 90 degrees; H toggles heatmap; Space runs 5 quick simulations on current best child.",
+            "validation": "Rotation remaps coordinates and requires visual re-orientation; ensures student engages, not screenshots."
+          },
+          {
+            "type": "click",
+            "element": "heatmap toggle and noise toggle",
+            "handler": "handleNoiseToggle(on): injects Dirichlet noise to root priors (alpha depends on board size), visibly perturbs early search.",
+            "validation": "Only allowed before first 10 expansions; logs usage to analyze exploration awareness."
+          }
+        ],
+        "randomization": "Deterministic per-student seeding: seed = SHA256(studentId + sessionId). RNG drives: initial 9x9 board templates from a curated pool, then random rotation/mirroring; toPlay and komi (5.5 or 6.5) randomized; policy priors sampled from template networks plus Dirichlet noise; hidden rollout outcomes sampled with seed for reproducibility; distractor visual themes vary subtly by seed.",
+        "feedback_system": "Real-time visuals: heatmap-bloom on strong priors; node-pop when expanding; edges glow-trace during rollouts; correct submission triggers green pulse and confetti arcs; incorrect triggers gentle shake and reveals a guided comparison overlay (N/Q/P side-by-side). Audio: soft chime on valid expansion, muted buzz on invalid, celebratory chime on correct. Toasts summarize parameter changes and their effects (e.g., 'Higher c_puct increased exploration to corners').",
+        "scoring": "Base 100 points per round for selecting the move with highest visit count N after your search. +20 bonus for meeting N_best >= 1.5 * N_second. +1 per efficient rollout up to 15 (expansions that increase Q of final choice), -1 for over-expansion beyond budget. +10 for appropriate c_puct tuning event (at least two adjustments affecting the ranking). Time bonus up to +10. Score persists in bottom bar and end-of-round summary."
+      },
+      "anti_cheating_measures": [
+        "Per-student seeded random boards with rotation/mirroring and noise; answers are unique.",
+        "Key information (N, Q, P, U) is hidden until the student expands nodes via interaction; screenshots without interaction are useless.",
+        "Board can auto-rotate every 30 seconds unless the student locks orientation via a keyboard action, preventing static screenshot recall.",
+        "Time-sliced heatmap pulses and evolving tree require active engagement; values decay from view without input (soft fade) requiring re-hover.",
+        "Dirichlet noise option and parameter tuning change the outcome path; static answer keys do not exist.",
+        "Submission requires minimum interaction proof: X expansions, at least one parameter adjustment, and a rollout event.",
+        "Server logs interaction paths with seed hash and timestamps; resubmissions reshuffle rotation and priors.",
+        "Touch-and-hold rollouts and drag-drop selection enforce fine-grained, device-specific interactions beyond copy-paste."
+      ],
+      "components": [
+        {
+          "name": "Board Canvas",
+          "type": "interactive",
+          "description": "9x9 Go board with stones, animated policy heatmap overlay, and selectable intersections.",
+          "implementation": "SVG grid with 81 circle hotspots; layered heatmap rects with opacity gradient; drag-ring element for selection; event listeners for hover, click, drag."
+        },
+        {
+          "name": "Policy Heatmap",
+          "type": "visual",
+          "description": "Color intensity visualization of policy priors across intersections.",
+          "implementation": "Canvas or SVG overlay mapping P to color ramp; transitions on updates; blend-mode screen for bloom effect."
+        },
+        {
+          "name": "MCTS Tree Viewer",
+          "type": "interactive",
+          "description": "Scrollable, zoomable tree of nodes with N/Q/P/U labels and expansion buttons.",
+          "implementation": "Flex or SVG tree with nodes as pill chips; expand icons; animated edges; click to focus and run rollouts."
+        },
+        {
+          "name": "Controls Panel",
+          "type": "interactive",
+          "description": "Sliders and toggles for c_puct, rollout budget, heatmap and noise.",
+          "implementation": "Range inputs styled with gradients; toggle switches; onchange triggers recalculation and re-render."
+        },
+        {
+          "name": "Rollout Button / Long-Press",
+          "type": "interactive",
+          "description": "Initiates simulated evaluations from a focused node.",
+          "implementation": "Button with loading ripple; long-press on board node triggers local rollout; debounced JS task updates tree stats."
+        },
+        {
+          "name": "Status and Score Bar",
+          "type": "visual",
+          "description": "Timer, progress ring, score tally, seed hash badge, submit button.",
+          "implementation": "Fixed bottom bar with circular progress SVG, numeric score, and gradient CTA submit button."
+        },
+        {
+          "name": "Feedback Toasts",
+          "type": "visual",
+          "description": "Non-blocking messages for actions, errors, and tips.",
+          "implementation": "Positioned stack with fade-up animation; auto-dismiss timers; semantic color accents."
+        },
+        {
+          "name": "Result Overlay",
+          "type": "visual",
+          "description": "Post-submit comparison of student-selected move vs AlphaGo’s predicted choice with N/Q/P bars.",
+          "implementation": "Modal with side-by-side bars, top-3 moves, and animated deltas; confetti on success."
+        },
+        {
+          "name": "Accessibility Panel",
+          "type": "container",
+          "description": "Settings like reduced motion, high contrast, larger grid spacing.",
+          "implementation": "Modal tied to top-bar; toggles adjust CSS variables and animation preferences."
+        }
+      ]
+    },
+    "gameplay_flow": {
+      "steps": [
+        {
+          "step_number": 1,
+          "description": "Intro modal shows a brief tutorial on policy heatmap, value estimates, and PUCT.",
+          "user_action": "Dismiss modal after reading; optionally toggle accessibility settings.",
+          "visual_feedback": "Panels slide in; faint board pulse indicates it's ready."
+        },
+        {
+          "step_number": 2,
+          "description": "Examine the randomized 9x9 board and the initial policy heatmap.",
+          "user_action": "Hover or tap intersections to see local P; press H to toggle heatmap on/off.",
+          "visual_feedback": "Heatmap blooms at high-prior points; tooltips show P and coordinate."
+        },
+        {
+          "step_number": 3,
+          "description": "Start constructing the MCTS by expanding nodes.",
+          "user_action": "Click nodes in the tree viewer or long-press a board intersection to expand and run rollouts.",
+          "visual_feedback": "New child nodes pop in; edges animate; N and Q labels increment smoothly."
+        },
+        {
+          "step_number": 4,
+          "description": "Tune exploration vs exploitation.",
+          "user_action": "Adjust the c_puct slider and optionally enable Dirichlet noise in early expansions.",
+          "visual_feedback": "Ranking of candidates updates; subtle reorder animation and heatmap shifts communicate change."
+        },
+        {
+          "step_number": 5,
+          "description": "Refine the search with limited rollout budget.",
+          "user_action": "Run targeted rollouts on top candidates using the Space key or rollout button until budget is near spent.",
+          "visual_feedback": "Progress ring advances; value hints appear as small colored bars next to candidates."
+        },
+        {
+          "step_number": 6,
+          "description": "Make the predictive selection.",
+          "user_action": "Drag the glowing selection ring onto the intersection you believe AlphaGo would choose.",
+          "visual_feedback": "Ring snaps to grid; selected intersection pulsing with a soft green or blue halo."
+        },
+        {
+          "step_number": 7,
+          "description": "Submit and review feedback.",
+          "user_action": "Press Submit before the timer ends; review the result overlay.",
+          "visual_feedback": "Confetti for correct; side-by-side N/Q/P comparisons; tips for improving exploration for the next round."
+        }
+      ],
+      "challenge_question": "Given the current randomized 9x9 position and your search progress, which move will AlphaGo select using PUCT? Expand the tree, tune c_puct, and then drag the selection ring to the intersection with the highest visit count after your search. Confirm your choice.",
+      "answer_validation": {
+        "correct_criteria": "Submission is correct if the selected coordinate matches the move with the highest visit count N in the student’s final tree state. The system requires at least X node expansions (e.g., 20), at least one c_puct adjustment, and at least one rollout event before allowing submission.",
+        "partial_credit": "Award 70% if the selected move is within the top-2 by N; 50% if within top-3 by N or if N_best/N_second < 1.2 (ambiguous search) but the student performed sufficient targeted rollouts; +10% bonus if the student’s tuning increases the Q of the final choice during the last 5 actions.",
+        "feedback_messages": [
+          "Excellent: Your search concentrated visits effectively; chosen move leads by a clear margin.",
+          "Good attempt: You were close—visits split between two strong candidates. Consider adjusting c_puct earlier.",
+          "Needs refinement: Your selection did not match the final visit leader. Expand promising priors and run focused rollouts next time."
+        ]
+      }
+    },
+    "difficulty_level": "intermediate",
+    "estimated_time": "15-20 minutes"
+  },
+  "html_size": 71941
+}

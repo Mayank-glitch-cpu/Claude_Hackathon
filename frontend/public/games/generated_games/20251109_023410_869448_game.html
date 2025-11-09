@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Quest: The Treasure Hunt</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #2E2E38 0%, #119DA4 100%);
+            color: #FFC857;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+        }
+        #instruction-panel, #game-board, #feedback-panel {
+            margin: 10px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+        }
+        #game-board {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .item {
+            background: #FFC857;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+        .item:hover {
+            transform: scale(1.1);
+        }
+        .correct {
+            animation: glow-on-correct 1s ease-in-out;
+        }
+        .incorrect {
+            animation: shake-on-error 0.5s ease-in-out;
+        }
+        @keyframes glow-on-correct {
+            0% { box-shadow: 0 0 5px #FFC857; }
+            100% { box-shadow: 0 0 20px #FFC857; }
+        }
+        @keyframes shake-on-error {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        button {
+            background: #119DA4;
+            color: #FFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0e7c89;
+        }
+        @media (max-width: 768px) {
+            #game-board {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>List Quest: The Treasure Hunt</h1>
+        <p>In the vibrant world of DataLand, young explorers embark on a quest to uncover treasures hidden in the vast data forests.</p>
+    </header>
+    <div id="instruction-panel">
+        <h2>Instructions</h2>
+        <p>Drag and drop the magical items into the correct order to unlock powerful spells. Click submit to check your sequence.</p>
+    </div>
+    <div id="game-board">
+        <!-- Magical items will be dynamically inserted here -->
+    </div>
+    <div id="feedback-panel">
+        <h2>Feedback</h2>
+        <p id="feedback-message">Arrange the items and submit your sequence.</p>
+    </div>
+    <button id="submit-btn">Submit Sequence</button>
+    <script>
+        const items = ['Gem', 'Potion', 'Scroll', 'Wand', 'Crystal'];
+        let currentSequence = [];
+        let correctSequence = [...items].sort();
+        const gameBoard = document.getElementById('game-board');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createItems() {
+            currentSequence = shuffle([...items]);
+            gameBoard.innerHTML = '';
+            currentSequence.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'item';
+                itemElement.draggable = true;
+                itemElement.textContent = item;
+                itemElement.addEventListener('dragstart', handleDragStart);
+                itemElement.addEventListener('dragover', handleDragOver);
+                itemElement.addEventListener('drop', handleDrop);
+                gameBoard.appendChild(itemElement);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedItem = e.dataTransfer.getData('text/plain');
+            const targetItem = e.target.textContent;
+            const draggedIndex = currentSequence.indexOf(draggedItem);
+            const targetIndex = currentSequence.indexOf(targetItem);
+            currentSequence[draggedIndex] = targetItem;
+            currentSequence[targetIndex] = draggedItem;
+            createItems();
+        }
+
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            if (JSON.stringify(currentSequence) === JSON.stringify(correctSequence)) {
+                feedbackMessage.textContent = "Correct sequence! The path is clear.";
+                feedbackMessage.className = 'correct';
+            } else {
+                feedbackMessage.textContent = "Incorrect placement, try again.";
+                feedbackMessage.className = 'incorrect';
+            }
+        });
+
+        createItems();
+    </script>
+</body>
+</html>

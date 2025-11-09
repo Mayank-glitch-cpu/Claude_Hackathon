@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Inside the Silver Mind: The AlphaGo Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --indigo:#1B1F3B;
+        --blue:#0A84FF;
+        --magenta:#FF3D77;
+        --teal:#00E5A8;
+        --heat0:#223355;
+        --heat1:#00B3FF;
+        --heat2:#FFDD00;
+        --heat3:#FF3D00;
+        --glass-bg: rgba(255,255,255,0.08);
+        --glass-border: rgba(255,255,255,0.22);
+        --text: #EAF1FF;
+        --muted: #B8C4FF;
+        --card:#0F1432cc;
+        --shadow: 0 20px 60px rgba(0,0,0,0.35);
+        --mono: 'JetBrains Mono', monospace;
+        --sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    *{margin:0; padding:0; box-sizing: border-box;}
+    html,body{height:100%}
+    body{
+        font-family: var(--sans);
+        color: var(--text);
+        background: radial-gradient(1200px 800px at 20% 10%, #263069, transparent), linear-gradient(135deg, #0e1230 0%, #0b0d24 60%, #040513 100%);
+        overflow-x:hidden;
+    }
+    #app-root{
+        min-height:100vh;
+        position:relative;
+        padding: 18px;
+    }
+    canvas#bg-particles{
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.32;
+    }
+    .container{
+        position: relative;
+        z-index: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+        border-radius: 20px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+    }
+
+    /* Top Bar */
+    .top-bar{
+        display:flex;
+        gap:16px;
+        align-items:center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: var(--card);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+    .title-wrap{
+        display:flex; align-items:center; gap:14px;
+    }
+    .app-title{
+        font-size:1.4rem;
+        font-weight:700;
+        letter-spacing:0.3px;
+        color:#dfe7ff;
+    }
+    .round-badge{
+        font-family: var(--mono);
+        font-size:0.85rem;
+        padding:6px 10px;
+        border-radius: 999px;
+        border:1px solid rgba(255,255,255,0.22);
+        background: linear-gradient(135deg, rgba(10,132,255,0.15), rgba(255,61,119,0.15));
+        color:#c9d7ff;
+    }
+    .seed-hash{
+        font-family: var(--mono);
+        font-size:0.78rem;
+        color:#9eb1ff;
+        padding:6px 10px;
+        border-radius:10px;
+        border:1px dashed rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.05);
+    }
+    .top-actions{
+        display:flex; align-items:center; gap:10px;
+    }
+    .btn{
+        position: relative;
+        display:inline-flex; align-items:center; justify-content:center;
+        gap:8px;
+        padding:10px 14px;
+        border:none; border-radius:12px;
+        color:white; cursor:pointer;
+        background: linear-gradient(135deg, #0A84FF, #FF3D77);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, opacity .2s ease;
+        box-shadow: 0 10px 25px rgba(10,132,255,0.35);
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow:0 14px 32px rgba(10,132,255,0.45) }
+    .btn:active{ transform: translateY(0); }
+    .btn.secondary{
+        background: linear-gradient(135deg, rgba(0,229,168,0.5), rgba(10,132,255,0.4));
+        box-shadow: 0 10px 25px rgba(0,229,168,0.25);
+    }
+    .btn.ghost{
+        background: rgba(255,255,255,0.08);
+        border:1px solid rgba(255,255,255,0.2);
+        box-shadow: none;
+    }
+    .hint-meter{
+        display:flex; align-items:center; gap:8px;
+        color:#a8b7ff;
+    }
+    .hint-bar{
+        width:120px; height:8px; background: rgba(255,255,255,0.1); border-radius:8px; overflow:hidden;
+        border:1px solid rgba(255,255,255,0.15);
+    }
+    .hint-fill{
+        height:100%; width:0%;
+        background: linear-gradient(90deg, #00E5A8, #0A84FF);
+        transition: width 0.35s ease;
+    }
+
+    /* Layout Grid */
+    .main-grid{
+        margin-top:16px;
+        display:grid;
+        grid-template-columns: 1fr 2.5fr 1fr;
+        gap:16px;
+    }
+    .panel{
+        background: var(--card);
+        border:1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+        overflow:hidden;
+        transform: translateZ(0);
+    }
+    .panel h3{
+        font-size:1.05rem;
+        color:#d7e1ff;
+        margin-bottom:12px;
+        letter-spacing: 0.3px;
+    }
+    .subtext{ color:#a7b4ff; font-size:0.9rem; margin-bottom:10px; }
+
+    /* Left Controls */
+    .control-group{ margin-bottom:14px; }
+    .control-label{ font-size:0.9rem; color:#c9d7ff; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
+    .control-label code{ font-family: var(--mono); font-size:0.86rem; color:#7fcbff;}
+    .range{
+        -webkit-appearance:none; width:100%; height:8px; border-radius:8px; outline:none; background: linear-gradient(90deg, rgba(10,132,255,0.35), rgba(255,61,119,0.35));
+    }
+    .range::-webkit-slider-thumb{
+        -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background: white; border:3px solid #0A84FF; box-shadow: 0 6px 18px rgba(10,132,255,0.45);
+        cursor:pointer; transition: transform .18s ease;
+    }
+    .range::-webkit-slider-thumb:hover{ transform: scale(1.1); }
+    .select{
+        width:100%; padding:10px; background: rgba(255,255,255,0.08); color:#e9f1ff; border:1px solid rgba(255,255,255,0.2); border-radius:10px;
+        outline:none;
+    }
+    .toggle{
+        position:relative; width:54px; height:28px; background: rgba(255,255,255,0.2); border-radius:999px; cursor:pointer; transition: background .2s ease;
+        border:1px solid rgba(255,255,255,0.25);
+    }
+    .toggle .knob{
+        position:absolute; top:3px; left:3px; width:22px; height:22px; background:white; border-radius:50%;
+        transition: left .2s ease, box-shadow .2s ease;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+    .toggle.on{ background: linear-gradient(90deg, #0A84FF, #00E5A8); }
+    .toggle.on .knob{ left:29px; }
+
+    .inline{
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+
+    /* Board Area */
+    .board-wrap{
+        position: relative;
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        border-radius:16px; border:1px solid var(--glass-border); overflow:hidden; padding:10px;
+    }
+    .board-header{
+        display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;
+    }
+    .board-title{ color:#e3eaff; font-weight:600; letter-spacing:0.4px; }
+    .board-stage{
+        position: relative;
+        width:100%; aspect-ratio: 1 / 1;
+        background: radial-gradient(500px 400px at 50% 0%, rgba(10,132,255,0.25), transparent), linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.05));
+        border-radius: 14px;
+        border:1px solid rgba(255,255,255,0.15);
+        overflow:hidden;
+        user-select:none;
+        touch-action: none;
+    }
+    .selection-ring{
+        position:absolute; width:38px; height:38px; border:2px solid #00E5A8; border-radius:50%;
+        box-shadow: 0 0 24px rgba(0,229,168,0.5), inset 0 0 12px rgba(0,229,168,0.45);
+        pointer-events: all; cursor: grab;
+        transition: transform .15s ease, opacity .2s ease;
+        z-index: 4;
+    }
+    .selection-ring.dragging{ cursor: grabbing; transform: scale(1.06); }
+    .heatmap{
+        position:absolute; inset:8px; pointer-events:none; mix-blend-mode: screen; z-index: 2;
+    }
+    .tooltip{
+        position:absolute; background: rgba(0,0,0,0.7); color:white; padding:6px 8px; border-radius:8px; font-size:12px; pointer-events:none;
+        opacity:0; transform: translateY(-6px); transition: all .15s ease;
+        z-index:5;
+    }
+    .tooltip.show{opacity:1; transform: translateY(0)}
+    .legend{
+        display:flex; align-items:center; gap:8px; color:#b9c7ff; font-size:0.85rem;
+    }
+    .legend .swatch{ width:16px; height:8px; border-radius:4px; background: linear-gradient(90deg, var(--heat0), var(--heat1), var(--heat2), var(--heat3)); border:1px solid rgba(255,255,255,0.25); }
+
+    /* Tree Panel */
+    .tree{
+        max-height: 560px;
+        overflow:auto;
+        padding-right:4px;
+    }
+    .tree::-webkit-scrollbar{ width:8px; }
+    .tree::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.18); border-radius:6px; }
+    .node{
+        background: rgba(255,255,255,0.06);
+        border:1px solid rgba(255,255,255,0.18);
+        padding:10px 10px;
+        border-radius:12px;
+        margin-bottom:10px;
+        transition: transform .18s ease, background .2s ease;
+    }
+    .node:hover{ transform: translateY(-2px); background: rgba(255,255,255,0.08); }
+    .node-header{
+        display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .pill{
+        font-family: var(--mono); font-size:0.78rem;
+        padding:4px 8px; border-radius:999px;
+        background: rgba(10,132,255,0.2); color:#cfe3ff; border:1px solid rgba(10,132,255,0.35);
+    }
+    .pill.teal{ background: rgba(0,229,168,0.18); color:#caffe8; border-color: rgba(0,229,168,0.45); }
+    .pill.mag{ background: rgba(255,61,119,0.2); color:#ffd1df; border-color: rgba(255,61,119,0.45); }
+    .node-stats{
+        display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; color:#bfcaff; font-family: var(--mono); font-size:0.78rem;
+    }
+    .edge-glow{
+        height:2px; background: linear-gradient(90deg, transparent, #0A84FF, transparent);
+        filter: drop-shadow(0 0 6px rgba(10,132,255,0.9));
+        opacity:0.7; margin:6px 0;
+        animation: glow-trace 2s linear infinite;
+    }
+
+    /* Bottom bar */
+    .bottom-bar{
+        position: sticky;
+        bottom: 0;
+        margin-top: 16px;
+        display:flex; align-items:center; justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--card);
+        border:1px solid var(--glass-border);
+        border-radius:14px;
+        box-shadow: var(--shadow);
+        z-index: 3;
+    }
+    .status{
+        display:flex; align-items:center; gap:16px;
+    }
+    .progress-ring{
+        width:48px; height:48px;
+    }
+    .score{
+        font-weight:700; font-size:1.1rem; color:#dfe6ff;
+    }
+    .toast-stack{
+        position: fixed; right: 24px; bottom: 90px; display:flex; flex-direction:column; gap:10px; z-index: 999;
+    }
+    .toast{
+        background: rgba(10,12,30,0.9);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: #e9f1ff;
+        padding: 10px 14px;
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        animation: fade-up .28s ease both;
+        font-size: 0.92rem;
+    }
+
+    /* Tabs for mobile/tablet panels */
+    .tabs{
+        display:none;
+        margin-top:10px;
+    }
+    .tab-buttons{
+        display:flex; gap:8px; margin-bottom:8px;
+    }
+    .tab-buttons button{
+        flex:1; padding:10px 8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); color:#e9f1ff; cursor:pointer; transition: all .2s ease;
+    }
+    .tab-buttons button.active{ background: linear-gradient(135deg, rgba(10,132,255,0.25), rgba(255,61,119,0.2)); }
+    .tab-content{ display:none; }
+    .tab-content.active{ display:block; }
+
+    /* Modals */
+    .modal-overlay{
+        position: fixed; inset:0; display:none; align-items:center; justify-content:center;
+        background: rgba(2,4,12,0.6);
+        z-index: 1000;
+    }
+    .modal{
+        width:min(860px, 92vw);
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+        border:1px solid var(--glass-border);
+        border-radius:16px; padding:18px;
+        box-shadow: var(--shadow);
+        animation: fade-up .28s ease both;
+    }
+    .modal h2{ color:#eaf1ff; margin-bottom:8px; }
+    .modal p{ color:#bdc9ff; line-height:1.55; margin-bottom:10px;}
+    .grid-2{
+        display:grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+    .input{
+        width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.06); color:#fff; outline:none;
+    }
+
+    /* Animations */
+    @keyframes fade-up{ from{ opacity:0; transform: translateY(8px) } to{ opacity:1; transform:translateY(0) } }
+    @keyframes slide-in-left{ from{ opacity:0; transform: translateX(-10px) } to{ opacity:1; transform: translateX(0) } }
+    @keyframes pulse-correct{ 0%{ box-shadow: 0 0 0 0 rgba(0,229,168,0.6)} 70%{ box-shadow: 0 0 0 18px rgba(0,229,168,0)} 100%{ box-shadow: 0 0 0 0 rgba(0,229,168,0)}}
+    @keyframes shake{ 10%, 90% { transform: translateX(-1px) } 20%, 80% { transform: translateX(2px) } 30%, 50%, 70% { transform: translateX(-4px) } 40%, 60% { transform: translateX(4px) } }
+    @keyframes heatmap-bloom{ from{ filter: saturate(0.7) brightness(0.9) } to{ filter: saturate(1.2) brightness(1.2) } }
+    @keyframes node-pop{ from{ transform: scale(0.9); opacity:0 } to{ transform: scale(1); opacity:1 } }
+    @keyframes glow-trace{ 0%{ background-position: -200px 0 } 100%{ background-position: 200px 0 } }
+    @keyframes progress-spin{ 0%{ transform: rotate(0) } 100%{ transform: rotate(360deg) } }
+
+    .pulse-on-correct{ animation: pulse-correct 1.2s ease; }
+    .shake-on-error{ animation: shake .4s ease; }
+    .heatmap-bloom{ animation: heatmap-bloom .25s ease; }
+    .node-pop{ animation: node-pop .18s ease; }
+
+    /* Adaptive */
+    @media (max-width: 1200px){
+        .main-grid{
+            grid-template-columns: 1fr;
+            grid-auto-rows: auto;
+        }
+        .tabs{ display:block; }
+        .left-panel, .tree-panel{ display:none; }
+    }
+    @media (max-width: 768px){
+        #app-root{ padding:12px; }
+        .app-title{ font-size:1.1rem; }
+        .seed-hash{ display:none; }
+    }
+
+    /* Accessibility preferences */
+    @media (prefers-reduced-motion: reduce){
+        *{ animation:none !important; transition:none !important }
+    }
+</style>
+</head>
+<body>
+<div id="app-root" aria-live="polite">
+    <canvas id="bg-particles"></canvas>
+    <div class="container">
+        <div class="top-bar">
+            <div class="title-wrap">
+                <div class="app-title">Inside the Silver Mind: The AlphaGo Lab</div>
+                <span class="round-badge" id="roundBadge">Round 1 / 3</span>
+                <span class="seed-hash" id="seedHash">seed: —</span>
+            </div>
+            <div class="top-actions">
+                <div class="hint-meter" title="Expand nodes and tune parameters to earn insights.">
+                    Hints
+                    <div class="hint-bar"><div class="hint-fill" id="hintFill" style="width:0%"></div></div>
+                </div>
+                <button class="btn ghost" id="openAccessibility" aria-label="Accessibility options">Accessibility</button>
+                <button class="btn secondary" id="openTutorial" aria-label="Open tutorial">Tutorial</button>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left Panel -->
+            <div class="panel left-panel" style="animation: slide-in-left .24s ease both;">
+                <h3>Controls</h3>
+                <p class="subtext">Tune AlphaGo-like parameters to steer the search. Adjust early for stronger guidance.</p>
+
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Exploration vs Exploitation</span>
+                        <code>c_puct: <span id="cPuctLabel">1.5</span></code>
+                    </div>
+                    <input type="range" min="0.5" max="3.0" step="0.1" value="1.5" class="range" id="cPuctRange" aria-label="c_puct slider">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label"><span>Rollout Budget</span> <code id="budgetLabel">60</code></div>
+                    <select id="budgetSelect" class="select" aria-label="Rollout budget">
+                        <option value="40">40 (Fast)</option>
+                        <option value="60" selected>60 (Balanced)</option>
+                        <option value="80">80 (Thorough)</option>
+                    </select>
+                </div>
+
+                <div class="control-group inline">
+                    <div>
+                        <div class="control-label">Policy Heatmap</div>
+                        <div class="toggle on" id="heatmapToggle" role="switch" aria-checked="true" tabindex="0">
+                            <div class="knob"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="control-label">Dirichlet Noise</div>
+                        <div class="toggle" id="noiseToggle" role="switch" aria-checked="false" tabindex="0">
+                            <div class="knob"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <button class="btn" id="runRolloutBtn" aria-label="Run rollout">Run Rollout</button>
+                    <button class="btn ghost" id="best5Btn" aria-label="Run 5 quick simulations (Space)">Quick x5</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">Keyboard</div>
+                    <p class="subtext">
+                        H: Toggle heatmap • R: Rotate board • Space: Quick x5 • L: Lock orientation
+                    </p>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-label">Story</div>
+                    <p class="subtext">
+                        You are a trainee inside the AlphaGo Lab, where policy heatmaps, value predictions, and search trees
+                        come alive as glowing holograms. Your mission: steer the search to predict AlphaGo’s move.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Board Area -->
+            <div class="panel board-wrap">
+                <div class="board-header">
+                    <div class="board-title">9×9 Board · To play: <span id="toPlayLabel">Black</span> · Komi: <span id="komiLabel">5.5</span></div>
+                    <div class="legend"><div class="swatch"></div> Policy Heatmap</div>
+                </div>
+                <div class="board-stage" id="boardStage" aria-label="Go board" role="application">
+                    <svg id="boardSVG" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="position:absolute; inset:8px; width:calc(100% - 16px); height:calc(100% - 16px); z-index:1;">
+                        <defs>
+                            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 0 0 L 100 0 M 0 0 L 0 100" stroke="#3b3f66" stroke-width="0.3"/>
+                            </pattern>
+                            <radialGradient id="stoneBlack" cx="30%" cy="30%">
+                                <stop offset="0%" stop-color="#666"/>
+                                <stop offset="100%" stop-color="#111"/>
+                            </radialGradient>
+                            <radialGradient id="stoneWhite" cx="30%" cy="30%">
+                                <stop offset="0%" stop-color="#fff"/>
+                                <stop offset="100%" stop-color="#cfd6ff"/>
+                            </radialGradient>
+                        </defs>
+                        <rect x="0" y="0" width="100" height="100" fill="url(#grid)" />
+                        <!-- star points -->
+                        <g id="starPoints" fill="#566" opacity="0.8"></g>
+                        <g id="stonesLayer"></g>
+                        <g id="intersections" fill="transparent"></g>
+                    </svg>
+                    <canvas class="heatmap" id="heatmapCanvas"></canvas>
+                    <div class="selection-ring" id="selectionRing" title="Drag me to select a move" aria-grabbed="false"></div>
+                    <div class="tooltip" id="boardTooltip">P: 0.00 · Q: — · N: 0 · D4</div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button class="btn ghost" id="rolloutHoldHint">Tip: Long-press on an intersection to expand</button>
+                    <button class="btn ghost" id="rotateBtn">Rotate (R)</button>
+                </div>
+            </div>
+
+            <!-- Tree Panel -->
+            <div class="panel tree-panel">
+                <h3>MCTS Tree</h3>
+                <p class="subtext">Click nodes to expand; edges glow on rollouts. N: visits · Q: average value · P: prior</p>
+                <div id="treeView" class="tree" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <!-- Tabs for mobile -->
+        <div class="tabs panel">
+            <div class="tab-buttons">
+                <button data-tab="controlsTab" class="active">Controls</button>
+                <button data-tab="treeTab">Tree</button>
+                <button data-tab="hintsTab">Hints</button>
+            </div>
+            <div class="tab-content active" id="controlsTab">
+                <div class="subtext">Same controls as left panel.</div>
+                <div id="mobileControls"></div>
+            </div>
+            <div class="tab-content" id="treeTab">
+                <div id="mobileTree"></div>
+            </div>
+            <div class="tab-content" id="hintsTab">
+                <p class="subtext">- Explore early using higher c_puct to let priors guide you.<br>- Use quick x5 on the best child to concentrate visits.<br>- Try Dirichlet noise in the first 10 expansions to widen the search.</p>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <div class="status">
+                <svg class="progress-ring" viewBox="0 0 36 36" aria-hidden="true">
+                    <path stroke="rgba(255,255,255,0.12)" stroke-width="3.5" fill="transparent" d="M18 2 a 16 16 0 0 1 0 32 a 16 16 0 0 1 0 -32"/>
+                    <path id="progressPath" stroke="#0A84FF" stroke-width="3.5" stroke-linecap="round" fill="transparent" d="M18 2 a 16 16 0 0 1 0 32 a 16 16 0 0 1 0 -32" stroke-dasharray="100 100" stroke-dashoffset="0"/>
+                </svg>
+                <div>
+                    <div style="color:#cfe0ff; font-size:0.86rem;">Timer</div>
+                    <div id="timerLabel" style="font-weight:700; letter-spacing:0.4px;">03:00</div>
+                </div>
+                <div class="score">Score: <span id="scoreLabel">0</span></div>
+                <div class="round-badge" id="requirementBadge" title="Interactions required before submit">Req: 0/20 exp · c_puct ✖ · rollout ✖</div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <div class="subtext" id="challengeQuestion">Challenge: Which move will AlphaGo select using PUCT? Expand, tune c_puct, then drag the ring to your predicted move.</div>
+                <button class="btn" id="submitBtn" disabled>Submit Move</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Tutorial / Intro Modal -->
+    <div class="modal-overlay" id="introOverlay" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+        <div class="modal">
+            <h2 id="introTitle">Welcome to the AlphaGo Lab</h2>
+            <p>Guide an AlphaGo-like search to predict the chosen move. Use the policy heatmap, adjust <code>c_puct</code>, expand nodes, and concentrate visits with rollouts. Beat three rounds: get at least two right and one with a strong visit lead (N_best ≥ 1.5 × N_second).</p>
+            <div class="grid-2" style="margin:10px 0 6px;">
+                <div>
+                    <label>Student ID</label>
+                    <input id="studentIdInput" class="input" placeholder="e.g., s12345">
+                </div>
+                <div>
+                    <label>Session ID (optional)</label>
+                    <input id="sessionIdInput" class="input" placeholder="e.g., labA">
+                </div>
+            </div>
+            <p class="subtext">Shortcuts: H (heatmap) · R (rotate) · Space (quick x5) · L (lock orientation). Long-press on the board to expand.</p>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+                <button class="btn ghost" id="introAccessibility">Accessibility</button>
+                <button class="btn" id="startBtn">Enter Lab</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accessibility Modal -->
+    <div class="modal-overlay" id="accessibilityOverlay" role="dialog" aria-modal="true" aria-labelledby="a11yTitle">
+        <div class="modal">
+            <h2 id="a11yTitle">Accessibility</h2>
+            <div class="grid-2" style="margin-top:8px;">
+                <div>
+                    <div class="control-label">High Contrast</div>
+                    <div class="toggle" id="highContrastToggle" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
+                </div>
+                <div>
+                    <div class="control-label">Reduce Motion</div>
+                    <div class="toggle" id="reduceMotionToggle" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+                <button class="btn" id="closeA11y">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Overlay -->
+    <div class="modal-overlay" id="resultOverlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+        <div class="modal">
+            <h2 id="resultTitle">Round Result</h2>
+            <div id="resultBody" class="subtext" style="margin:10px 0 14px;">—</div>
+            <div id="comparisonBars" style="display:grid; grid-template-columns: 1fr; gap:10px; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn ghost" id="reviewBtn">Review Tree</button>
+                <button class="btn" id="nextRoundBtn">Next Round</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ===== Utilities & PRNG ===== */
+const Alea = (function() {
+    function Mash() { let n = 0xefc8249d; return function(data) { data = data.toString(); for (let i = 0; i < data.length; i++) { n += data.charCodeAt(i); let h = 0.02519603282416938 * n; n = h >>> 0; h -= n; h *= n; n = h >>> 0; h -= n; n += h * 0x100000000; } return (n >>> 0) * 2.3283064365386963e-10; } }
+    return function(seed) { const mash = Mash(); let s0 = mash(' '), s1 = mash(' '), s2 = mash(' '), c = 1;
+        s0 -= mash(seed); if (s0 < 0) s0 += 1; s1 -= mash(seed); if (s1 < 0) s1 += 1; s2 -= mash(seed); if (s2 < 0) s2 += 1;
+        function random(){ const t = 2091639 * s0 + c * 2.3283064365386963e-10; s0 = s1; s1 = s2; s2 = t - (c = t | 0); return s2; }
+        random.uint32 = function(){ return random() * 0x100000000 >>> 0; }
+        random.frac = random;
+        random.range = (a,b)=> a + (b-a)*random();
+        random.pick = arr => arr[Math.floor(random()*arr.length)];
+        return random;
+    }
+})();
+
+async function sha256(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+function lerp(a,b,t){ return a + (b-a) * t; }
+
+function colorRamp(t){
+    // Heatmap low->high: #223355 -> #00B3FF -> #FFDD00 -> #FF3D00
+    t = clamp(t,0,1);
+    if (t < 0.33) {
+        const k = t/0.33;
+        return mixHex('#223355','#00B3FF',k);
+    } else if (t < 0.66) {
+        const k = (t-0.33)/0.33;
+        return mixHex('#00B3FF','#FFDD00',k);
+    } else {
+        const k = (t-0.66)/0.34;
+        return mixHex('#FFDD00','#FF3D00',k);
+    }
+}
+
+function mixHex(a,b,t){
+    const pa = parseInt(a.slice(1),16), pb = parseInt(b.slice(1),16);
+    const ar = (pa>>16)&255, ag = (pa>>8)&255, ab = pa&255;
+    const br = (pb>>16)&255, bg = (pb>>8)&255, bb = pb&255;
+    const rr = Math.round(lerp(ar,br,t)), rg = Math.round(lerp(ag,bg,t)), rb = Math.round(lerp(ab,bb,t));
+    return `rgb(${rr},${rg},${rb})`;
+}
+
+function coordToName(x,y){
+    const letters = 'ABCDEFGHJ'; // omit I like Go
+    return letters[x] + (9-y);
+}
+
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+/* ===== Game State ===== */
+window.Game = {
+    seed: '',
+    rng: null,
+    roundIndex: 0,
+    totalRounds: 3,
+    score: 0,
+    komi: 5.5,
+    toPlay: 0, // 0 black, 1 white
+    board: [],
+    orientation: 0, // 0,1,2,3 rotations
+    orientationLocked: false,
+    candidates: [], // {x,y,P}
+    root: null, // tree root node
+    nodes: {}, // map id -> node
+    focusedNodeId: null,
+    c_puct: 1.5,
+    rolloutBudget: 60,
+    budgetUsed: 0,
+    heatmapOn: true,
+    dirichletOn: false,
+    expansions: 0,
+    cPuctAdjustments: 0,
+    rolloutEvents: 0,
+    visitTimeline: [],
+    interactionsLog: [],
+    submittedMove: null,
+    requiredMinExpansions: 20,
+    timerSec: 180,
+    timerHandle: null,
+    lastAutoRotate: 0,
+    autoRotateInterval: 30,
+    hintProgress: 0,
+    templates: [],
+    boardPool: [],
+    priorsInjected: false,
+    reduceMotion: false,
+    highContrast: false
+};
+
+/* ===== DOM Elements ===== */
+const els = {};
+function cacheEls(){
+    els.seedHash = document.getElementById('seedHash');
+    els.roundBadge = document.getElementById('roundBadge');
+    els.toPlayLabel = document.getElementById('toPlayLabel');
+    els.komiLabel = document.getElementById('komiLabel');
+    els.cPuctRange = document.getElementById('cPuctRange');
+    els.cPuctLabel = document.getElementById('cPuctLabel');
+    els.budgetSelect = document.getElementById('budgetSelect');
+    els.budgetLabel = document.getElementById('budgetLabel');
+    els.heatmapToggle = document.getElementById('heatmapToggle');
+    els.noiseToggle = document.getElementById('noiseToggle');
+    els.boardSVG = document.getElementById('boardSVG');
+    els.stonesLayer = document.getElementById('stonesLayer');
+    els.intersections = document.getElementById('intersections');
+    els.starPoints = document.getElementById('starPoints');
+    els.heatmapCanvas = document.getElementById('heatmapCanvas');
+    els.selectionRing = document.getElementById('selectionRing');
+    els.boardStage = document.getElementById('boardStage');
+    els.boardTooltip = document.getElementById('boardTooltip');
+    els.treeView = document.getElementById('treeView');
+    els.mobileTree = document.getElementById('mobileTree');
+    els.mobileControls = document.getElementById('mobileControls');
+    els.submitBtn = document.getElementById('submitBtn');
+    els.timerLabel = document.getElementById('timerLabel');
+    els.progressPath = document.getElementById('progressPath');
+    els.scoreLabel = document.getElementById('scoreLabel');
+    els.toastStack = document.getElementById('toastStack');
+    els.introOverlay = document.getElementById('introOverlay');
+    els.startBtn = document.getElementById('startBtn');
+    els.studentIdInput = document.getElementById('studentIdInput');
+    els.sessionIdInput = document.getElementById('sessionIdInput');
+    els.resultOverlay = document.getElementById('resultOverlay');
+    els.resultBody = document.getElementById('resultBody');
+    els.comparisonBars = document.getElementById('comparisonBars');
+    els.nextRoundBtn = document.getElementById('nextRoundBtn');
+    els.reviewBtn = document.getElementById('reviewBtn');
+    els.openTutorial = document.getElementById('openTutorial');
+    els.openAccessibility = document.getElementById('openAccessibility');
+    els.accessibilityOverlay = document.getElementById('accessibilityOverlay');
+    els.closeA11y = document.getElementById('closeA11y');
+    els.highContrastToggle = document.getElementById('highContrastToggle');
+    els.reduceMotionToggle = document.getElementById('reduceMotionToggle');
+    els.introAccessibility = document.getElementById('introAccessibility');
+    els.requirementBadge = document.getElementById('requirementBadge');
+    els.runRolloutBtn = document.getElementById('runRolloutBtn');
+    els.best5Btn = document.getElementById('best5Btn');
+    els.rotateBtn = document.getElementById('rotateBtn');
+}
+
+/* ===== Particles Background ===== */
+function startParticles(){
+    const canvas = document.getElementById('bg-particles');
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr;
+    const orbs = [];
+    function resize(){
+        dpr = devicePixelRatio || 1;
+        w = canvas.width = innerWidth * dpr; h = canvas.height = innerHeight * dpr;
+        canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px';
+    }
+    function init(){
+        resize();
+        orbs.length = 0;
+        const rng = Game.rng || Math.random;
+        for(let i=0;i<70;i++){
+            orbs.push({
+                x: rng()*w, y: rng()*h,
+                r: 1 + rng()*2*dpr,
+                s: 0.2 + rng()*0.6,
+                hue: 210 + rng()*90,
+                alpha: 0.15 + rng()*0.35
+            });
+        }
+    }
+    function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(const o of orbs){
+            ctx.beginPath();
+            ctx.fillStyle = `hsla(${o.hue}, 85%, 60%, ${o.alpha})`;
+            ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+            ctx.fill();
+            o.x += Math.sin(o.y*0.0007)*o.s;
+            o.y += Math.cos(o.x*0.0006)*o.s;
+            if(o.x<-10 || o.x>w+10) o.x = (o.x+w)%w;
+            if(o.y<-10 || o.y>h+10) o.y = (o.y+h)%h;
+        }
+        requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    init(); draw();
+}
+
+/* ===== Board & Tree Setup ===== */
+function emptyBoard(){
+    const b = [];
+    for(let y=0;y<9;y++){ const row=[]; for(let x=0;x<9;x++) row.push(-1); b.push(row); }
+    return b;
+}
+
+function placeTemplates(){
+    // curated pool of small patterns to ensure interesting starting positions
+    Game.boardPool = [
+        // Simple corner enclosure fights
+        [{stones:[{x:2,y:2,c:0},{x:3,y:2,c:1},{x:2,y:3,c:1},{x:6,y:6,c:0},{x:5,y:6,c:1}], toPlay:0},
+         {stones:[{x:1,y:7,c:0},{x:2,y:7,c:1},{x:1,y:6,c:1},{x:7,y:1,c:0}], toPlay:1}],
+        // Side influence
+        [{stones:[{x:4,y:1,c:0},{x:4,y:2,c:1},{x:5,y:2,c:0},{x:3,y:1,c:1},{x:2,y:5,c:0},{x:3,y:5,c:1}], toPlay:0}],
+        // Center tangle
+        [{stones:[{x:4,y:4,c:0},{x:3,y:4,c:1},{x:5,y:4,c:1},{x:4,y:3,c:1},{x:4,y:5,c:0}], toPlay:1}],
+        // Ladder-like
+        [{stones:[{x:2,y:5,c:0},{x:3,y:4,c:1},{x:4,y:3,c:0},{x:5,y:2,c:1},{x:6,y:1,c:0}], toPlay:1}],
+        // Two corners
+        [{stones:[{x:1,y:1,c:0},{x:1,y:2,c:1},{x:7,y:7,c:1},{x:6,y:7,c:0}], toPlay:0}],
+    ];
+}
+
+function rotateCoord(x,y,rot){
+    if(rot===0) return {x,y};
+    if(rot===1) return {x: y, y: 8-x};
+    if(rot===2) return {x: 8-x, y: 8-y};
+    if(rot===3) return {x: 8-y, y: x};
+}
+
+function mirrorCoord(x,y,mirror){
+    if(!mirror) return {x,y};
+    return {x: 8-x, y};
+}
+
+function generateBoardFromPool(){
+    const rng = Game.rng;
+    const group = rng.pick(Game.boardPool);
+    const variant = rng.pick(group);
+    let board = emptyBoard();
+    let rot = Math.floor(rng()*4);
+    let mir = rng() < 0.5;
+    for(const s of variant.stones){
+        let p = rotateCoord(s.x, s.y, rot);
+        p = mirrorCoord(p.x, p.y, mir);
+        board[p.y][p.x] = s.c;
+    }
+    Game.toPlay = rng() < 0.5 ? 0 : 1;
+    Game.komi = rng() < 0.5 ? 5.5 : 6.5;
+    Game.orientation = 0;
+    Game.board = board;
+}
+
+function renderBoard(){
+    // star points for 9x9
+    const stars = [{x:2,y:2},{x:6,y:2},{x:2,y:6},{x:6,y:6},{x:4,y:4}];
+    els.starPoints.innerHTML = stars.map(s => `<circle cx="${(s.x)* (100/8)}" cy="${(s.y)* (100/8)}" r="0.9" />`).join('');
+
+    // stones
+    const stones = [];
+    for(let y=0;y<9;y++){
+        for(let x=0;x<9;x++){
+            const loc = orient({x,y});
+            const v = Game.board[loc.y][loc.x];
+            if(v>=0){
+                const cx = x*(100/8), cy = y*(100/8);
+                stones.push(`<circle cx="${cx}" cy="${cy}" r="4.1" fill="url(#${v===0?'stoneBlack':'stoneWhite'})" stroke="${v===0?'#000':'#b9c7ff'}" stroke-width="0.2"/>`);
+            }
+        }
+    }
+    els.stonesLayer.innerHTML = stones.join('');
+
+    // intersections hotspots
+    const hits = [];
+    for(let y=0;y<9;y++){
+        for(let x=0;x<9;x++){
+            const cx = x*(100/8), cy = y*(100/8);
+            hits.push(`<circle data-x="${x}" data-y="${y}" cx="${cx}" cy="${cy}" r="4.5" fill="transparent"></circle>`);
+        }
+    }
+    els.intersections.innerHTML = hits.join('');
+}
+
+function orient(p){
+    // convert board orientation for display; inverse mapping to fetch stone at view pos
+    // orientation rotates visual, but selection mapping uses inverse
+    let x = p.x, y = p.y;
+    const rot = Game.orientation % 4;
+    if(rot===0) return {x,y};
+    if(rot===1) return {x: 8-y, y: x};
+    if(rot===2) return {x: 8-x, y: 8-y};
+    if(rot===3) return {x: y, y: 8-x};
+}
+
+function deorient(p){
+    // map from displayed x,y to board array coords
+    const rot = Game.orientation % 4;
+    let x = p.x, y = p.y;
+    if(rot===0) return {x,y};
+    if(rot===1) return {x: y, y: 8-x};
+    if(rot===2) return {x: 8-x, y: 8-y};
+    if(rot===3) return {x: 8-y, y: x};
+}
+
+function drawHeatmap(){
+    const canvas = els.heatmapCanvas;
+    const stage = els.boardStage.getBoundingClientRect();
+    const inset = 8;
+    const size = Math.min(stage.width, stage.height) - inset*2;
+    canvas.width = size; canvas.height = size;
+    canvas.style.left = inset+'px'; canvas.style.top = inset+'px';
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+
+    if(!Game.heatmapOn) return;
+
+    const cell = size / 8;
+    // Normalize P to 0..1
+    const Ps = Game.candidates.map(c => c.P);
+    const maxP = Math.max(...Ps, 0.00001);
+    for(const c of Game.candidates){
+        const p = deorient({x:c.x, y:c.y});
+        const xx = p.x * cell, yy = p.y * cell;
+        const t = c.P / maxP;
+        const grad = ctx.createRadialGradient(xx, yy, 0, xx, yy, cell * 0.7);
+        const col = colorRamp(t);
+        grad.addColorStop(0, col.replace('rgb', 'rgba').replace(')', ',0.55)'));
+        grad.addColorStop(1, col.replace('rgb', 'rgba').replace(')', ',0.0)'));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(xx, yy, cell*0.8, 0, Math.PI*2);
+        ctx.fill();
+    }
+    canvas.classList.add('heatmap-bloom');
+    setTimeout(()=>canvas.classList.remove('heatmap-bloom'), 250);
+}
+
+function computePolicyPriors(){
+    // assign P to empty intersections using a simple heuristic + RNG Dirichlet baseline
+    const rng = Game.rng;
+    const alphas = [];
+    const coords = [];
+    for(let y=0;y<9;y++){
+        for(let x=0;x<9;x++){
+            if(Game.board[y][x] === -1){
+                coords.push({x,y});
+                // Basic guidance: prefer corners and near stones
+                let base = 0.4;
+                const dx = Math.min(x, 8-x), dy = Math.min(y, 8-y);
+                const cornerBias = 0.6 * (1 - (dx+dy)/8);
+                // neighbor stones
+                let neighbor = 0;
+                [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=> {
+                    const nx=x+dx, ny=y+dy;
+                    if(nx>=0 && nx<9 && ny>=0 && ny<9 && Game.board[ny][nx] !== -1) neighbor += 0.3;
+                });
+                const alpha = Math.max(0.05, base + cornerBias + neighbor);
+                alphas.push(alpha);
+            }
+        }
+    }
+    // sample Dirichlet using gamma approx
+    function sampleGamma(k, theta=1){
+        // Marsaglia and Tsang
+        if(k<1){
+            const u = rng();
+            return sampleGamma(1+k, theta) * Math.pow(u,1/k);
+        }
+        const d = k - 1/3, c = 1/Math.sqrt(9*d);
+        while(true){
+            let x, v, u;
+            do{ x = normal(); v = 1 + c*x; } while(v<=0);
+            v = v*v*v;
+            u = rng();
+            if(u < 1 - 0.0331*(x*x)*(x*x)) return d*v*theta;
+            if(Math.log(u) < 0.5*x*x + d*(1 - v + Math.log(v))) return d*v*theta;
+        }
+    }
+    function normal(){
+        // Box-Muller
+        let u = 0, v = 0;
+        while(u===0) u = rng();
+        while(v===0) v = rng();
+        return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+    }
+    const g = alphas.map(a => sampleGamma(a));
+    const sumg = g.reduce((a,b)=>a+b,0) || 1;
+    const priors = g.map(x => x/sumg);
+
+    Game.candidates = coords.map((c,i)=>({x:c.x,y:c.y,P:priors[i]}));
+    if(Game.dirichletOn) injectDirichletRootNoise();
+}
+
+function injectDirichletRootNoise(force=false){
+    if(Game.expansions > 10 && !force) { toast('Noise can only be applied early (≤10 expansions).', 'warn'); return; }
+    const eps = 0.25, alpha = 0.30; // 9x9
+    const rng = Game.rng;
+    const dir = Game.candidates.map(()=> {
+        // gamma sample
+        function gamma(){
+            const d = alpha;
+            // simple approach:
+            let u1 = -Math.log(rng());
+            let u2 = -Math.log(rng());
+            return u1 / (u1 + u2);
+        }
+        return Math.max(1e-6, -Math.log(rng()+1e-9));
+    });
+    const sum = dir.reduce((a,b)=>a+b,0);
+    const dirn = dir.map(v=>v/sum);
+    Game.candidates.forEach((c,i)=> c.P = (1-eps)*c.P + eps*dirn[i]);
+    Game.priorsInjected = true;
+    drawHeatmap();
+    toast('Root priors perturbed with Dirichlet noise (ε=0.25).', 'info');
+}
+
+/* ===== Tree Model ===== */
+let NODE_ID = 1;
+function makeNode(props){
+    const node = Object.assign({
+        id: NODE_ID++,
+        move: null, // {x,y}
+        parent: null,
+        children: [],
+        N: 0, W: 0, Q: 0, P: 0, U: 0,
+        player: Game.toPlay,
+        expandedSet: false
+    }, props||{});
+    Game.nodes[node.id] = node;
+    return node;
+}
+function initRoot(){
+    const root = makeNode({move:null, parent:null, player: Game.toPlay, N:0, P:1});
+    root.children = []; root.expandedSet = false;
+    Game.root = root;
+    Game.focusedNodeId = root.id;
+    NODE_ID = 1 + Math.floor(Game.rng()*1000);
+}
+
+function expandNode(node){
+    if(node.expandedSet) return;
+    // choose top-K candidates to create as children (lazy expansion)
+    const K = 10;
+    const sorted = [...Game.candidates].sort((a,b)=> b.P - a.P).slice(0, K);
+    const parentN = Math.max(1, node.N);
+    sorted.forEach(c=>{
+        const child = makeNode({
+            move: {x:c.x, y:c.y},
+            parent: node.id,
+            P: c.P,
+            player: 1 - node.player
+        });
+        child.U = uValue(child.P, parentN, child.N);
+        node.children.push(child.id);
+    });
+    node.expandedSet = true;
+    Game.expansions += 1;
+    Game.interactionsLog.push({t:Date.now(), type:'expand', node: node.id});
+    addHint(4);
+    renderTree();
+    toast('Node expanded. Children seeded from policy priors.', 'chime');
+}
+
+function uValue(P, Np, Nc){
+    return Game.c_puct * P * Math.sqrt(Np+1) / (1 + Nc);
+}
+
+function recalcAllU(){
+    for(const id in Game.nodes){
+        const node = Game.nodes[id];
+        if(node.parent !== null){
+            const parent = Game.nodes[node.parent];
+            node.U = uValue(node.P, parent.N, node.N);
+        }
+    }
+}
+
+/* ===== Rollouts ===== */
+let rolloutDebounce = 0;
+function runRollout(targetNodeId=null){
+    if(Date.now() - rolloutDebounce < 280) return;
+    if(Game.budgetUsed >= Game.rolloutBudget){ toast('Rollout budget exhausted.', 'warn'); return; }
+
+    const path = [];
+    let node = targetNodeId ? Game.nodes[targetNodeId] : Game.root;
+
+    // Selection
+    for(let depth=0; depth<30; depth++){
+        path.push(node);
+        if(!node.expandedSet || node.children.length===0) break;
+        // choose best by Q+U for current player
+        let best = null, bestScore = -Infinity;
+        for(const cid of node.children){
+            const c = Game.nodes[cid];
+            const score = c.Q + c.U;
+            if(score > bestScore){ bestScore = score; best = c; }
+        }
+        node = best;
+    }
+
+    // Expansion if needed
+    if(!node.expandedSet) expandNode(node);
+
+    // Value model: sample [-1,1] biased by prior and local pattern
+    const leaf = node;
+    const prior = leaf.P || 0.01;
+    const noise = (Game.rng()*2-1) * 0.35;
+    const bias = (prior - 0.1) * 0.8;
+    const value = clamp(bias + noise, -1, 1);
+    // Backup
+    for(const n of path){
+        n.N += 1;
+        n.W += value;
+        n.Q = n.W / Math.max(1,n.N);
+        // update children U
+        if(n.parent !== null){
+            const parent = Game.nodes[n.parent];
+            n.U = uValue(n.P, parent.N, n.N);
+        }
+        // update siblings U
+        if(n.children && n.children.length){
+            const Np = n.N;
+            for(const cid of n.children){
+                const c = Game.nodes[cid];
+                c.U = uValue(c.P, Np, c.N);
+            }
+        }
+    }
+
+    Game.budgetUsed += 1;
+    Game.rolloutEvents += 1;
+    Game.visitTimeline.push({t:Date.now(), node:leaf.id, v:value});
+    renderTree();
+    if(Game.focusedNodeId===null) Game.focusedNodeId = Game.root.id;
+    addHint(2);
+    glowEdges();
+}
+
+function glowEdges(){
+    // Visual effect: add an edge glow bar temporarily
+    const bars = document.querySelectorAll('.edge-glow.temp'); bars.forEach(b=>b.remove());
+    const el = document.createElement('div');
+    el.className = 'edge-glow temp';
+    els.treeView.prepend(el);
+    setTimeout(()=>el.remove(), 1600);
+}
+
+/* ===== UI Rendering ===== */
+function renderTree(){
+    function nodeHTML(n){
+        const mv = n.move ? coordToName(n.move.x, n.move.y) : 'ROOT';
+        const movePill = `<span class="pill">${mv}</span>`;
+        const btn = `<button class="btn ghost" data-act="expand" data-id="${n.id}" style="padding:6px 10px;">Expand</button>`;
+        const roll = `<button class="btn secondary" data-act="roll" data-id="${n.id}" style="padding:6px 10px;">Rollout</button>`;
+        const q = n.Q.toFixed(2), p = (n.P*100).toFixed(1)+'%', u = n.U.toFixed(2);
+        const info = `<div class="node-stats"><span>N:${n.N}</span><span>Q:${q}</span><span>P:${p}</span><span>U:${u}</span></div>`;
+        return `<div class="node node-pop">
+            <div class="node-header">
+                ${movePill}
+                <div style="display:flex; gap:6px;">
+                    ${btn}${roll}
+                </div>
+            </div>
+            ${info}
+        </div>`;
+    }
+    const root = Game.root;
+    // Show root and up to top 12 children by N/P
+    const children = root.children.map(id=>Game.nodes[id]);
+    children.sort((a,b)=> (b.N + b.P*0.1) - (a.N + a.P*0.1));
+    const top = children.slice(0,12);
+    els.treeView.innerHTML = nodeHTML(root) + '<div class="edge-glow"></div>' + top.map(nodeHTML).join('');
+    els.mobileTree.innerHTML = els.treeView.innerHTML;
+
+    // delegate events
+    function bind(container){
+        container.querySelectorAll('button[data-act]').forEach(btn=>{
+            const id = parseInt(btn.getAttribute('data-id'));
+            const act = btn.getAttribute('data-act');
+            btn.onclick = ()=>{
+                if(act==='expand'){ handleNodeExpand(id); }
+                else if(act==='roll'){ handleRollout(id); }
+            };
+        });
+    }
+    bind(els.treeView);
+    bind(els.mobileTree);
+
+    // Update requirements badge
+    const req = Game.expansions + '/' + Game.requiredMinExpansions;
+    const cAdj = Game.cPuctAdjustments > 0 ? '✔' : '✖';
+    const rll = Game.rolloutEvents > 0 ? '✔' : '✖';
+    els.requirementBadge.textContent = `Req: ${req} exp · c_puct ${cAdj} · rollout ${rll}`;
+
+    // Responsive copy of controls to mobile
+    els.mobileControls.innerHTML = '';
+    const cloneControls = document.querySelector('.left-panel').cloneNode(true);
+    cloneControls.querySelectorAll('script').forEach(s=>s.remove());
+    cloneControls.style.display = 'block';
+    cloneControls.classList.remove('left-panel');
+    els.mobileControls.appendChild(cloneControls);
+    // Re-bind these cloned controls for mobile
+    bindControls(cloneControls);
+}
+
+function renderHUD(){
+    els.roundBadge.textContent = `Round ${Game.roundIndex+1} / ${Game.totalRounds}`;
+    els.toPlayLabel.textContent = Game.toPlay===0?'Black':'White';
+    els.komiLabel.textContent = Game.komi.toFixed(1);
+    els.cPuctLabel.textContent = Game.c_puct.toFixed(1);
+    els.budgetLabel.textContent = Game.rolloutBudget;
+    els.scoreLabel.textContent = Game.score;
+}
+
+function placeSelectionRing(){
+    // place ring near best prior
+    const best = [...Game.candidates].sort((a,b)=>b.P - a.P)[0];
+    const pt = orient({x:best.x,y:best.y});
+    const stage = els.boardStage.getBoundingClientRect();
+    const inset = 8;
+    const cell = (Math.min(stage.width, stage.height) - inset*2) / 8;
+    const ring = els.selectionRing;
+    ring.style.left = (inset + pt.x*cell - ring.offsetWidth/2) + 'px';
+    ring.style.top = (inset + pt.y*cell - ring.offsetHeight/2) + 'px';
+}
+
+function updateProgress(secondsLeft){
+    const perc = (secondsLeft / Game.timerSec) * 100;
+    const dash = clamp(perc,0,100);
+    els.progressPath.setAttribute('stroke-dasharray', '100 100');
+    els.progressPath.setAttribute('stroke-dashoffset', (100 - dash).toFixed(2));
+}
+
+/* ===== Interactions Handlers ===== */
+function handleNodeExpand(nodeId){
+    const node = Game.nodes[nodeId];
+    expandNode(node);
+}
+
+function handleRollout(targetId){
+    runRollout(targetId);
+}
+
+function handleCPuctChange(v){
+    const old = Game.c_puct;
+    Game.c_puct = parseFloat(v);
+    els.cPuctLabel.textContent = Game.c_puct.toFixed(1);
+    recalcAllU();
+    renderTree();
+    drawHeatmap();
+    if(Math.abs(old - Game.c_puct) >= 0.01){
+        Game.cPuctAdjustments += 1;
+        Game.interactionsLog.push({t:Date.now(), type:'c_puct', value: Game.c_puct});
+        addHint(3);
+        toast((Game.c_puct>old?'Higher':'Lower')+' c_puct adjusted exploration weight.', 'info');
+    }
+}
+
+function handleHeatmapToggle(on){
+    Game.heatmapOn = on;
+    els.heatmapToggle.classList.toggle('on', on);
+    drawHeatmap();
+    toast('Heatmap ' + (on?'enabled':'disabled') + ' (H).', 'info');
+}
+
+function handleNoiseToggle(on){
+    Game.dirichletOn = on;
+    els.noiseToggle.classList.toggle('on', on);
+    if(on) handleNoiseInjection();
+}
+
+function handleNoiseInjection(){
+    injectDirichletRootNoise();
+    renderTree();
+}
+
+function handleMoveSelectDrop(x, y){
+    const boardPos = deorient({x,y});
+    const legal = Game.board[boardPos.y][boardPos.x] === -1;
+    if(!legal){
+        els.selectionRing.classList.add('shake-on-error');
+        setTimeout(()=>els.selectionRing.classList.remove('shake-on-error'), 400);
+        toast('Invalid: intersection is not empty.', 'warn');
+        return;
+    }
+    Game.submittedMove = {x: boardPos.x, y: boardPos.y}; // store in board coordinates
+    const mv = coordToName(boardPos.x, boardPos.y);
+    toast('Selected ' + mv + '. Submit when ready.', 'info');
+}
+
+function handleKeyShortcuts(e){
+    if(e.repeat) return;
+    if(e.key==='H' || e.key==='h'){
+        handleHeatmapToggle(!Game.heatmapOn);
+    }else if(e.key==='R' || e.key==='r'){
+        rotateBoard();
+    }else if(e.code==='Space'){
+        e.preventDefault();
+        quickX(5);
+    }else if(e.key==='L' || e.key==='l'){
+        Game.orientationLocked = !Game.orientationLocked;
+        toast('Orientation ' + (Game.orientationLocked?'locked':'unlocked') + '.', 'info');
+    }
+}
+
+function quickX(n){
+    const bestChild = getBestChildByPUCT();
+    for(let i=0;i<n;i++){ runRollout(bestChild ? bestChild.id : null); }
+}
+
+function getBestChildByPUCT(){
+    const root = Game.root;
+    if(!root.expandedSet) expandNode(root);
+    let best=null, bestS=-Infinity;
+    for(const cid of root.children){
+        const c = Game.nodes[cid];
+        const s = c.Q + c.U;
+        if(s>bestS){bestS=s; best=c;}
+    }
+    return best;
+}
+
+function rotateBoard(){
+    Game.orientation = (Game.orientation + 1) % 4;
+    renderBoard();
+    drawHeatmap();
+    placeSelectionRing();
+    toast('Board rotated (R).', 'info');
+}
+
+function autoRotateTick(){
+    if(Game.orientationLocked) return;
+    const now = Math.floor(Date.now()/1000);
+    if(Game.lastAutoRotate === 0) Game.lastAutoRotate = now;
+    if(now - Game.lastAutoRotate >= Game.autoRotateInterval){
+        Game.lastAutoRotate = now;
+        rotateBoard();
+    }
+}
+
+function addHint(v){
+    Game.hintProgress = clamp(Game.hintProgress + v, 0, 100);
+    document.getElementById('hintFill').style.width = Game.hintProgress+'%';
+}
+
+/* ===== Submit & Scoring ===== */
+function canSubmit(){
+    return Game.expansions >= Game.requiredMinExpansions && Game.cPuctAdjustments >= 1 && Game.rolloutEvents >= 1 && Game.submittedMove;
+}
+
+function getRootVisitLeader(){
+    const root = Game.root;
+    if(!root.expandedSet) return null;
+    const mapped = root.children.map(id=>Game.nodes[id]);
+    if(mapped.length===0) return null;
+    mapped.sort((a,b)=> b.N - a.N);
+    return mapped;
+}
+
+function submitMove(){
+    if(!canSubmit()){
+        toast('Complete required actions before submit: 20 expansions, c_puct adjust, and a rollout.', 'warn');
+        return;
+    }
+    const root = Game.root;
+    if(!root.expandedSet) expandNode(root);
+    const ranked = getRootVisitLeader() || [];
+    const top = ranked[0];
+    const second = ranked[1] || {N:0};
+    const sel = Game.submittedMove;
+    const selName = coordToName(sel.x, sel.y);
+    let topName = '—';
+    if(top && top.move){
+        topName = coordToName(top.move.x, top.move.y);
+    }
+    const correct = top && top.move && top.move.x===sel.x && top.move.y===sel.y;
+    let roundScore = 0;
+    let msg = '';
+    if(correct){
+        roundScore += 100;
+        if(top.N >= 1.5 * Math.max(1, second.N)) roundScore += 20;
+        msg = 'Excellent: Your search concentrated visits effectively; chosen move leads by a clear margin.';
+    }else{
+        const topIdx = ranked.findIndex(n => n.move && n.move.x===sel.x && n.move.y===sel.y);
+        if(topIdx===1) { roundScore += 70; msg = 'Good attempt: You were close—visits split between two strong candidates. Consider adjusting c_puct earlier.'; }
+        else if(topIdx===2 || (top.N/Math.max(1,second.N))<1.2){ roundScore += 50; msg = 'Partial: Within top-3 or ambiguous search. Run focused rollouts next time.'; }
+        else { msg = 'Needs refinement: Your selection did not match the final visit leader.'; }
+    }
+    // Efficiency bonuses
+    const efficient = Math.min(15, Game.visitTimeline.slice(-15).filter(v=>v.v>0).length);
+    roundScore += efficient;
+    const over = Math.max(0, Game.budgetUsed - Game.rolloutBudget);
+    roundScore -= over;
+    if(Game.cPuctAdjustments >= 2) roundScore += 10;
+    // time bonus
+    const timeLeft = parseInt(els.timerLabel.dataset.left || '0',10);
+    roundScore += Math.min(10, Math.floor(timeLeft/18));
+    Game.score += Math.max(0, Math.floor(roundScore));
+    renderHUD();
+
+    // Feedback modal
+    showRoundResult(correct, selName, topName, ranked);
+    if(correct) celebrate();
+
+    // move to next or finish after modal
+}
+
+/* ===== Modals & Feedback ===== */
+function showRoundResult(correct, selName, topName, ranked){
+    const r = ranked.slice(0,3);
+    els.resultBody.innerHTML = (correct ? 'Correct ✅' : 'Incorrect ❌') + ` — You selected ${selName}. Visit leader: ${topName}.`;
+    els.comparisonBars.innerHTML = r.map(n=>{
+        const mv = coordToName(n.move.x, n.move.y);
+        const perc = Math.min(100, (n.N / Math.max(1, r[0].N)) * 100).toFixed(0);
+        return `<div style="background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); border-radius:10px; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; padding:6px 10px;"><span>${mv}</span><span>N:${n.N} · Q:${n.Q.toFixed(2)} · P:${(n.P*100).toFixed(1)}%</span></div>
+            <div style="height:10px; background: rgba(255,255,255,0.06);"><div style="height:10px; width:${perc}%; background: linear-gradient(90deg,#00E5A8,#0A84FF);"></div></div>
+        </div>`;
+    }).join('');
+    openModal(els.resultOverlay);
+}
+
+function celebrate(){
+    // simple confetti arcs using particles canvas overlay
+    const area = els.resultOverlay.querySelector('.modal');
+    area.classList.add('pulse-on-correct');
+    setTimeout(()=>area.classList.remove('pulse-on-correct'), 1400);
+    audioChime(true);
+}
+
+function toast(text, kind='info'){
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = text;
+    if(kind==='warn'){ t.style.borderColor = 'rgba(255,61,119,0.5)'; t.style.background = 'rgba(60,10,25,0.9)'; audioBuzz(); }
+    if(kind==='chime'){ audioChime(); }
+    els.toastStack.appendChild(t);
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(8px)'; setTimeout(()=>t.remove(), 300); }, 3400);
+}
+
+/* ===== Audio (WebAudio) ===== */
+let audioCtx = null;
+function initAudio(){
+    try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+}
+function audioChime(success=false){
+    if(!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(success?660:520, now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.2, now+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+0.25);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now+0.26);
+}
+function audioBuzz(){
+    if(!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(120, now);
+    g.gain.setValueAtTime(0.2, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+0.25);
+    osc.connect(g).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now+0.26);
+}
+
+/* ===== Board Events ===== */
+function bindBoardEvents(){
+    // hover tooltip, long-press, drag ring
+    let longPressTimer = null;
+    let isDraggingRing = false;
+    let dragOffset = {x:0,y:0};
+
+    els.boardSVG.addEventListener('mousemove', e=>{
+        const pt = getNearestIntersection(e);
+        if(!pt) return;
+        const P = getPriorAt(pt.x, pt.y);
+        const node = findRootChild(pt.x, pt.y);
+        const Q = node ? node.Q : NaN;
+        const N = node ? node.N : 0;
+        const name = coordToName(pt.x, pt.y);
+        showTooltip(`P: ${(P*100).toFixed(1)}% · Q: ${isNaN(Q)?'—':Q.toFixed(2)} · N: ${N} · ${name}`, e.clientX, e.clientY);
+    });
+    els.boardSVG.addEventListener('mouseleave', ()=> hideTooltip());
+
+    els.boardSVG.addEventListener('mousedown', e=>{
+        if(e.target.id === 'boardSVG') return;
+        longPressTimer = setTimeout(()=>{
+            const pt = getNearestIntersection(e);
+            if(pt) {
+                // expand path: focus node is child of root for that move
+                expandOrRollBoardPress(pt.x, pt.y);
+            }
+        }, 600);
+    });
+    els.boardSVG.addEventListener('mouseup', ()=>{ if(longPressTimer) clearTimeout(longPressTimer); });
+
+    function expandOrRollBoardPress(x,y){
+        // map to deoriented board coords
+        const bp = {x,y};
+        const dp = deorient(bp);
+        // ensure child exists
+        let child = findRootChild(dp.x, dp.y);
+        if(!child){
+            if(!Game.root.expandedSet) expandNode(Game.root);
+            // if still doesn't exist, ensure within top-K by P or create on demand
+            const P = getPriorAt(dp.x, dp.y);
+            const newNode = makeNode({
+                move:{x:dp.x,y:dp.y}, parent: Game.root.id, P, player: 1-Game.root.player
+            });
+            Game.root.children.push(newNode.id);
+            Game.expansions += 1;
+            recalcAllU();
+            renderTree();
+            child = newNode;
+        }
+        runRollout(child.id);
+    }
+
+    // DRAG selection ring
+    function posToBoard(x,y){
+        const rect = els.boardStage.getBoundingClientRect();
+        const inset = 8;
+        const cell = (Math.min(rect.width, rect.height) - inset*2)/8;
+        let bx = clamp(Math.round((x - rect.left - inset)/cell), 0, 8);
+        let by = clamp(Math.round((y - rect.top - inset)/cell), 0, 8);
+        return {x:bx, y:by, cell, inset, rect};
+    }
+
+    function moveRingToBoardXY(bx,by,meta){
+        const ring = els.selectionRing;
+        const {cell,inset,rect} = meta;
+        ring.style.left = (rect.left + inset + bx*cell - ring.offsetWidth/2) + 'px';
+        ring.style.top = (rect.top + inset + by*cell - ring.offsetHeight/2) + 'px';
+    }
+
+    els.selectionRing.addEventListener('mousedown', e=>{
+        isDraggingRing = true;
+        els.selectionRing.classList.add('dragging');
+        dragOffset.x = e.offsetX; dragOffset.y = e.offsetY;
+        e.preventDefault();
+    });
+    window.addEventListener('mousemove', e=>{
+        if(!isDraggingRing) return;
+        const meta = posToBoard(e.clientX, e.clientY);
+        moveRingToBoardXY(meta.x, meta.y, meta);
+    });
+    window.addEventListener('mouseup', e=>{
+        if(!isDraggingRing) return;
+        isDraggingRing = false;
+        els.selectionRing.classList.remove('dragging');
+        const meta = posToBoard(e.clientX, e.clientY);
+        handleMoveSelectDrop(meta.x, meta.y);
+    });
+
+    // Touch support
+    els.selectionRing.addEventListener('touchstart', e=>{
+        isDraggingRing = true;
+        els.selectionRing.classList.add('dragging');
+        e.preventDefault();
+    }, {passive:false});
+    window.addEventListener('touchmove', e=>{
+        if(!isDraggingRing) return;
+        const t = e.touches[0];
+        const meta = posToBoard(t.clientX, t.clientY);
+        moveRingToBoardXY(meta.x, meta.y, meta);
+    }, {passive:false});
+    window.addEventListener('touchend', e=>{
+        if(!isDraggingRing) return;
+        isDraggingRing = false;
+        els.selectionRing.classList.remove('dragging');
+        const t = e.changedTouches[0];
+        const meta = posToBoard(t.clientX, t.clientY);
+        handleMoveSelectDrop(meta.x, meta.y);
+    }, {passive:false});
+
+    // Click rollout hint
+    document.getElementById('runRolloutBtn').onclick = ()=>runRollout();
+    document.getElementById('best5Btn').onclick = ()=>quickX(5);
+    document.getElementById('rotateBtn').onclick = ()=>rotateBoard();
+}
+
+function getNearestIntersection(e){
+    const rect = els.boardStage.getBoundingClientRect();
+    const inset = 8;
+    const size = Math.min(rect.width, rect.height) - inset*2;
+    const cell = size/8;
+    const x = clamp(Math.round((e.clientX - rect.left - inset)/cell), 0, 8);
+    const y = clamp(Math.round((e.clientY - rect.top - inset)/cell), 0, 8);
+    return {x,y};
+}
+
+function getPriorAt(x,y){
+    // board coords (deoriented expected)
+    const c = Game.candidates.find(cc => cc.x===x && cc.y===y);
+    return c ? c.P : 0.0001;
+}
+
+function findRootChild(x,y){
+    const root = Game.root;
+    if(!root.children) return null;
+    for(const cid of root.children){
+        const c = Game.nodes[cid];
+        if(c.move && c.move.x===x && c.move.y===y) return c;
+    }
+    return null;
+}
+
+function showTooltip(text, clientX, clientY){
+    const tb = els.boardTooltip;
+    tb.textContent = text;
+    tb.style.left = (clientX + 12) + 'px';
+    tb.style.top = (clientY + 12) + 'px';
+    tb.classList.add('show');
+}
+function hideTooltip(){ els.boardTooltip.classList.remove('show'); }
+
+/* ===== Tabs ===== */
+function bindTabs(){
+    const btns = document.querySelectorAll('.tab-buttons button');
+    btns.forEach(b=>{
+        b.onclick = ()=>{
+            btns.forEach(x=>x.classList.remove('active'));
+            b.classList.add('active');
+            const id = b.getAttribute('data-tab');
+            document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    });
+}
+
+/* ===== Timer ===== */
+function startTimer(){
+    let left = Game.timerSec;
+    els.timerLabel.dataset.left = left;
+    els.timerLabel.textContent = formatTime(left);
+    updateProgress(left);
+    if(Game.timerHandle) clearInterval(Game.timerHandle);
+    Game.timerHandle = setInterval(()=>{
+        left--;
+        els.timerLabel.dataset.left = left;
+        els.timerLabel.textContent = formatTime(left);
+        updateProgress(left);
+        autoRotateTick();
+        if(left<=0){
+            clearInterval(Game.timerHandle);
+            if(canSubmit()){
+                submitMove();
+            }else{
+                toast('Time up! Auto-selecting current ring.', 'warn');
+                if(Game.submittedMove){
+                    submitMove();
+                } else {
+                    // pick best guess: current leader by visits or prior
+                    if(!Game.root.expandedSet) expandNode(Game.root);
+                    const ranked = getRootVisitLeader();
+                    const best = ranked && ranked[0] ? ranked[0].move : [...Game.candidates].sort((a,b)=>b.P - a.P)[0];
+                    Game.submittedMove = {x: best.x, y: best.y};
+                    submitMove();
+                }
+            }
+        }
+    }, 1000);
+}
+
+function formatTime(s){ const m = Math.floor(s/60), ss = s%60; return `${m.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`; }
+
+/* ===== Modals ===== */
+function openModal(el){ el.style.display='flex'; }
+function closeModal(el){ el.style.display='none'; }
+
+/* ===== Controls Binding (Desktop + Mobile Clones) ===== */
+function bindControls(root=document){
+    const cRange = root.querySelector('#cPuctRange');
+    const heat = root.querySelector('#heatmapToggle');
+    const noise = root.querySelector('#noiseToggle');
+    const budget = root.querySelector('#budgetSelect');
+
+    if(cRange){
+        cRange.oninput = e=> handleCPuctChange(e.target.value);
+    }
+    if(heat){
+        heat.onclick = ()=> handleHeatmapToggle(!Game.heatmapOn);
+        heat.onkeydown = e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleHeatmapToggle(!Game.heatmapOn); } };
+    }
+    if(noise){
+        noise.onclick = ()=> handleNoiseToggle(!Game.dirichletOn);
+        noise.onkeydown = e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); handleNoiseToggle(!Game.dirichletOn); } };
+    }
+    if(budget){
+        budget.onchange = e=>{
+            Game.rolloutBudget = parseInt(e.target.value,10);
+            els.budgetLabel.textContent = Game.rolloutBudget;
+            toast('Budget set to '+Game.rolloutBudget, 'info');
+        };
+    }
+}
+
+/* ===== Accessibility ===== */
+function bindAccessibility(){
+    els.openAccessibility.onclick = ()=>openModal(els.accessibilityOverlay);
+    els.introAccessibility.onclick = ()=>openModal(els.accessibilityOverlay);
+    els.closeA11y.onclick = ()=>closeModal(els.accessibilityOverlay);
+
+    function toggleEl(el,flag){
+        el.classList.toggle('on', flag);
+        el.setAttribute('aria-checked', String(flag));
+    }
+    els.highContrastToggle.onclick = ()=>{
+        Game.highContrast = !Game.highContrast;
+        toggleEl(els.highContrastToggle, Game.highContrast);
+        document.body.style.filter = Game.highContrast ? 'contrast(1.18) saturate(1.1)' : '';
+    };
+    els.reduceMotionToggle.onclick = ()=>{
+        Game.reduceMotion = !Game.reduceMotion;
+        toggleEl(els.reduceMotionToggle, Game.reduceMotion);
+        document.querySelectorAll('*').forEach(e=> {
+            if(Game.reduceMotion){ e.style.transition='none'; e.style.animation='none'; } else { e.style.transition=''; e.style.animation=''; }
+        });
+    };
+}
+
+/* ===== Round Flow ===== */
+function newRound(){
+    Game.expansions = 0;
+    Game.cPuctAdjustments = 0;
+    Game.rolloutEvents = 0;
+    Game.visitTimeline = [];
+    Game.submittedMove = null;
+    Game.budgetUsed = 0;
+    Game.priorsInjected = false;
+    Game.hintProgress = 0;
+    document.getElementById('hintFill').style.width = '0%';
+
+    generateBoardFromPool();
+    renderBoard();
+    computePolicyPriors();
+    drawHeatmap();
+    initRoot();
+    expandNode(Game.root); // ensure some children are visible
+    placeSelectionRing();
+    renderTree();
+    renderHUD();
+    startTimer();
+}
+
+function nextRound(){
+    closeModal(els.resultOverlay);
+    Game.roundIndex++;
+    if(Game.roundIndex >= Game.totalRounds){
+        // end summary
+        els.resultBody.innerHTML = `Final Score: ${Game.score}. ${Game.score>=220 ? 'Excellent work—your guidance aligned with policy and value signals.' : 'Good job—review c_puct tuning and focused rollouts to improve further.'}`;
+        els.comparisonBars.innerHTML = '';
+        els.nextRoundBtn.textContent = 'Restart';
+        els.reviewBtn.style.display='none';
+        openModal(els.resultOverlay);
+        els.nextRoundBtn.onclick = ()=> location.reload();
+        return;
+    }
+    els.reviewBtn.style.display='inline-flex';
+    els.nextRoundBtn.textContent = 'Next Round';
+    newRound();
+}
+
+/* ===== Start / Init ===== */
+async function start(){
+    cacheEls();
+    placeTemplates();
+    bindTabs();
+    bindControls();
+    bindAccessibility();
+    bindBoardEvents();
+    startParticles();
+    initAudio();
+
+    els.openTutorial.onclick = ()=>openModal(els.introOverlay);
+    document.addEventListener('keydown', handleKeyShortcuts);
+    els.submitBtn.onclick = submitMove;
+    els.startBtn.onclick = async ()=>{
+        const a = els.studentIdInput.value.trim() || (Math.random().toString(36).slice(2));
+        const b = els.sessionIdInput.value.trim() || (Math.random().toString(36).slice(2));
+        const seed = await sha256(a + ':' + b);
+        Game.seed = seed.slice(0,16);
+        Game.rng = Alea(seed);
+        els.seedHash.textContent = 'seed: ' + Game.seed;
+        closeModal(els.introOverlay);
+        newRound();
+        toast('Session initialized. Unique seed activated.', 'info');
+    };
+    document.getElementById('openTutorial').onclick = ()=>openModal(els.introOverlay);
+    document.getElementById('reviewBtn').onclick = ()=>closeModal(els.resultOverlay);
+    document.getElementById('nextRoundBtn').onclick = nextRound;
+
+    // requirement check enabling submit
+    setInterval(()=>{
+        els.submitBtn.disabled = !canSubmit();
+    }, 400);
+
+    // initial show intro
+    openModal(els.introOverlay);
+}
+
+window.addEventListener('load', start);
+
+/* ===== Additional UI Enhancements ===== */
+function glowSubmit(correct=false){
+    els.submitBtn.classList.add(correct?'pulse-on-correct':'');
+    setTimeout(()=>els.submitBtn.classList.remove('pulse-on-correct'), 1000);
+}
+
+/* ===== Result & Confetti optional (visual via celebrate) ===== */
+
+/* ===== Attach events for mobile tabs duplicates ===== */
+document.addEventListener('click', e=>{
+    const tabBtn = e.target.closest('.tab-buttons button');
+    if(tabBtn){ /* handled in bindTabs */ }
+});
+
+/* ===== Periodic recalculation on c_puct slider change ===== */
+
+/* ===== Navigate tree events are bound in renderTree ===== */
+
+</script>
+</body>
+</html>
