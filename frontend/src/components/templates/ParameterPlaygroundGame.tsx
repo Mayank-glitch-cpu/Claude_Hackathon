@@ -339,14 +339,11 @@ export function ParameterPlaygroundGame({ blueprint }: { blueprint: ParameterPla
       })
     }
     
-    // If correct and required to proceed, show visualization then completion
+    // If correct and required to proceed, show visualization
     if (isCorrect && task.requiredToProceed) {
       setTimeout(() => {
         setShowVisualization(true)
-        // After showing visualization, mark as completed after a delay
-        setTimeout(() => {
-          setIsCompleted(true)
-        }, 3000) // Show visualization for 3 seconds before completion screen
+        // User will click button to proceed to completion screen
       }, 1500)
     }
   }
@@ -942,6 +939,26 @@ export function ParameterPlaygroundGame({ blueprint }: { blueprint: ParameterPla
                   </div>
                 )}
               </div>
+            </motion.div>
+          )}
+
+          {/* Button to proceed to completion screen - only show when visualization is displayed and answer was correct */}
+          {showVisualization && currentTask && taskResults[currentTask.id]?.isCorrect && !isCompleted && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-6 flex justify-center"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsCompleted(true)}
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                <Trophy className="w-5 h-5" />
+                Continue to Great Page
+              </motion.button>
             </motion.div>
           )}
         </motion.div>

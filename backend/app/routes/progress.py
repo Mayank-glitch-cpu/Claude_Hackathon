@@ -87,7 +87,8 @@ async def get_progress(
                     "retry_count": getattr(step, 'retry_count', 0) or 0,
                     "started_at": step.started_at.isoformat() if step.started_at else None,
                     "completed_at": step.completed_at.isoformat() if step.completed_at else None,
-                    "validation_result": step.validation_result
+                    "validation_result": step.validation_result,
+                    "cached": step.output_data.get("_cached", False) if step.output_data else False
                 }
                 for step in steps
             ]

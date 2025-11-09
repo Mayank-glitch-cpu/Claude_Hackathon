@@ -7,6 +7,7 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import Header from '@/components/Header'
 import { GameEngine } from '@/components/GameEngine'
+import { SpecialGameViewer } from '@/components/SpecialGameViewer'
 import type { GameBlueprint } from '@/types/gameBlueprint'
 
 interface GameState {
@@ -36,8 +37,32 @@ export default function GamePage() {
   const [showFeedback, setShowFeedback] = useState(false)
   const [isCorrect, setIsCorrect] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [specialGameHtml, setSpecialGameHtml] = useState<string | null>(null)
 
   useEffect(() => {
+    // Check if this is a special game (HTML file stored in localStorage)
+    const specialGameHtmlFile = localStorage.getItem('specialGameHtml')
+    
+    if (specialGameHtmlFile) {
+      // Load the HTML file directly
+      axios.get(specialGameHtmlFile, { responseType: 'text' })
+        .then(response => {
+          // Store the full HTML content (with CSS)
+          setSpecialGameHtml(response.data)
+          setLoading(false)
+          // Clean up localStorage
+          localStorage.removeItem('specialGameHtml')
+        })
+        .catch(error => {
+          console.error('Failed to load special game HTML:', error)
+          setError('Failed to load game')
+          setLoading(false)
+          localStorage.removeItem('specialGameHtml')
+        })
+      return
+    }
+
+    // Normal flow - check for visualization ID
     const visualizationId = localStorage.getItem('visualizationId')
     if (!visualizationId) {
       router.push('/app')
@@ -185,6 +210,18 @@ export default function GamePage() {
           </button>
         </div>
       </div>
+    )
+  }
+
+  // If special game HTML is loaded, show it in immersive mode
+  if (specialGameHtml) {
+    return (
+      <SpecialGameViewer
+        htmlContent={specialGameHtml}
+        onComplete={() => {
+          // This will be handled by the SpecialGameViewer component
+        }}
+      />
     )
   }
 

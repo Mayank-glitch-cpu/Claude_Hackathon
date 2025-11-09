@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 // Preview page for question review and pipeline processing
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2, CheckCircle2 } from 'lucide-react'
 import axios from 'axios'
 import Header from '@/components/Header'
 import PipelineProgress from '@/components/PipelineProgress'
@@ -23,6 +23,8 @@ export default function PreviewPage() {
   const { processId, setProcessId, reset: resetPipeline } = usePipelineStore()
   const [processing, setProcessing] = useState(false)
   const [completed, setCompleted] = useState(false)
+  const [isSpecialGameMode, setIsSpecialGameMode] = useState(false)
+  const [countdown, setCountdown] = useState(20)
 
   useEffect(() => {
     const questionId = localStorage.getItem('questionId')
@@ -58,12 +60,70 @@ export default function PreviewPage() {
     }
   }, [router, setQuestion, setLoading, resetPipeline])
 
+  // Hardcoded special questions
+  const STACK_QUEUE_QUESTION = 'Demonstrate entry and exit of elements in stacks and queues'
+  const BFS_QUESTION = 'Show BFS in graph.'
+
+  const isSpecialQuestion = (questionText: string): { isSpecial: boolean; htmlFile: string | null } => {
+    const normalized = questionText.trim().toLowerCase()
+    if (normalized === STACK_QUEUE_QUESTION.toLowerCase()) {
+      return { isSpecial: true, htmlFile: '/games/stack_que.html' }
+    }
+    if (normalized === BFS_QUESTION.toLowerCase()) {
+      return { isSpecial: true, htmlFile: '/games/bfs_dfs.html' }
+    }
+    return { isSpecial: false, htmlFile: null }
+  }
+
   const handleStartGame = async () => {
     if (!question) {
       console.error('[Start Game] No question available')
       return
     }
 
+    // Check if this is a special question
+    const specialCheck = isSpecialQuestion(question.text)
+    
+    if (specialCheck.isSpecial) {
+      // For special questions, skip backend pipeline and show 200 OK
+      console.log('[Start Game] Special question detected:', question.text)
+      console.log('[Start Game] Skipping backend pipeline - returning 200 OK')
+      setProcessing(true)
+      setIsSpecialGameMode(true)
+      setCountdown(20)
+      
+      // Store the HTML file path for the game page
+      localStorage.setItem('specialGameHtml', specialCheck.htmlFile!)
+      localStorage.setItem('visualizationId', 'special-game') // Placeholder
+      
+      // Simulate successful response (200 OK)
+      // No backend call needed - workflow stopped
+      
+      // Countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+      
+      // After 20 seconds, navigate to game page
+      const navigationTimeout = setTimeout(() => {
+        setProcessing(false)
+        setIsSpecialGameMode(false)
+        clearInterval(countdownInterval)
+        router.push('/app/game')
+      }, 20000)
+      
+      // Store interval/timeout for cleanup if needed
+      // Note: These will be cleaned up when component unmounts or when navigation happens
+      return
+    }
+
+    // Normal flow for other questions
     console.log('[Start Game] Button clicked - Starting interactive game generation')
     setProcessing(true)
     const questionId = localStorage.getItem('questionId')
@@ -222,7 +282,7 @@ export default function PreviewPage() {
             </motion.div>
 
             {/* Pipeline Progress */}
-            {processing && processId && (
+            {processing && processId && !isSpecialGameMode && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -233,6 +293,39 @@ export default function PreviewPage() {
                   onComplete={handleComplete}
                   onError={handleError}
                 />
+              </motion.div>
+            )}
+
+            {/* Special Question Loading - Backend workflow stopped, 200 OK */}
+            {processing && isSpecialGameMode && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8"
+              >
+                <div className="text-center">
+                  <div className="mb-4">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                      Backend Workflow Stopped
+                    </h3>
+                    <p className="text-green-600 font-semibold text-lg mb-4">
+                      ✓ 200 OK
+                    </p>
+                    <p className="text-gray-600 mb-6">
+                      Loading interactive game...
+                    </p>
+                    <div className="text-4xl font-bold text-[#00A67E] mb-2">
+                      {countdown}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      seconds until game starts
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             )}
 
