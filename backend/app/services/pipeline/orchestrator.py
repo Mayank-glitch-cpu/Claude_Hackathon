@@ -16,6 +16,7 @@ from app.services.pipeline.layer3_strategy import StrategyOrchestrator
 from app.services.pipeline.layer4_generation import GenerationOrchestrator
 from app.services.pipeline.validators import get_validator
 from app.services.pipeline.retry_handler import RetryHandler
+from app.services.cache_service import CacheService
 from app.utils.logger import setup_logger
 
 logger = setup_logger("orchestrator")
@@ -47,6 +48,7 @@ class PipelineOrchestrator:
         self.template_router = TemplateRouter()
         self.strategy_orchestrator = StrategyOrchestrator()
         self.generation_orchestrator = GenerationOrchestrator()
+        self.cache_service = CacheService()
     
     def execute_pipeline(
         self,
@@ -327,40 +329,92 @@ class PipelineOrchestrator:
                 step_result = result
             
             elif step_name == "story_generation":
-                question_data = {
-                    "text": pipeline_state["question_text"],
-                    "options": pipeline_state["question_options"],
-                    **pipeline_state["analysis"]
-                }
-                result = self.generation_orchestrator.story_generator.generate(
-                    question_data,
-                    pipeline_state["strategy"]["prompt_template"],
-                    pipeline_state["strategy"],
-                    pipeline_state.get("template_type")
-                )
-                pipeline_state["story"] = result["data"]
-                step_result = result
+                question_text = pipeline_state["question_text"]
+                question_options = pipeline_state["question_options"]
+                
+                # Check cache first
+                cached_story = self.cache_service.get_story(question_text, question_options)
+                if cached_story:
+                    logger.info(f"Using cached story for question: {question_text[:50]}...")
+                    pipeline_state["story"] = cached_story
+                    step_result = {
+                        "success": True,
+                        "data": cached_story,
+                        "cached": True,
+                        "state_updates": {"story": cached_story}
+                    }
+                else:
+                    # Generate new story
+                    question_data = {
+                        "text": question_text,
+                        "options": question_options,
+                        **pipeline_state["analysis"]
+                    }
+                    result = self.generation_orchestrator.story_generator.generate(
+                        question_data,
+                        pipeline_state["strategy"]["prompt_template"],
+                        pipeline_state["strategy"],
+                        pipeline_state.get("template_type")
+                    )
+                    pipeline_state["story"] = result["data"]
+                    
+                    # Save to cache
+                    self.cache_service.save_story(question_text, question_options, result["data"])
+                    
+                    step_result = {
+                        **result,
+                        "cached": False
+                    }
             
             elif step_name == "blueprint_generation":
-                result = self.generation_orchestrator.blueprint_generator.generate(
-                    pipeline_state["story"],
-                    pipeline_state["template_type"],
-                    pipeline_state.get("question_text", "")
-                )
-                blueprint_data = result["data"]
+                question_text = pipeline_state["question_text"]
+                question_options = pipeline_state["question_options"]
                 template_type = pipeline_state["template_type"]
-                is_valid = result.get("valid", True)
-                error_fields = result.get("error_fields", [])
-                pipeline_state["blueprint"] = blueprint_data
+                
+                # Check cache first
+                cached_blueprint_data = self.cache_service.get_blueprint(question_text, question_options)
+                if cached_blueprint_data:
+                    logger.info(f"Using cached blueprint for question: {question_text[:50]}...")
+                    blueprint_data = cached_blueprint_data.get("blueprint", cached_blueprint_data)
+                    # Use cached template_type if available, otherwise use current
+                    if "template_type" in cached_blueprint_data:
+                        template_type = cached_blueprint_data["template_type"]
+                    pipeline_state["blueprint"] = blueprint_data
+                    is_valid = True  # Cached blueprints are assumed valid
+                    step_result = {
+                        "success": True,
+                        "data": blueprint_data,
+                        "valid": True,
+                        "cached": True,
+                        "state_updates": {"blueprint": blueprint_data}
+                    }
+                else:
+                    # Generate new blueprint
+                    result = self.generation_orchestrator.blueprint_generator.generate(
+                        pipeline_state["story"],
+                        template_type,
+                        question_text
+                    )
+                    blueprint_data = result["data"]
+                    is_valid = result.get("valid", True)
+                    error_fields = result.get("error_fields", [])
+                    pipeline_state["blueprint"] = blueprint_data
+                    
+                    # Save to cache
+                    self.cache_service.save_blueprint(question_text, question_options, blueprint_data, template_type)
+                    
+                    step_result = {
+                        **result,
+                        "cached": False
+                    }
                 
                 # Log blueprint generation event
                 question_id = pipeline_state.get("question_id", "unknown")
+                is_cached = step_result.get("cached", False)
                 logger.info(
                     f"event=blueprint_generated question_id={question_id} template_type={template_type} "
-                    f"valid={is_valid} error_fields={error_fields}"
+                    f"valid={is_valid} cached={is_cached}"
                 )
-                
-                step_result = result
             
             elif step_name == "asset_planning":
                 asset_requests = self.generation_orchestrator.asset_planner.plan_assets(
@@ -486,11 +540,16 @@ class PipelineOrchestrator:
                     raise ValueError(f"Step validation failed: {', '.join(validation_result.errors)}")
             
             # Update step as completed
+            # Include cache information in output_data
+            output_data = self._sanitize_for_storage(step_result.get("data", {}))
+            if step_result.get("cached"):
+                output_data["_cached"] = True
+            
             PipelineStepRepository.update_status(
                 self.db,
                 step.id,
                 "completed",
-                output_data=self._sanitize_for_storage(step_result.get("data", {})),
+                output_data=output_data,
                 validation_result=step_result.get("validation") if step_result else None
             )
             

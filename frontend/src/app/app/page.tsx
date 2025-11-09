@@ -75,8 +75,9 @@ export default function SearchPage() {
       localStorage.removeItem('visualizationId')
       localStorage.removeItem('processId')
       
-      // Store the question ID for preview
+      // Store the question ID and text for preview
       localStorage.setItem('questionId', questionId)
+      localStorage.setItem('questionText', questionText)
       
       // Navigate to preview page (user will click "Start Interactive Game" button there)
       router.push('/app/preview')
@@ -146,7 +147,7 @@ export default function SearchPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mb-12"
+            className="mb-8"
           >
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
@@ -171,6 +172,37 @@ export default function SearchPage() {
                   <Search className="w-5 h-5" />
                 </button>
               )}
+            </div>
+          </motion.div>
+
+          {/* Quick Suggestions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-12"
+          >
+            <div className="flex gap-4 flex-wrap justify-center">
+              <button
+                onClick={() => {
+                  setSearchQuery('Demonstrate entry and exit of elements in stacks and queues')
+                  handleSearch()
+                }}
+                disabled={isSearching || processingIndex !== null}
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                📚 Demonstrate entry and exit of elements in stacks and queues
+              </button>
+              <button
+                onClick={() => {
+                  setSearchQuery('Show BFS in graph.')
+                  handleSearch()
+                }}
+                disabled={isSearching || processingIndex !== null}
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                🗺️ Show BFS in graph.
+              </button>
             </div>
           </motion.div>
 

@@ -2,6 +2,9 @@
 logs/
 *.log
 
+# Cache
+cache/
+
 # Environment
 .env
 .env.local
