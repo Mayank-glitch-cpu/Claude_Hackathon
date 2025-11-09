@@ -17,15 +17,77 @@ export interface MatrixMatchBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "matrix_match";
     questionText: string;
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    cellSelect: string;
-    matchFound: string;
-    mismatch: string;
-    matrixComplete?: string;
-  };
 }
+
+---
+
+## MATRIX_MATCH Data Extraction Instructions
+
+**CRITICAL: Extract ONLY data values. DO NOT include UI hints or animation descriptions.**
+
+### 1. Rows Array - Extract Data Only:
+
+**For each row, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "row1", "row2", "category_a")
+- **label**: Extract exact row label from component_specifications (e.g., "Mammals", "Vertebrates", "Category A")
+- **DO NOT** include `type` field - the React component decides how to render rows
+
+### 2. Columns Array - Extract Data Only:
+
+**For each column, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "col1", "col2", "property_x")
+- **label**: Extract exact column label from component_specifications (e.g., "Has fur", "Lives in water", "Property X")
+- **DO NOT** include `type` field - the React component decides how to render columns
+
+### 3. Matches Array - Extract Data Only:
+
+**For each match, extract from component_specifications.game_logic:**
+
+- **rowId**: Extract row ID from component_specifications (which row this match belongs to)
+- **columnId**: Extract column ID from component_specifications (which column this match belongs to)
+- **isCorrect**: Extract correctness from component_specifications.game_logic (true if this match is correct)
+- **DO NOT** include `type` field - the React component decides how to render matches
+
+### 4. Tasks Array - Extract Data Only:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "matrix_task")
+- **questionText**: Extract from question_flow or component_specifications (e.g., "Match rows with columns")
+- **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
+
+### 5. Title and NarrativeIntro - Extract Data:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Matrix Matching Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "matching matrix", "grid game", "table matching") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and grid styling
+
+### 6. Visual Styling Extraction:
+
+**Extract visual metaphors and styling hints from narrativeIntro:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "matching matrix", "grid game", "table matching") that inform the component's visual design
+- **Color Schemes**: Extract color hints from narrative context (e.g., "organized grid", "matching table", "classification matrix")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "organizational", "scientific", "educational", "analytical")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: row labels, column labels, match data, question text
+2. **DO NOT** include UI hints like `type: "matrix"` or `type: "grid"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

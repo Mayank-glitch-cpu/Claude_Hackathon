@@ -22,15 +22,82 @@ export interface BeforeAfterTransformerBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "transformation_sequence" | "transformation_analysis";
     questionText: string;
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    transformationApply: string;
-    stateTransition: string;
-    sequenceCorrect: string;
-    sequenceIncorrect?: string;
-  };
 }
+
+---
+
+## BEFORE_AFTER_TRANSFORMER Data Extraction Instructions
+
+**CRITICAL: Extract ONLY data values. DO NOT include UI hints or animation descriptions.**
+
+### 1. BeforeState Object - Extract Data Only:
+
+**Extract from component_specifications:**
+
+- **description**: Extract before state description from component_specifications (e.g., "Initial state with all items", "Original configuration")
+- **assetPrompt**: Extract detailed before state description from component_specifications.visual_components (for image generation)
+- **assetUrl**: Extract before state image URL from component_specifications (if applicable)
+- **data**: Extract before state data from component_specifications (if applicable, e.g., {"items": [1, 2, 3]})
+- **DO NOT** include `type` field - the React component decides how to render before state
+
+### 2. AfterState Object - Extract Data Only:
+
+**Extract from component_specifications:**
+
+- **description**: Extract after state description from component_specifications (e.g., "Final state with sorted items", "Transformed configuration")
+- **assetPrompt**: Extract detailed after state description from component_specifications.visual_components (for image generation)
+- **assetUrl**: Extract after state image URL from component_specifications (if applicable)
+- **data**: Extract after state data from component_specifications (if applicable, e.g., {"items": [1, 2, 3]})
+- **DO NOT** include `type` field - the React component decides how to render after state
+
+### 3. Transformations Array - Extract Data Only:
+
+**For each transformation, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "transform1", "transform2", "step_a")
+- **description**: Extract transformation description from component_specifications (e.g., "Sort items", "Reverse order", "Apply filter")
+- **order**: Extract transformation order from component_specifications.game_logic (correct order in sequence, 0-based)
+- **effect**: Extract transformation effect from component_specifications (if applicable, e.g., "Items are sorted", "Order is reversed")
+- **DO NOT** include `type` field - the React component decides how to render transformations
+
+### 4. Tasks Array - Extract Data Only:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "transform_task")
+- **questionText**: Extract from question_flow or component_specifications (e.g., "Arrange transformations in correct order", "Identify the transformation")
+- **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
+
+### 5. Title and NarrativeIntro - Extract Data:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Transformation Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "before and after", "transformation sequence", "state change") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and transformation styling
+
+### 6. Visual Styling Extraction:
+
+**Extract visual metaphors and styling hints from narrativeIntro and visualization.assetPrompt:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "before and after", "transformation sequence", "state change") that inform the component's visual design
+- **Color Schemes**: Extract color hints from visualization.assetPrompt (e.g., "before blue", "after green", "transformation purple")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "transformation", "comparison", "technical", "educational")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: before/after state data, transformation descriptions, question text
+2. **DO NOT** include UI hints like `type: "comparison"` or `type: "transformation"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro and assetPrompt - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

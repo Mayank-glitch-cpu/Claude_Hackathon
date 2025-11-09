@@ -9,7 +9,6 @@ from app.repositories.game_blueprint_repository import GameBlueprintRepository
 from app.db.session import get_db
 from app.utils.logger import setup_logger
 import uuid
-import asyncio
 
 # Set up logging
 logger = setup_logger("generate")
@@ -56,16 +55,21 @@ async def start_processing(
         logger.error(f"[API] Question {question_id} not found")
         raise HTTPException(status_code=404, detail="Question not found")
     
-    # Create process record
+    # CRITICAL: Always create a NEW process for each question to ensure fresh pipeline run
+    # Even if a process exists for this question_id, create a new one to ensure fresh processing
+    logger.info(f"[API] Creating NEW process for question_id={question_id} (force_fresh={force_fresh})")
     process = ProcessRepository.create(db, question_id, initial_status="pending")
     process_id = process.id
     
-    logger.info(f"[API] Starting processing pipeline - process_id={process_id}, question_id={question_id}, force_fresh={force_fresh}")
+    logger.info(f"[API] Starting processing pipeline - NEW process_id={process_id}, question_id={question_id}, force_fresh={force_fresh}")
     
-    # Start background processing
+    # CRITICAL: Start background processing AFTER preparing response to ensure immediate return
+    # This ensures the HTTP response is sent immediately, not waiting for background task
     background_tasks.add_task(process_pipeline_background, process_id, question_id, force_fresh)
     logger.info(f"[API] Background task added for process_id={process_id}")
     
+    # CRITICAL: Return immediately - don't wait for background task
+    # The background task will run asynchronously after the response is sent
     return {
         "process_id": process_id,
         "question_id": question_id,

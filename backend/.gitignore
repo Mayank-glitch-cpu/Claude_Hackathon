@@ -22,3 +22,9 @@ ENV/
 *.swp
 *.swo
 
+# Windows reserved device names
+nul
+CON
+PRN
+AUX
+

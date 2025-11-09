@@ -28,8 +28,10 @@ class PipelineStepRepository:
             started_at=datetime.utcnow()
         )
         db.add(step)
+        # CRITICAL: Just use commit() directly - it will auto-flush and assign ID
+        # Don't use flush() + commit() in threaded contexts - it causes transaction state issues with SQLite
+        # commit() automatically flushes and the object will have its ID after commit
         db.commit()
-        db.refresh(step)
         logger.info(f"Created pipeline step: {step.id} - {step_name} (step {step_number})")
         return step
     
@@ -72,8 +74,9 @@ class PipelineStepRepository:
         elif status in ["completed", "error", "skipped"]:
             step.completed_at = datetime.utcnow()
         
+        # CRITICAL: Just use commit() directly - it will auto-flush
+        # Don't use flush() + commit() in threaded contexts - it causes transaction state issues with SQLite
         db.commit()
-        db.refresh(step)
         logger.info(f"Updated step {step_id}: status={status}")
         return step
     
@@ -88,8 +91,9 @@ class PipelineStepRepository:
         step.status = "pending"  # Reset to pending for retry
         step.error_message = None
         step.completed_at = None
+        # CRITICAL: Just use commit() directly - it will auto-flush
+        # Don't use flush() + commit() in threaded contexts - it causes transaction state issues with SQLite
         db.commit()
-        db.refresh(step)
         logger.info(f"Incremented retry count for step {step_id}: {step.retry_count}")
         return step
     

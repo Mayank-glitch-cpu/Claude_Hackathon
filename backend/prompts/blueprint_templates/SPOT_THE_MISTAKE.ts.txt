@@ -3,7 +3,6 @@ export interface SpotTheMistakeBlueprint {
   title: string;
   narrativeIntro: string;
   content: {
-    type: "code" | "text" | "diagram";
     text?: string;
     code?: string;
     assetPrompt?: string;
@@ -20,14 +19,75 @@ export interface SpotTheMistakeBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "mistake_identification";
     questionText: string;
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    mistakeHighlight: string;
-    mistakeFound: string;
-    allMistakesFound?: string;
-  };
 }
+
+---
+
+## SPOT_THE_MISTAKE Data Extraction Instructions
+
+**CRITICAL: Extract ONLY data values. DO NOT include UI hints or animation descriptions.**
+
+### 1. Content Object - Extract Data Only:
+
+**Extract from component_specifications:**
+
+- **text**: Extract text content from component_specifications (if applicable, e.g., "The quick brown fox jumps over the lazy dog")
+- **code**: Extract code content from component_specifications (if applicable, e.g., "def add(a, b):\n    return a + b")
+- **assetPrompt**: Extract detailed content description from component_specifications.visual_components (for image generation)
+- **assetUrl**: Extract content URL from component_specifications (if applicable)
+- **DO NOT** include `type` field - the React component decides how to render content
+
+### 2. Mistakes Array - Extract Data Only:
+
+**For each mistake, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "mistake1", "mistake2", "error_a")
+- **lineNumber**: Extract line number from component_specifications (if applicable, e.g., 5)
+- **startChar**: Extract start character position from component_specifications (if applicable, e.g., 10)
+- **endChar**: Extract end character position from component_specifications (if applicable, e.g., 15)
+- **regionId**: Extract region ID from component_specifications (if applicable, for diagram mistakes)
+- **description**: Extract mistake description from component_specifications (e.g., "Missing semicolon", "Incorrect variable name")
+- **correction**: Extract correction text from component_specifications (e.g., "Add semicolon", "Use correct variable name")
+- **DO NOT** include `type` field - the React component decides how to render mistakes
+
+### 3. Tasks Array - Extract Data Only:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "mistake_task")
+- **questionText**: Extract from question_flow or component_specifications (e.g., "Find all mistakes in the code", "Identify errors in the text")
+- **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
+
+### 4. Title and NarrativeIntro - Extract Data:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Mistake Finder Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "code review", "proofreading", "error detection") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and highlighting styling
+
+### 5. Visual Styling Extraction:
+
+**Extract visual metaphors and styling hints from narrativeIntro and visualization.assetPrompt:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "code review", "proofreading", "error detection") that inform the component's visual design
+- **Color Schemes**: Extract color hints from visualization.assetPrompt (e.g., "code blue", "error red", "correction green")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "programming", "writing", "technical", "educational")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: content text/code, mistake locations, question text
+2. **DO NOT** include UI hints like `type: "code"` or `type: "text"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro and assetPrompt - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

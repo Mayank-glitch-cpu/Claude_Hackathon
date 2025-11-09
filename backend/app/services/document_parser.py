@@ -59,14 +59,37 @@ class DocumentParser:
         """Extract question and options from text"""
         logger.info(f"Extracting question from text - Length: {len(text)} chars")
         
-        # Simple regex patterns to find questions
-        question_pattern = r'([A-Z][^.!?]*[?])'
+        # Improved regex patterns to find questions
+        # Pattern 1: Match from start of text until first question mark (handles multi-sentence questions)
+        # This captures the full question including context sentences
+        full_question_pattern = r'^([^?]*\?)'
+        
+        # Pattern 2: Match individual sentences ending with question mark (fallback)
+        # This allows periods and other punctuation within the question
+        question_pattern = r'([A-Z][^?]*[?])'
+        
         option_pattern = r'([a-d]\)\s*[^\n]+)'
         
-        questions = re.findall(question_pattern, text)
-        options = re.findall(option_pattern, text, re.IGNORECASE)
+        # Try to match full question from start of text
+        full_match = re.match(full_question_pattern, text.strip(), re.MULTILINE | re.DOTALL)
         
-        logger.debug(f"Found {len(questions)} potential questions, {len(options)} potential options")
+        if full_match:
+            # Found full question from start
+            question_text = full_match.group(1).strip()
+            logger.debug("Matched full question from start of text")
+        else:
+            # Fallback: find all questions and take the first one
+            questions = re.findall(question_pattern, text)
+            if questions:
+                question_text = questions[0].strip()
+                logger.debug(f"Matched {len(questions)} potential questions, using first")
+            else:
+                # Last resort: use first line or whole text up to first newline
+                question_text = text.split('\n')[0].strip()
+                logger.debug("No question pattern found, using first line")
+        
+        # Extract options
+        options = re.findall(option_pattern, text, re.IGNORECASE)
         
         # Clean up options
         cleaned_options = []
@@ -75,8 +98,7 @@ class DocumentParser:
             if cleaned:
                 cleaned_options.append(cleaned)
         
-        # Get the first question or use the whole text
-        question_text = questions[0] if questions else text.split('\n')[0]
+        logger.debug(f"Found {len(cleaned_options)} potential options")
         
         result = {
             "text": question_text.strip(),

@@ -284,6 +284,12 @@ class PipelineOrchestrator:
                 template_type = routing_data.get("templateType")
                 confidence = routing_data.get("confidence", 0)
                 rationale = routing_data.get("rationale", "")
+                
+                # Validation: Ensure template_type is set
+                if not template_type:
+                    logger.error(f"CRITICAL: Template routing returned None for question {pipeline_state.get('question_id', 'unknown')}")
+                    raise ValueError("Template routing failed - template_type is None")
+                
                 pipeline_state["template_type"] = template_type
                 
                 # Log template routing event

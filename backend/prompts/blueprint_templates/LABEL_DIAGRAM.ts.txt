@@ -20,7 +20,6 @@ export interface LabelDiagramBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "label_diagram" | "free_response";
     questionText: string;
     requiredToProceed: boolean;
     rubric?: {
@@ -28,12 +27,6 @@ export interface LabelDiagramBlueprint {
       commonMisconceptions?: string[];
     };
   }>;
-  animationCues: {
-    correctPlacement: string;
-    incorrectPlacement: string;
-    onSubmitCorrect?: string;
-    onSubmitIncorrect?: string;
-  };
 }
 
 ---
@@ -85,54 +78,41 @@ export interface LabelDiagramBlueprint {
 - **text**: Extract exact label text from component_specifications (e.g., "Heart", "Resistor", "CPU")
 - **isCorrect**: Extract correctness mapping from component_specifications.game_logic (which label matches which zone)
 
-### 3. Tasks Array - Customize for Question:
+### 3. Tasks Array - Extract Data Only:
 
 **Extract from component_specifications.game_logic and question_flow:**
 
 - **id**: Use descriptive ID (e.g., "task1", "label_task")
-- **type**: Use "label_diagram" for labeling tasks, "free_response" for explanation tasks
 - **questionText**: Extract from question_flow or component_specifications (e.g., "Label the parts of the heart", "Explain how the heart pumps blood")
 - **requiredToProceed**: Set to true if task must be completed
 - **rubric**: Extract from component_specifications.game_logic (mustMention, commonMisconceptions)
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
 
-### 4. AnimationCues Object - Customize for Question:
-
-**Extract from component_specifications.styling_details.animations:**
-
-- **correctPlacement**: Extract success animation from component_specifications:
-  - Describe animation when label is correctly placed (e.g., "Green glow appears around zone, checkmark animation plays")
-  - Include duration, easing, visual effects
-  - Example: "The zone glows green for 0.5 seconds with a checkmark animation when label is correctly placed."
-  
-- **incorrectPlacement**: Extract error animation from component_specifications:
-  - Describe animation when label is incorrectly placed (e.g., "Red shake animation, X mark appears")
-  - Include duration, easing, visual effects
-  - Example: "The zone shakes red for 0.3 seconds with an X mark animation when label is incorrectly placed."
-  
-- **onSubmitCorrect**: Extract success animation from component_specifications:
-  - Describe animation when all labels are correctly placed
-  - Include visual effects, duration
-  - Example: "A success message appears with a celebration animation when all labels are correctly placed."
-  
-- **onSubmitIncorrect**: Extract error animation from component_specifications:
-  - Describe animation when submission has errors
-  - Include visual effects, duration
-  - Example: "An error message appears with a shake animation when submission has incorrect labels."
-
-### 5. Title and NarrativeIntro - Customize for Question:
+### 4. Title and NarrativeIntro - Extract Data:
 
 **Extract from story_data:**
 
 - **title**: Extract from story_title (e.g., "The Heart Anatomy Challenge")
 - **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "anatomy diagram", "circuit board", "system architecture") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and diagram styling
 
-## Key Customization Guidelines:
+### 5. Visual Styling Extraction:
 
-1. **Extract specific values** from component_specifications (zone positions, label text, animation details)
-2. **Customize diagram type** based on question context (anatomy for biology, circuit for electronics, etc.)
-3. **Customize zone positions** from component_specifications.visual_components.dimensions
-4. **Customize label text** with exact text from component_specifications
-5. **Customize animations** with detailed descriptions from component_specifications.styling_details
-6. **Include production-quality details** that enable rendering a polished, interactive game
-7. **Adapt all components** to the specific question while using the template's component set
+**Extract visual metaphors and styling hints from narrativeIntro and visualization.assetPrompt:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "anatomy diagram", "circuit schematic", "system architecture") that inform the component's visual design
+- **Color Schemes**: Extract color hints from visualization.assetPrompt (e.g., "medical blue", "technical gray", "scientific white")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "medical", "technical", "scientific", "educational")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: zone positions, label text, question text
+2. **DO NOT** include UI hints or animation descriptions
+3. **DO NOT** specify how components should render - components are smart and decide this
+4. **Include visual metaphors** in narrativeIntro and assetPrompt - components extract styling from these
+5. The React component will render high-quality UI with built-in animations based on the data you provide
 

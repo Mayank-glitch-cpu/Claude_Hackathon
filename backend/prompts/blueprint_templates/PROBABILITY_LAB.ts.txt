@@ -6,29 +6,85 @@ export interface ProbabilityLabBlueprint {
     id: string;
     name: string;
     description: string;
-    type: "coin_flip" | "dice_roll" | "card_draw" | "custom";
     parameters?: Record<string, any>;
   }>;
   parameters: Array<{
     id: string;
     label: string;
-    type: "slider" | "input" | "dropdown";
     min?: number;
     max?: number;
     defaultValue: number | string;
   }>;
   tasks: Array<{
     id: string;
-    type: "probability_prediction" | "experiment_analysis";
     questionText: string;
     targetProbability?: number;
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    experimentRun: string;
-    resultUpdate: string;
-    probabilityDisplay: string;
-    targetReached?: string;
-  };
 }
+
+---
+
+## PROBABILITY_LAB Data Extraction Instructions
+
+**CRITICAL: Extract ONLY data values. DO NOT include UI hints or animation descriptions.**
+
+### 1. Experiments Array - Extract Data Only:
+
+**For each experiment, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "experiment1", "experiment2", "trial_a")
+- **name**: Extract exact experiment name from component_specifications (e.g., "Coin Toss", "Dice Roll", "Card Draw")
+- **description**: Extract experiment description from component_specifications (e.g., "Flip a coin 10 times", "Roll a die 6 times")
+- **parameters**: Extract experiment parameters from component_specifications (if applicable, e.g., {"numTrials": 10, "numSides": 6})
+- **DO NOT** include `type` field - the React component decides how to render experiments
+
+### 2. Parameters Array - Extract Data Only:
+
+**For each parameter, extract from component_specifications.interactive_elements:**
+
+- **id**: Use descriptive ID based on question (e.g., "numTrials", "probability", "sampleSize")
+- **label**: Extract exact parameter label from component_specifications (e.g., "Number of Trials", "Probability", "Sample Size")
+- **min/max**: Extract from component_specifications (e.g., min: 1, max: 100 for numTrials)
+- **defaultValue**: Extract initial value from component_specifications (e.g., 10 for numTrials)
+- **DO NOT** include `type` field - the React component decides how to render controls
+
+### 3. Tasks Array - Extract Data Only:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "probability_task")
+- **questionText**: Extract from question_flow or component_specifications (e.g., "What is the probability of getting heads?", "Calculate the probability")
+- **targetProbability**: Extract target probability from component_specifications.game_logic (if applicable, e.g., 0.5, 0.25)
+- **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
+
+### 4. Title and NarrativeIntro - Extract Data:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Probability Lab Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "probability lab", "experiment station", "statistical playground") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and lab interface styling
+
+### 5. Visual Styling Extraction:
+
+**Extract visual metaphors and styling hints from narrativeIntro:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "probability lab", "experiment station", "statistical playground") that inform the component's visual design
+- **Color Schemes**: Extract color hints from narrative context (e.g., "lab blue", "experiment green", "statistical purple")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "scientific", "statistical", "mathematical", "educational")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: experiment data, parameter values, question text
+2. **DO NOT** include UI hints like `type: "lab"` or `type: "experiment"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

@@ -18,16 +18,76 @@ export interface MicroScenarioBranchingBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "decision_making" | "path_analysis";
     questionText: string;
     targetPath?: string[]; // Array of scenario IDs
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    scenarioTransition: string;
-    choiceSelect: string;
-    pathComplete: string;
-    optimalPath?: string;
-  };
 }
+
+---
+
+## MICRO_SCENARIO_BRANCHING Data Extraction Instructions
+
+**CRITICAL: Extract ONLY data values. DO NOT include UI hints or animation descriptions.**
+
+### 1. Scenarios Array - Extract Data Only:
+
+**For each scenario, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "scenario1", "scenario2", "scene_a")
+- **text**: Extract exact scenario text from component_specifications (e.g., "You are at a crossroads. Which path do you take?")
+- **imageUrl**: Extract scenario image URL from component_specifications (if applicable)
+- **assetPrompt**: Extract detailed scenario description from component_specifications.visual_components (for image generation)
+- **DO NOT** include `type` field - the React component decides how to render scenarios
+
+### 2. Branches Array - Extract Data Only:
+
+**For each branch, extract from component_specifications:**
+
+- **id**: Use descriptive ID based on question (e.g., "branch1", "branch2", "choice_ab")
+- **fromScenarioId**: Extract source scenario ID from component_specifications
+- **toScenarioId**: Extract target scenario ID from component_specifications
+- **choiceText**: Extract choice text from component_specifications (e.g., "Take the left path", "Go straight", "Turn back")
+- **isCorrect**: Extract correctness from component_specifications.game_logic (true if this choice is correct)
+- **consequence**: Extract consequence text from component_specifications (if applicable, e.g., "You find a treasure", "You encounter a monster")
+- **DO NOT** include `type` field - the React component decides how to render branches
+
+### 3. Tasks Array - Extract Data Only:
+
+**Extract from component_specifications.game_logic and question_flow:**
+
+- **id**: Use descriptive ID (e.g., "task1", "scenario_task")
+- **questionText**: Extract from question_flow or component_specifications (e.g., "Navigate through the scenarios", "Find the correct path")
+- **targetPath**: Extract target path from component_specifications.game_logic (if applicable, array of scenario IDs)
+- **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
+
+### 4. Title and NarrativeIntro - Extract Data:
+
+**Extract from story_data:**
+
+- **title**: Extract from story_title (e.g., "The Branching Scenario Challenge")
+- **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "branching story", "decision tree", "scenario path") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and scenario styling
+
+### 5. Visual Styling Extraction:
+
+**Extract visual metaphors and styling hints from narrativeIntro:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "branching story", "decision tree", "scenario path") that inform the component's visual design
+- **Color Schemes**: Extract color hints from narrative context (e.g., "story blue", "decision green", "scenario purple")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "narrative", "interactive", "creative", "educational")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: scenario text, branch choices, question text
+2. **DO NOT** include UI hints like `type: "scenario"` or `type: "branch"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

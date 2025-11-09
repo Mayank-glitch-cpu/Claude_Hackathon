@@ -20,8 +20,10 @@ class ProcessRepository:
             started_at=datetime.utcnow()
         )
         db.add(process)
+        # CRITICAL: Just use commit() directly - it will auto-flush and assign ID
+        # Don't use flush() + commit() in threaded contexts - it causes transaction state issues with SQLite
+        # commit() automatically flushes and the object will have its ID after commit
         db.commit()
-        db.refresh(process)
         logger.info(f"Created process: {process.id} for question: {question_id}")
         return process
     
@@ -57,8 +59,9 @@ class ProcessRepository:
         if status in ["completed", "error", "cancelled"]:
             process.completed_at = datetime.utcnow()
         
+        # CRITICAL: Just use commit() directly - it will auto-flush
+        # Don't use flush() + commit() in threaded contexts - it causes transaction state issues with SQLite
         db.commit()
-        db.refresh(process)
         logger.info(f"Updated process {process_id}: status={status}, progress={progress}")
         return process
     

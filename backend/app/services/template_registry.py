@@ -90,6 +90,41 @@ class TemplateRegistry:
         if blueprint.get("templateType") != template_type:
             errors.append(f"templateType mismatch: expected {template_type}, got {blueprint.get('templateType')}")
         
+        # CRITICAL: Reject blueprints with UI hints or animationCues (Smart Component, Dumb Blueprint pattern)
+        # Blueprints must contain DATA ONLY - no UI hints, no animation descriptions.
+        # React components are "smart" and decide how to render and animate based on data.
+        
+        # Check for animationCues object
+        if "animationCues" in blueprint:
+            errors.append("Blueprint contains 'animationCues' object. Blueprints must be data-only - components have built-in animations. Remove animationCues and let components handle animations via CSS transitions.")
+        
+        # Helper function to recursively check for UI hints
+        def check_for_ui_hints(obj, path="", depth=0):
+            """Recursively check for UI hint fields"""
+            if depth > 5:  # Prevent infinite recursion
+                return
+            
+            if isinstance(obj, dict):
+                # Check for common UI hint field names
+                ui_hint_fields = ["type", "component", "widget", "control", "uiType", "componentType"]
+                for field in ui_hint_fields:
+                    if field in obj:
+                        field_path = f"{path}.{field}" if path else field
+                        errors.append(f"Blueprint contains UI hint field '{field_path}'. Blueprints must be data-only - components decide UI rendering. Use data fields like 'initialValue', 'goalValue', 'label', etc. instead.")
+                
+                # Recursively check nested objects
+                for key, value in obj.items():
+                    if key not in ["templateType", "title", "narrativeIntro"]:  # Skip top-level metadata
+                        new_path = f"{path}.{key}" if path else key
+                        check_for_ui_hints(value, new_path, depth + 1)
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    new_path = f"{path}[{i}]" if path else f"[{i}]"
+                    check_for_ui_hints(item, new_path, depth + 1)
+        
+        # Check entire blueprint for UI hints
+        check_for_ui_hints(blueprint)
+        
         return len(errors) == 0, errors
     
     def get_template_types(self) -> List[str]:

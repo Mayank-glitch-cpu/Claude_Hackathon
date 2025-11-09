@@ -17,16 +17,9 @@ export interface MatchPairsBlueprint {
   }>;
   tasks: Array<{
     id: string;
-    type: "match_pairs";
     questionText: string;
     requiredToProceed: boolean;
   }>;
-  animationCues: {
-    cardFlip: string;
-    cardMatch: string;
-    cardMismatch: string;
-    allMatched?: string;
-  };
 }
 
 ---
@@ -68,52 +61,41 @@ export interface MatchPairsBlueprint {
   - **text**: Extract exact text from component_specifications (e.g., "Pumps blood", "Blood circulation", "4")
   - **imageUrl**: Extract image URL or description from component_specifications (if applicable)
 
-### 2. Tasks Array - Customize for Question:
+### 2. Tasks Array - Extract Data Only:
 
 **Extract from component_specifications.game_logic and question_flow:**
 
 - **id**: Use descriptive ID (e.g., "task1", "match_task")
-- **type**: Use "match_pairs" for matching tasks
 - **questionText**: Extract from question_flow or component_specifications (e.g., "Match each term with its definition", "Match each equation with its solution")
 - **requiredToProceed**: Set to true if task must be completed
+- **DO NOT** include `type` field - the React component decides task handling
+- **DO NOT** include animation descriptions - components have built-in animations
 
-### 3. AnimationCues Object - Customize for Question:
-
-**Extract from component_specifications.styling_details.animations:**
-
-- **cardFlip**: Extract flip animation from component_specifications:
-  - Describe flip animation when card is revealed (e.g., "3D flip animation, 0.5 seconds, ease-out")
-  - Include duration, easing, visual effects
-  - Example: "Cards flip with a 3D rotation animation over 0.5 seconds with ease-out easing when clicked."
-  
-- **cardMatch**: Extract success animation from component_specifications:
-  - Describe animation when pair is correctly matched (e.g., "Green glow, connection line, checkmark")
-  - Include duration, easing, visual effects
-  - Example: "Matched cards glow green with a connection line animation and checkmark when correctly matched."
-  
-- **cardMismatch**: Extract error animation from component_specifications:
-  - Describe animation when pair is incorrectly matched (e.g., "Red shake, X mark, cards flip back")
-  - Include duration, easing, visual effects
-  - Example: "Mismatched cards shake red with an X mark animation and flip back face-down after 1 second."
-  
-- **allMatched**: Extract completion animation from component_specifications:
-  - Describe animation when all pairs are matched
-  - Include visual effects, duration
-  - Example: "A celebration animation with sparkles and a success message appears when all pairs are matched."
-
-### 4. Title and NarrativeIntro - Customize for Question:
+### 3. Title and NarrativeIntro - Extract Data:
 
 **Extract from story_data:**
 
 - **title**: Extract from story_title (e.g., "The Matching Challenge")
 - **narrativeIntro**: Extract from story_context or narrativeIntro (full narrative description)
+  - **IMPORTANT**: Include full narrative text as it contains visual metaphors (e.g., "matching cards", "pairing game", "memory challenge") that the React component will use to determine visual styling and theming
+  - The component will extract visual metaphors from this text to adapt colors, backgrounds, and card designs
 
-## Key Customization Guidelines:
+### 4. Visual Styling Extraction:
 
-1. **Extract specific values** from component_specifications (card text, image URLs, animation details)
-2. **Customize card content** based on question context (terms, definitions, equations, solutions, etc.)
-3. **Customize card text** with exact text from component_specifications
-4. **Customize animations** with detailed descriptions from component_specifications.styling_details
-5. **Include production-quality details** that enable rendering a polished, interactive game
-6. **Adapt all components** to the specific question while using the template's component set
+**Extract visual metaphors and styling hints from narrativeIntro:**
+
+- **Visual Metaphors**: The narrativeIntro may contain visual metaphors (e.g., "matching cards", "pairing game", "memory challenge") that inform the component's visual design
+- **Color Schemes**: Extract color hints from narrative context (e.g., "colorful cards", "memory game", "matching pairs")
+- **Theming**: Extract theme context from narrativeIntro (e.g., "educational", "game", "memory", "matching")
+- **DO NOT** specify exact colors or styles - the component interprets these metaphors
+- **DO NOT** include `animationCues` or animation descriptions - components have built-in animations
+
+## Key Guidelines:
+
+1. **Extract ONLY data values**: pair text, question text
+2. **DO NOT** include UI hints like `type: "card"` or `type: "match"`
+3. **DO NOT** include `animationCues` objects or animation descriptions
+4. **DO NOT** specify how components should render - components are smart and decide this
+5. **Include visual metaphors** in narrativeIntro - components extract styling from these
+6. The React component will render high-quality UI with built-in animations based on the data you provide
 

@@ -263,6 +263,64 @@ class BlueprintGenerator:
             logger.error(f"Failed to load TS interface for {template_type}: {e}")
             return f"// TypeScript interface for {template_type}"
     
+    def _normalize_numeric_values(self, blueprint: Dict[str, Any], template_type: str) -> Dict[str, Any]:
+        """Normalize numeric values: coerce string numbers to actual numbers"""
+        def coerce_to_number(value: Any) -> Any:
+            """Coerce value to number if it's a numeric string"""
+            if isinstance(value, str):
+                # Try to parse as float/int
+                try:
+                    # Check if it's a float
+                    if '.' in value or 'e' in value.lower() or 'E' in value:
+                        return float(value)
+                    else:
+                        # Try int first, fallback to float
+                        return int(value)
+                except (ValueError, TypeError):
+                    return value
+            return value
+        
+        def normalize_value(value: Any) -> Any:
+            """Normalize a single value recursively"""
+            if isinstance(value, dict):
+                normalized = {}
+                for key, val in value.items():
+                    # Normalize numeric fields based on template type
+                    if template_type == "PARAMETER_PLAYGROUND":
+                        # For parameters: min, max, defaultValue should be numbers
+                        if key in ["min", "max", "defaultValue"]:
+                            normalized[key] = coerce_to_number(val)
+                        # For tasks: targetValues should have numeric values
+                        elif key == "targetValues" and isinstance(val, dict):
+                            normalized[key] = {k: coerce_to_number(v) for k, v in val.items()}
+                        # For parameters array: normalize each parameter
+                        elif key == "parameters" and isinstance(val, list):
+                            normalized[key] = [
+                                {**param, "min": coerce_to_number(param.get("min", 0)),
+                                 "max": coerce_to_number(param.get("max", 100)),
+                                 "defaultValue": coerce_to_number(param.get("defaultValue", 0))}
+                                if isinstance(param, dict) else normalize_value(param)
+                                for param in val
+                            ]
+                        # For tasks array: normalize targetValues
+                        elif key == "tasks" and isinstance(val, list):
+                            normalized[key] = [
+                                {**task, "targetValues": {k: coerce_to_number(v) for k, v in task.get("targetValues", {}).items()}}
+                                if isinstance(task, dict) and "targetValues" in task else normalize_value(task)
+                                for task in val
+                            ]
+                        else:
+                            normalized[key] = normalize_value(val)
+                    else:
+                        normalized[key] = normalize_value(val)
+                return normalized
+            elif isinstance(value, list):
+                return [normalize_value(item) for item in value]
+            else:
+                return value
+        
+        return normalize_value(blueprint)
+    
     def generate(
         self,
         story_data: Dict[str, Any],
@@ -321,8 +379,21 @@ Do not wrap the response in any additional text."""
             
             blueprint = json.loads(response)
             
-            # Ensure templateType matches
+            # Normalize numeric values: coerce string numbers to actual numbers
+            # LLM may return strings like "10.5" instead of 10.5, which causes runtime errors
+            blueprint = self._normalize_numeric_values(blueprint, template_type)
+            
+            # Ensure templateType matches (CRITICAL for frontend routing)
+            if "templateType" not in blueprint or blueprint["templateType"] != template_type:
+                logger.warning(f"Blueprint templateType mismatch: expected {template_type}, got {blueprint.get('templateType')}. Setting to {template_type}")
             blueprint["templateType"] = template_type
+            
+            # Validate that templateType is set correctly
+            if blueprint.get("templateType") != template_type:
+                logger.error(f"CRITICAL: Failed to set templateType in blueprint! Expected {template_type}, got {blueprint.get('templateType')}")
+                raise ValueError(f"Failed to set templateType in blueprint: expected {template_type}")
+            
+            logger.info(f"Blueprint templateType set to: {blueprint['templateType']}")
             
             # Validate blueprint
             is_valid, errors = self.template_registry.validate_blueprint(blueprint, template_type)
