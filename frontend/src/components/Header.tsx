@@ -27,7 +27,7 @@ export default function Header() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 md:h-20 flex items-center justify-between">
         <Link href="/" className="text-2xl font-bold text-black hover:opacity-80 transition-opacity">
-          URBrilliant.AI
+          GamED.AI
         </Link>
         
         <div className="hidden md:flex items-center gap-8">

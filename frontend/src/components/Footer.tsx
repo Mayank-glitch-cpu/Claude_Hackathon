@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
             <Link href="/" className="text-2xl font-bold mb-4 block">
-              URBrilliant.AI
+              GamED.AI
             </Link>
           </div>
           {Object.entries(footerLinks).map(([category, links]) => (
@@ -58,7 +58,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-          <p>© 2025 URBrilliant.AI Worldwide, Inc.</p>
+          <p>© 2025 GamED.AI Worldwide, Inc.</p>
           <div className="flex gap-4">
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms

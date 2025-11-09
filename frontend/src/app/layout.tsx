@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AI-Powered Gamified Learning Platform',
+  title: 'GamED.AI - AI-Powered Gamified Learning Platform',
   description: 'Transform educational questions into interactive, story-based visualizations',
 }
 
