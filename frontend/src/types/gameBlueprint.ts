@@ -257,6 +257,23 @@ export interface ParameterPlaygroundBlueprint {
     type: "chart" | "graph" | "diagram" | "simulation";
     assetPrompt?: string;
     assetUrl?: string;
+    // Enhanced visualization config
+    algorithmType?: "binary_search" | "binary_search_rotated" | "sorting" | "graph" | "custom";
+    array?: number[];
+    target?: number;
+    steps?: Array<{
+      stepNumber: number;
+      left?: number;
+      right?: number;
+      mid?: number;
+      comparison?: string;
+      decision?: string;
+      explanation?: string;
+      variables?: Record<string, any>;
+      highlightIndices?: number[];
+      sortedRanges?: Array<{ start: number; end: number }>;
+    }>;
+    code?: string;
   };
   tasks: Array<{
     id: string;

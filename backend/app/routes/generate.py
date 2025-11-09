@@ -65,64 +65,6 @@ async def start_processing(
         "message": "Processing started"
     }
 
-@router.get("/visualization/{visualization_id}")
-async def get_visualization(
-    visualization_id: str,
-    db: Session = Depends(get_db)
-):
-    """Get generated visualization"""
-    logger.info(f"[API] /visualization/{visualization_id} - Request received")
-    
-    try:
-        visualization = VisualizationRepository.get_by_id(db, visualization_id)
-        
-        if not visualization:
-            logger.warning(f"[API] Visualization {visualization_id} not found")
-            raise HTTPException(status_code=404, detail="Visualization not found")
-        
-        # Get story data from story_data_json
-        question_data = visualization.story_data_json if visualization.story_data_json else None
-        if question_data:
-            logger.debug(f"[API] Found story data for visualization {visualization_id}")
-        else:
-            logger.warning(f"[API] Visualization {visualization_id} has no story data")
-        
-        # Get blueprint if available
-        blueprint_data = None
-        if visualization.blueprint_id:
-            blueprint = GameBlueprintRepository.get_by_id(db, visualization.blueprint_id)
-            if blueprint:
-                blueprint_data = {
-                    "id": blueprint.id,
-                    "template_type": blueprint.template_type,
-                    "blueprint": blueprint.blueprint_json,
-                    "assets": blueprint.assets_json or {}
-                }
-                logger.info(f"[API] Found blueprint for visualization {visualization_id}")
-        
-        # Return blueprint if available, otherwise HTML (backward compatibility)
-        if blueprint_data:
-            logger.info(f"[API] Returning blueprint for visualization {visualization_id}")
-            return {
-                "id": visualization.id,
-                "type": "blueprint",
-                "blueprint": blueprint_data,
-                "question_data": question_data
-            }
-        else:
-            logger.info(f"[API] Returning HTML for visualization {visualization_id}, HTML length: {len(visualization.html_content or '')} chars")
-            return {
-                "id": visualization.id,
-                "type": "html",
-                "html": visualization.html_content or "",
-                "question_data": question_data
-            }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[API] Error getting visualization {visualization_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error getting visualization: {str(e)}")
-
 @router.post("/check-answer/{visualization_id}")
 async def check_answer(
     visualization_id: str,

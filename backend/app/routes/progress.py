@@ -42,13 +42,38 @@ async def get_progress(
         except Exception as e:
             logger.warning(f"[API] Error loading visualization for process {process_id}: {e}")
             # Continue without visualization_id
+            pass
         
-        logger.info(f"[API] Returning status: {process.status}, progress: {process.progress}%, steps: {len(steps)}, visualization_id: {visualization_id}")
+        # Calculate progress - use process.progress if available, otherwise calculate from steps
+        calculated_progress = process.progress if process.progress is not None else 0
+        
+        # Fallback: Calculate progress from steps if process.progress is 0 or None
+        if calculated_progress == 0 and steps:
+            # Count completed and processing steps
+            completed_steps = [s for s in steps if s.status == 'completed']
+            processing_steps = [s for s in steps if s.status == 'processing']
+            
+            # Total pipeline steps (9 steps total)
+            total_steps = 9
+            
+            if completed_steps:
+                # Progress based on completed steps
+                calculated_progress = int((len(completed_steps) / total_steps) * 100)
+            elif processing_steps:
+                # If a step is processing, show progress at start of that step
+                processing_step = processing_steps[0]
+                # Progress = (step_number - 1) / total_steps * 100
+                calculated_progress = int(((processing_step.step_number - 1) / total_steps) * 100)
+        
+        # Ensure progress is between 0 and 100
+        calculated_progress = max(0, min(100, calculated_progress))
+        
+        logger.info(f"[API] Returning status: {process.status}, progress: {calculated_progress}%, steps: {len(steps)}, visualization_id: {visualization_id}")
         
         return {
             "process_id": process_id,
             "status": process.status,
-            "progress": process.progress or 0,
+            "progress": calculated_progress,
             "current_step": process.current_step or "Initializing",
             "visualization_id": visualization_id,
             "error_message": process.error_message,

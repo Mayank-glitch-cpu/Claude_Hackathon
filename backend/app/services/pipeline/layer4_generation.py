@@ -24,7 +24,6 @@ class StoryGenerator:
         template_type: Optional[str] = None
     ) -> Dict[str, Any]:
         """Generate complete story data"""
-        logger.info(f"Generating story data (template: {template_type})")
         
         # Load base story prompt
         base_prompt_path = Path(__file__).parent.parent.parent.parent / "prompts" / "story_base.md"
@@ -37,15 +36,50 @@ class StoryGenerator:
         
         # Load template-specific supplement if template_type is provided
         system_prompt = base_prompt
+        actual_template = template_type  # Track the actual template being used
         if template_type:
-            template_supplement_path = Path(__file__).parent.parent.parent.parent / "prompts" / "story_templates" / f"{template_type}.txt"
+            # Check if this is an algorithmic/coding question - use ALGORITHM_VISUALIZATION for any coding/algorithm question
+            question_type = question_data.get('question_type', '')
+            subject = question_data.get('subject', '')
+            key_concepts = question_data.get('key_concepts', [])
+            question_text = question_data.get('text', '').lower()
+            
+            # Check if this is an algorithmic/coding question (regardless of initial template routing)
+            # If template is STATE_TRACER_CODE or PARAMETER_PLAYGROUND, route to ALGORITHM_VISUALIZATION
+            is_algorithmic = (
+                template_type in ["PARAMETER_PLAYGROUND", "STATE_TRACER_CODE"] or
+                question_type == "coding" or 
+                "algorithm" in str(key_concepts).lower() or
+                "coding" in subject.lower() or
+                any(concept in ["binary search", "sorting", "graph", "cycle", "two pointer", "sliding window", "dynamic programming", "floyd", "tortoise", "hare", "duplicate", "array", "linked list"] 
+                    for concept in str(key_concepts).lower() + question_text)
+            )
+            
+            # Use ALGORITHM_VISUALIZATION for algorithmic questions, otherwise use template_type
+            template_name = "ALGORITHM_VISUALIZATION" if is_algorithmic else template_type
+            actual_template = template_name  # Update to show actual template being used
+            
+            template_supplement_path = Path(__file__).parent.parent.parent.parent / "prompts" / "story_templates" / f"{template_name}.txt"
             try:
                 with open(template_supplement_path, 'r', encoding='utf-8') as f:
                     template_supplement = f.read()
                     system_prompt = base_prompt + "\n\n" + template_supplement
-                    logger.info(f"Loaded template supplement for {template_type}")
+                    logger.info(f"Generating story data (template: {template_name})")
+                    if is_algorithmic:
+                        logger.info(f"Using ALGORITHM_VISUALIZATION template for algorithmic question (routed from {template_type})")
             except Exception as e:
-                logger.warning(f"Failed to load template supplement for {template_type}: {e}")
+                # Fallback to original template_type if ALGORITHM_VISUALIZATION doesn't exist
+                if is_algorithmic:
+                    template_supplement_path = Path(__file__).parent.parent.parent.parent / "prompts" / "story_templates" / f"{template_type}.txt"
+                    try:
+                        with open(template_supplement_path, 'r', encoding='utf-8') as f:
+                            template_supplement = f.read()
+                            system_prompt = base_prompt + "\n\n" + template_supplement
+                            logger.info(f"Loaded fallback template supplement for {template_type}")
+                    except Exception as e2:
+                        logger.warning(f"Failed to load template supplement for {template_type}: {e2}")
+                else:
+                    logger.warning(f"Failed to load template supplement for {template_type}: {e}")
                 # Use base prompt only
         
         user_prompt = f"""Generate a story-based visualization for the following question:
@@ -204,36 +238,117 @@ Generate ONLY the HTML code, no markdown, no explanations."""
             raise
 
 class ImageGenerator:
-    """Generate images for visualizations (Future: DALL-E integration)"""
+    """Generate images for visualizations using DALL-E"""
     
     def __init__(self):
-        # Placeholder for future image generation
-        pass
+        self.llm_service = LLMService()
+        self.openai_client = None
+        if self.llm_service.openai_client:
+            self.openai_client = self.llm_service.openai_client
     
-    def generate(self, description: str) -> Dict[str, Any]:
-        """Generate image from description"""
-        logger.info("Image generation not yet implemented")
-        # Future implementation
-        return {
-            "success": False,
-            "message": "Image generation not yet implemented"
-        }
+    def generate(self, description: str, size: str = "1024x1024") -> Dict[str, Any]:
+        """Generate image from description using DALL-E"""
+        if not self.openai_client:
+            logger.warning("OpenAI client not available for image generation")
+            return {
+                "success": False,
+                "message": "OpenAI client not configured"
+            }
+        
+        try:
+            logger.info(f"Generating image: {description[:100]}...")
+            
+            # Enhanced prompt for educational content
+            enhanced_prompt = f"Educational illustration, clear and colorful, suitable for learning: {description}"
+            
+            response = self.openai_client.images.generate(
+                model="dall-e-3",
+                prompt=enhanced_prompt,
+                size=size,
+                quality="standard",
+                n=1,
+            )
+            
+            image_url = response.data[0].url
+            logger.info(f"Image generated successfully: {image_url[:100]}...")
+            
+            return {
+                "success": True,
+                "url": image_url,
+                "description": description
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to generate image: {e}")
+            return {
+                "success": False,
+                "message": f"Image generation failed: {str(e)}"
+            }
 
 class AnimationGenerator:
-    """Generate animations (Future: Animation creation)"""
+    """Generate animations using DALL-E frame sequences"""
     
     def __init__(self):
-        # Placeholder for future animation generation
-        pass
+        self.llm_service = LLMService()
+        self.openai_client = None
+        if self.llm_service.openai_client:
+            self.openai_client = self.llm_service.openai_client
     
     def generate(self, animation_spec: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate animation from specification"""
-        logger.info("Animation generation not yet implemented")
-        # Future implementation
-        return {
-            "success": False,
-            "message": "Animation generation not yet implemented"
-        }
+        """Generate animation from specification using multiple DALL-E frames"""
+        if not self.openai_client:
+            logger.warning("OpenAI client not available for animation generation")
+            return {
+                "success": False,
+                "message": "OpenAI client not configured"
+            }
+        
+        try:
+            prompt = animation_spec.get("prompt", "")
+            frames = animation_spec.get("frames", 5)
+            
+            logger.info(f"Generating animation: {prompt[:100]}... ({frames} frames)")
+            
+            # Generate multiple frames
+            frame_urls = []
+            for i in range(frames):
+                frame_prompt = f"{prompt}, frame {i+1} of {frames}, showing progression step by step"
+                
+                try:
+                    response = self.openai_client.images.generate(
+                        model="dall-e-3",
+                        prompt=f"Educational illustration, clear and colorful: {frame_prompt}",
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    frame_urls.append(response.data[0].url)
+                    logger.info(f"Generated frame {i+1}/{frames}")
+                except Exception as e:
+                    logger.warning(f"Failed to generate frame {i+1}: {e}")
+            
+            if frame_urls:
+                # Return first frame URL as the animation representation
+                # In production, combine frames into GIF using PIL/Pillow
+                logger.info(f"Generated {len(frame_urls)} animation frames")
+                return {
+                    "success": True,
+                    "url": frame_urls[0],  # First frame as placeholder
+                    "frames": frame_urls,
+                    "frame_count": len(frame_urls)
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": "Failed to generate any animation frames"
+                }
+                
+        except Exception as e:
+            logger.error(f"Failed to generate animation: {e}")
+            return {
+                "success": False,
+                "message": f"Animation generation failed: {str(e)}"
+            }
 
 class BlueprintGenerator:
     """Generate game blueprint JSON from story data and template"""
@@ -253,8 +368,43 @@ class BlueprintGenerator:
             logger.error(f"Failed to load blueprint_base.md: {e}")
             self.base_prompt = """You are a Game Blueprint Generator. Generate JSON blueprints matching TypeScript interfaces."""
     
-    def _load_ts_interface(self, template_type: str) -> str:
+    def _load_ts_interface(self, template_type: str, story_data: Dict[str, Any] = None) -> str:
         """Load TypeScript interface for template"""
+        # For coding/algorithm questions, use ALGORITHM_VISUALIZATION regardless of initial template routing
+        # If template is STATE_TRACER_CODE or PARAMETER_PLAYGROUND, route to ALGORITHM_VISUALIZATION
+        if template_type in ["PARAMETER_PLAYGROUND", "STATE_TRACER_CODE"]:
+            interface_path = Path(__file__).parent.parent.parent.parent / "prompts" / "blueprint_templates" / "ALGORITHM_VISUALIZATION.ts.txt"
+            try:
+                with open(interface_path, 'r', encoding='utf-8') as f:
+                    logger.info(f"Loaded ALGORITHM_VISUALIZATION blueprint interface (routed from {template_type})")
+                    return f.read()
+            except Exception as e:
+                logger.warning(f"Failed to load ALGORITHM_VISUALIZATION interface, falling back to {template_type}: {e}")
+        
+        # Also check story_data for algorithmic indicators
+        if story_data:
+            key_concepts = story_data.get('key_concepts', [])
+            learning_alignment = story_data.get('learning_alignment', '')
+            story_title = story_data.get('story_title', '').lower()
+            
+            # Check if this is an algorithmic/coding question
+            is_algorithmic = (
+                "algorithm" in str(key_concepts).lower() or
+                "coding" in str(learning_alignment).lower() or
+                any(concept in ["binary search", "sorting", "graph", "cycle", "two pointer", "sliding window", "dynamic programming", "floyd", "tortoise", "hare", "duplicate", "array", "linked list"] 
+                    for concept in str(key_concepts).lower() + str(learning_alignment).lower() + story_title)
+            )
+            
+            if is_algorithmic:
+                interface_path = Path(__file__).parent.parent.parent.parent / "prompts" / "blueprint_templates" / "ALGORITHM_VISUALIZATION.ts.txt"
+                try:
+                    with open(interface_path, 'r', encoding='utf-8') as f:
+                        logger.info(f"Loaded ALGORITHM_VISUALIZATION blueprint interface (detected algorithmic question)")
+                        return f.read()
+                except Exception as e:
+                    logger.warning(f"Failed to load ALGORITHM_VISUALIZATION interface, falling back to {template_type}: {e}")
+        
+        # Default: use template_type
         interface_path = Path(__file__).parent.parent.parent.parent / "prompts" / "blueprint_templates" / f"{template_type}.ts.txt"
         try:
             with open(interface_path, 'r', encoding='utf-8') as f:
@@ -266,23 +416,55 @@ class BlueprintGenerator:
     def generate(
         self,
         story_data: Dict[str, Any],
-        template_type: str
+        template_type: str,
+        question_text: str = None
     ) -> Dict[str, Any]:
         """Generate blueprint JSON from story data"""
-        logger.info(f"Generating blueprint for template: {template_type}")
         
-        # Get template metadata
-        template_metadata = self.template_registry.get_template(template_type)
+        # Check if this should use ALGORITHM_VISUALIZATION
+        actual_template = template_type
+        # If template is STATE_TRACER_CODE or PARAMETER_PLAYGROUND, route to ALGORITHM_VISUALIZATION
+        if template_type in ["PARAMETER_PLAYGROUND", "STATE_TRACER_CODE"]:
+            actual_template = "ALGORITHM_VISUALIZATION"
+            logger.info(f"Generating blueprint for template: {actual_template} (routed from {template_type})")
+        elif story_data:
+            key_concepts = story_data.get('key_concepts', [])
+            learning_alignment = story_data.get('learning_alignment', '')
+            story_title = story_data.get('story_title', '').lower()
+            
+            # Check if this is an algorithmic/coding question
+            is_algorithmic = (
+                "algorithm" in str(key_concepts).lower() or
+                "coding" in str(learning_alignment).lower() or
+                any(concept in ["binary search", "sorting", "graph", "cycle", "two pointer", "sliding window", "dynamic programming", "floyd", "tortoise", "hare", "duplicate", "array", "linked list"] 
+                    for concept in str(key_concepts).lower() + str(learning_alignment).lower() + story_title)
+            )
+            
+            if is_algorithmic:
+                actual_template = "ALGORITHM_VISUALIZATION"
+                logger.info(f"Generating blueprint for template: {actual_template} (detected algorithmic question)")
+            else:
+                logger.info(f"Generating blueprint for template: {template_type}")
+        else:
+            logger.info(f"Generating blueprint for template: {template_type}")
+        
+        # Get template metadata - use PARAMETER_PLAYGROUND if routing to ALGORITHM_VISUALIZATION
+        metadata_template = "PARAMETER_PLAYGROUND" if actual_template == "ALGORITHM_VISUALIZATION" else template_type
+        template_metadata = self.template_registry.get_template(metadata_template)
         if not template_metadata:
-            raise ValueError(f"Template {template_type} not found in registry")
+            raise ValueError(f"Template {metadata_template} not found in registry")
         
-        # Load TypeScript interface
-        ts_interface = self._load_ts_interface(template_type)
+        # Load TypeScript interface (pass story_data to detect algorithmic questions)
+        ts_interface = self._load_ts_interface(template_type, story_data)
         
         # Build system prompt
         system_prompt = self.base_prompt + "\n\n" + ts_interface
         
-        # Build user prompt
+        # Build user prompt with original question for algorithm correctness
+        question_context = ""
+        if question_text:
+            question_context = f"\n\nORIGINAL QUESTION (for algorithm correctness):\n{question_text}\n\nIMPORTANT: If the question requires O(log n) runtime or mentions binary search, the code MUST implement binary search, NOT linear search."
+        
         user_prompt = f"""TemplateType: {template_type}
 
 Template Metadata:
@@ -294,6 +476,7 @@ TypeScript interface for this template:
 
 Story Data:
 {json.dumps(story_data, indent=2)}
+{question_context}
 
 Generate a blueprint object that conforms EXACTLY to the TypeScript interface.
 Do not include any fields that are not defined in the interface.
@@ -322,15 +505,50 @@ Do not wrap the response in any additional text."""
             blueprint = json.loads(response)
             
             # Ensure templateType matches
-            blueprint["templateType"] = template_type
+            # If we routed to ALGORITHM_VISUALIZATION, use PARAMETER_PLAYGROUND as templateType
+            # (as specified in the ALGORITHM_VISUALIZATION interface)
+            if actual_template == "ALGORITHM_VISUALIZATION":
+                blueprint["templateType"] = "PARAMETER_PLAYGROUND"
+                validation_template = "PARAMETER_PLAYGROUND"
+            else:
+                blueprint["templateType"] = template_type
+                validation_template = template_type
             
-            # Validate blueprint
-            is_valid, errors = self.template_registry.validate_blueprint(blueprint, template_type)
+            # Post-process: Ensure tasks have correctAnswer from story_data
+            if "tasks" in blueprint and isinstance(blueprint["tasks"], list) and story_data:
+                question_flow = story_data.get("question_flow", [])
+                for i, task in enumerate(blueprint["tasks"]):
+                    if isinstance(task, dict):
+                        # If correctAnswer is missing, try to get it from question_flow
+                        if "correctAnswer" not in task or task.get("correctAnswer") is None:
+                            if i < len(question_flow):
+                                q = question_flow[i]
+                                answer_struct = q.get("answer_structure", {})
+                                correct_answer = answer_struct.get("correct_answer")
+                                if correct_answer is not None:
+                                    task["correctAnswer"] = correct_answer
+                                    logger.info(f"Added missing correctAnswer '{correct_answer}' to task {task.get('id', i)}")
+                        
+                        # Ensure options are in correct format if they exist
+                        if "options" in task and isinstance(task["options"], list):
+                            # Convert string options to {value, label} format if needed
+                            formatted_options = []
+                            for opt in task["options"]:
+                                if isinstance(opt, str):
+                                    formatted_options.append({"value": opt, "label": opt})
+                                elif isinstance(opt, dict) and "value" in opt:
+                                    formatted_options.append(opt)
+                                else:
+                                    formatted_options.append({"value": str(opt), "label": str(opt)})
+                            task["options"] = formatted_options
+            
+            # Validate blueprint against the correct template type
+            is_valid, errors = self.template_registry.validate_blueprint(blueprint, validation_template)
             if not is_valid:
                 logger.error(f"Blueprint validation failed: {errors}")
                 raise ValueError(f"Blueprint validation failed: {', '.join(errors)}")
             
-            logger.info(f"Blueprint generated successfully for {template_type}")
+            logger.info(f"Blueprint generated successfully for {validation_template} (routed from {template_type})")
             
             return {
                 "success": True,
@@ -358,7 +576,14 @@ class AssetPlanner:
     def plan_assets(self, blueprint: Dict[str, Any]) -> list[AssetRequest]:
         """Extract asset requests from blueprint"""
         requests = []
+        if not blueprint:
+            logger.warning("Blueprint is None or empty, cannot plan assets")
+            return requests
+            
         template_type = blueprint.get("templateType")
+        if not template_type:
+            logger.warning("Blueprint missing templateType, cannot plan assets")
+            return requests
         
         if template_type == "LABEL_DIAGRAM":
             diagram = blueprint.get("diagram", {})
@@ -426,32 +651,157 @@ class AssetPlanner:
         return requests
 
 class AssetGenerator:
-    """Generates assets (images, etc.) from prompts"""
+    """Generates assets (images, animations, etc.) from prompts using DALL-E and other services"""
     
     def __init__(self):
-        # Placeholder for image generation API integration
-        # Future: integrate with DALL-E, Stable Diffusion, etc.
-        pass
+        self.llm_service = LLMService()
+        self.openai_client = None
+        if self.llm_service.openai_client:
+            self.openai_client = self.llm_service.openai_client
+    
+    def _generate_image_dalle(self, prompt: str, size: str = "1024x1024") -> Optional[str]:
+        """Generate image using DALL-E API"""
+        if not self.openai_client:
+            logger.warning("OpenAI client not available, cannot generate images with DALL-E")
+            return None
+        
+        try:
+            logger.info(f"Calling DALL-E API - Prompt: {prompt[:100]}... Size: {size}")
+            
+            # Enhanced prompt for educational content
+            enhanced_prompt = f"Educational illustration, clear and colorful, suitable for learning: {prompt}"
+            
+            response = self.openai_client.images.generate(
+                model="dall-e-3",
+                prompt=enhanced_prompt,
+                size=size,
+                quality="standard",
+                n=1,
+            )
+            
+            image_url = response.data[0].url
+            logger.info(
+                f"DALL-E image generated successfully - URL: {image_url[:100]}... "
+                f"Model: dall-e-3, Size: {size}"
+            )
+            return image_url
+            
+        except Exception as e:
+            logger.error(
+                f"DALL-E image generation failed - Error: {str(e)}, "
+                f"Prompt: {prompt[:100]}..."
+            )
+            return None
+    
+    def _generate_animation(self, prompt: str, frames: int = 5) -> Optional[str]:
+        """Generate animation (GIF) from prompt using multiple DALL-E images"""
+        if not self.openai_client:
+            logger.warning("OpenAI client not available, cannot generate animations")
+            return None
+        
+        try:
+            logger.info(f"Generating animation: {prompt[:100]}...")
+            
+            # Generate multiple frames for animation
+            frame_urls = []
+            for i in range(frames):
+                frame_prompt = f"{prompt}, frame {i+1} of {frames}, showing progression"
+                frame_url = self._generate_image_dalle(frame_prompt, size="1024x1024")
+                if frame_url:
+                    frame_urls.append(frame_url)
+            
+            if len(frame_urls) > 1:
+                # For now, return the first frame URL
+                # In production, you would combine these into a GIF using PIL or similar
+                logger.info(f"Generated {len(frame_urls)} animation frames")
+                return frame_urls[0]  # Return first frame as placeholder
+            elif frame_urls:
+                return frame_urls[0]
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to generate animation: {e}")
+            return None
     
     def generate_assets(self, requests: list[AssetRequest]) -> Dict[str, str]:
         """Generate assets and return URL map"""
         urls = {}
+        total_requests = len(requests)
+        dalle_success = 0
+        dalle_failed = 0
+        placeholder_used = 0
+        
+        logger.info(f"Starting asset generation for {total_requests} asset(s)")
         
         for req in requests:
             if req.type == "image":
-                # TODO: Integrate with image generation API
-                # For now, return placeholder URL
-                logger.info(f"Generating image asset: {req.purpose} - {req.prompt[:50]}...")
-                # Placeholder URL - replace with actual API call
-                urls[req.purpose] = f"https://placeholder.com/800x600?text={req.purpose.replace('_', '+')}"
-            # Add other asset types as needed
+                logger.info(f"Generating image asset: {req.purpose} - Prompt: {req.prompt[:100]}...")
+                
+                # Try DALL-E generation
+                image_url = self._generate_image_dalle(req.prompt)
+                
+                if image_url:
+                    urls[req.purpose] = image_url
+                    dalle_success += 1
+                    logger.info(
+                        f"Successfully generated DALL-E image for {req.purpose} - "
+                        f"URL: {image_url[:100]}..."
+                    )
+                else:
+                    # Fallback to placeholder if DALL-E fails
+                    dalle_failed += 1
+                    placeholder_used += 1
+                    placeholder_url = f"https://placeholder.com/800x600?text={req.purpose.replace('_', '+')}"
+                    urls[req.purpose] = placeholder_url
+                    logger.warning(
+                        f"DALL-E generation failed for {req.purpose}, using placeholder. "
+                        f"Prompt was: {req.prompt[:100]}"
+                    )
+            
+            elif req.type == "animation":
+                logger.info(f"Generating animation: {req.purpose} - Prompt: {req.prompt[:100]}...")
+                
+                # Generate animation
+                animation_url = self._generate_animation(req.prompt)
+                
+                if animation_url:
+                    urls[req.purpose] = animation_url
+                    dalle_success += 1
+                    logger.info(
+                        f"Successfully generated animation for {req.purpose} - "
+                        f"URL: {animation_url[:100]}..."
+                    )
+                else:
+                    # Fallback to placeholder
+                    dalle_failed += 1
+                    placeholder_used += 1
+                    placeholder_url = f"https://placeholder.com/800x600?text={req.purpose.replace('_', '+')}"
+                    urls[req.purpose] = placeholder_url
+                    logger.warning(
+                        f"Animation generation failed for {req.purpose}, using placeholder. "
+                        f"Prompt was: {req.prompt[:100]}"
+                    )
         
-        logger.info(f"Generated {len(urls)} asset URLs")
+        # Log summary
+        logger.info(
+            f"Asset generation complete - Total: {total_requests}, "
+            f"DALL-E Success: {dalle_success}, DALL-E Failed: {dalle_failed}, "
+            f"Placeholders Used: {placeholder_used}"
+        )
+        
         return urls
     
     def inject_asset_urls(self, blueprint: Dict[str, Any], asset_urls: Dict[str, str]) -> Dict[str, Any]:
         """Inject asset URLs into blueprint"""
+        if not blueprint:
+            logger.warning("Blueprint is None, cannot inject asset URLs")
+            return {}
+            
         template_type = blueprint.get("templateType")
+        if not template_type:
+            logger.warning("Blueprint missing templateType, cannot inject asset URLs")
+            return blueprint
         
         if template_type == "LABEL_DIAGRAM":
             if "diagram" in blueprint and "diagram" in asset_urls:

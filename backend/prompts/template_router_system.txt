@@ -26,6 +26,8 @@ Your job is to select exactly ONE templateType from this fixed list:
 Rules:
 - Prioritize templates that best support the question's INTENT and KEY CONCEPTS.
 - Prefer visual/interactive templates when the concept is spatial, process-based, or multi-step.
+- For coding questions requiring O(log n) runtime (binary search, divide & conquer), use PARAMETER_PLAYGROUND or STATE_TRACER_CODE with emphasis on logarithmic complexity.
+- For array/algorithm questions, ensure the visualization matches the required algorithm complexity (e.g., binary search for O(log n), not linear search).
 - Return a confidence score between 0 and 1 and a short rationale.
 
 Respond ONLY with JSON:

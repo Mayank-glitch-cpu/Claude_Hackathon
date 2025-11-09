@@ -115,7 +115,8 @@ class PipelineOrchestrator:
                 # Update pipeline state with step output
                 pipeline_state.update(step_result.get("state_updates", {}))
                 
-                # Update progress
+                # Update progress at END of step (after it completes)
+                # This ensures progress reflects completed steps
                 progress = int((step_def["number"] / len(self.PIPELINE_STEPS)) * 100)
                 ProcessRepository.update_status(
                     self.db,
@@ -124,6 +125,7 @@ class PipelineOrchestrator:
                     progress=progress,
                     current_step=step_def["name"]
                 )
+                logger.debug(f"Updated progress to {progress}% after step {step_def['number']} completed")
             
             # Store final results
             visualization_id = self._store_results(process_id, question_id, pipeline_state)
@@ -147,12 +149,26 @@ class PipelineOrchestrator:
             
         except Exception as e:
             logger.error(f"Pipeline execution failed: {e}", exc_info=True)
-            ProcessRepository.update_status(
-                self.db,
-                process_id,
-                "error",
-                error_message=str(e)
-            )
+            # Rollback any pending transaction before updating status
+            try:
+                self.db.rollback()
+            except Exception:
+                pass  # Ignore rollback errors if already rolled back
+            
+            try:
+                ProcessRepository.update_status(
+                    self.db,
+                    process_id,
+                    "error",
+                    error_message=str(e)
+                )
+            except Exception as update_error:
+                logger.error(f"Failed to update process status after error: {update_error}")
+                # Rollback again if status update fails
+                try:
+                    self.db.rollback()
+                except Exception:
+                    pass
             raise
     
     def _execute_step(
@@ -167,14 +183,34 @@ class PipelineOrchestrator:
         
         logger.info(f"Executing step {step_number}: {step_name}")
         
-        # Create step record
-        step = PipelineStepRepository.create(
+        # Update progress at START of step (before it completes)
+        # Calculate progress based on step number: (step_number - 1) / total_steps * 100
+        # This shows progress while the step is processing
+        total_steps = len(self.PIPELINE_STEPS)
+        progress_at_start = int(((step_number - 1) / total_steps) * 100)
+        ProcessRepository.update_status(
             self.db,
             process_id,
-            step_name,
-            step_number,
-            input_data=self._sanitize_for_storage(pipeline_state)
+            "processing",
+            progress=progress_at_start,
+            current_step=step_name
         )
+        logger.debug(f"Updated progress to {progress_at_start}% at start of step {step_number}")
+        
+        # Create step record
+        try:
+            step = PipelineStepRepository.create(
+                self.db,
+                process_id,
+                step_name,
+                step_number,
+                input_data=self._sanitize_for_storage(pipeline_state)
+            )
+        except Exception as create_error:
+            # If step creation fails (e.g., JSON serialization), rollback and re-raise
+            logger.error(f"Failed to create step record for {step_name}: {create_error}")
+            self.db.rollback()
+            raise
         
         try:
             # Update step status to processing
@@ -308,7 +344,8 @@ class PipelineOrchestrator:
             elif step_name == "blueprint_generation":
                 result = self.generation_orchestrator.blueprint_generator.generate(
                     pipeline_state["story"],
-                    pipeline_state["template_type"]
+                    pipeline_state["template_type"],
+                    pipeline_state.get("question_text", "")
                 )
                 blueprint_data = result["data"]
                 template_type = pipeline_state["template_type"]
@@ -332,22 +369,51 @@ class PipelineOrchestrator:
                 asset_request_count = len(asset_requests)
                 pipeline_state["asset_requests"] = asset_requests
                 
-                # Log asset planning event
+                # Log asset planning event with details
                 question_id = pipeline_state.get("question_id", "unknown")
+                template_type = pipeline_state.get("template_type", "unknown")
+                
+                # Log each asset request
+                asset_details = []
+                for req in asset_requests:
+                    asset_details.append({
+                        "type": req.type,
+                        "purpose": req.purpose,
+                        "prompt_preview": req.prompt[:100] if req.prompt else ""
+                    })
+                    logger.info(
+                        f"event=asset_planned question_id={question_id} template_type={template_type} "
+                        f"asset_type={req.type} purpose={req.purpose} prompt={req.prompt[:100]}"
+                    )
+                
                 logger.info(
-                    f"event=assets_planned question_id={question_id} "
+                    f"event=assets_planned question_id={question_id} template_type={template_type} "
                     f"asset_request_count={asset_request_count}"
                 )
                 
                 step_result = {
                     "success": True,
-                    "data": {"asset_request_count": asset_request_count}
+                    "data": {
+                        "asset_request_count": asset_request_count,
+                        "asset_requests": asset_details
+                    }
                 }
             
             elif step_name == "asset_generation":
-                asset_urls = self.generation_orchestrator.asset_generator.generate_assets(
-                    pipeline_state["asset_requests"]
+                asset_requests = pipeline_state.get("asset_requests", [])
+                question_id = pipeline_state.get("question_id", "unknown")
+                template_type = pipeline_state.get("template_type", "unknown")
+                
+                # Log start of asset generation
+                logger.info(
+                    f"event=asset_generation_started question_id={question_id} template_type={template_type} "
+                    f"total_assets={len(asset_requests)}"
                 )
+                
+                asset_urls = self.generation_orchestrator.asset_generator.generate_assets(
+                    asset_requests
+                )
+                
                 # Inject asset URLs into blueprint
                 pipeline_state["blueprint"] = self.generation_orchestrator.asset_generator.inject_asset_urls(
                     pipeline_state["blueprint"],
@@ -355,17 +421,61 @@ class PipelineOrchestrator:
                 )
                 pipeline_state["assets"] = asset_urls
                 
-                # Log asset generation events
-                question_id = pipeline_state.get("question_id", "unknown")
-                for purpose, url in asset_urls.items():
-                    logger.info(
-                        f"event=asset_generated question_id={question_id} asset_type=image "
-                        f"purpose={purpose} url={url[:100]}"
-                    )
+                # Log detailed asset generation events
+                generated_count = 0
+                failed_count = 0
+                asset_results = []
+                
+                for req in asset_requests:
+                    purpose = req.purpose
+                    url = asset_urls.get(purpose)
+                    
+                    if url:
+                        generated_count += 1
+                        is_dalle = "dalle" in url.lower() or "openai" in url.lower() or url.startswith("https://oaidalle")
+                        asset_type = "dalle" if is_dalle else "placeholder"
+                        
+                        asset_results.append({
+                            "purpose": purpose,
+                            "type": req.type,
+                            "status": "success",
+                            "url": url,
+                            "generation_method": asset_type
+                        })
+                        
+                        logger.info(
+                            f"event=asset_generated question_id={question_id} template_type={template_type} "
+                            f"asset_type={req.type} purpose={purpose} generation_method={asset_type} "
+                            f"url={url[:100]}"
+                        )
+                    else:
+                        failed_count += 1
+                        asset_results.append({
+                            "purpose": purpose,
+                            "type": req.type,
+                            "status": "failed",
+                            "error": "No URL generated"
+                        })
+                        
+                        logger.warning(
+                            f"event=asset_generation_failed question_id={question_id} template_type={template_type} "
+                            f"asset_type={req.type} purpose={purpose}"
+                        )
+                
+                # Log summary
+                logger.info(
+                    f"event=asset_generation_complete question_id={question_id} template_type={template_type} "
+                    f"total={len(asset_requests)} generated={generated_count} failed={failed_count}"
+                )
                 
                 step_result = {
                     "success": True,
-                    "data": {"asset_urls": asset_urls}
+                    "data": {
+                        "asset_urls": asset_urls,
+                        "generated_count": generated_count,
+                        "failed_count": failed_count,
+                        "asset_results": asset_results
+                    }
                 }
             
             # Validate step output
@@ -462,6 +572,14 @@ class PipelineOrchestrator:
     
     def _sanitize_for_storage(self, data: Any) -> Any:
         """Sanitize data for database storage (remove large binary data, etc.)"""
+        # Handle AssetRequest objects (convert to dict for JSON serialization)
+        if hasattr(data, 'type') and hasattr(data, 'purpose') and hasattr(data, 'prompt'):
+            # This is an AssetRequest object - convert to dict
+            return {
+                "type": getattr(data, 'type', None),
+                "purpose": getattr(data, 'purpose', None),
+                "prompt": getattr(data, 'prompt', None)
+            }
         if isinstance(data, dict):
             sanitized = {}
             for key, value in data.items():
@@ -471,7 +589,7 @@ class PipelineOrchestrator:
                 elif isinstance(value, (dict, list)):
                     sanitized[key] = self._sanitize_for_storage(value)
                 else:
-                    sanitized[key] = value
+                    sanitized[key] = self._sanitize_for_storage(value)  # Recursively sanitize
             return sanitized
         elif isinstance(data, list):
             return [self._sanitize_for_storage(item) for item in data]

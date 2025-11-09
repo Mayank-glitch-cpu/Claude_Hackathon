@@ -47,6 +47,10 @@ export default function UploadPage() {
         },
       })
 
+      // Clear old visualization data when uploading a new question
+      localStorage.removeItem('visualizationId')
+      localStorage.removeItem('processId')
+      
       // Store the question ID for preview
       localStorage.setItem('questionId', response.data.question_id)
       router.push('/app/preview')

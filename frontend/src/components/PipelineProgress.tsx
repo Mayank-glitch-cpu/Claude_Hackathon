@@ -54,9 +54,13 @@ export default function PipelineProgress({
         })
 
         setStatus(data.status as any)
-        setProgress(data.progress)
+        // Ensure progress is a number, default to 0 if null/undefined
+        const progressValue = typeof data.progress === 'number' ? data.progress : (data.progress ? parseInt(data.progress) : 0)
+        setProgress(progressValue)
         setCurrentStep(data.current_step)
         setSteps(data.steps || [])
+        
+        console.log('[PipelineProgress] Progress value set:', progressValue, 'from API:', data.progress)
         
         if (data.visualization_id) {
           console.log('[PipelineProgress] Visualization ID received:', data.visualization_id)
@@ -96,23 +100,40 @@ export default function PipelineProgress({
           return // Don't call onError for connection resets, just retry
         }
         
+        // Handle 404 errors (process not found yet) - this is normal during startup
+        if (error.response?.status === 404) {
+          console.warn('[PipelineProgress] Process not found yet (may still be initializing), will retry')
+          return // Don't treat as error, just retry
+        }
+        
         console.error('[PipelineProgress] Failed to fetch progress:', error)
         if (error.response) {
           console.error('[PipelineProgress] Error response:', error.response.status, error.response.data)
-          // Only call onError for actual errors, not connection issues
-          if (error.response.status >= 500 && onError) {
-            onError(`Server error: ${error.response.status}`)
+          // Only call onError for actual server errors (500+), not 404s or connection issues
+          if (error.response.status >= 500) {
+            // Don't break the UI immediately - log and continue polling
+            console.error('[PipelineProgress] Server error detected, but continuing to poll')
+            // Only call onError if we've had multiple consecutive 500 errors
+            // For now, just log and continue
           }
-        } else if (onError && !error.code) {
-          // Only call onError if it's not a connection error
-          onError(error.message || 'Failed to fetch progress')
+        } else if (onError && !error.code && error.message && !error.message.includes('Network Error')) {
+          // Only call onError for non-network errors
+          console.warn('[PipelineProgress] Non-network error, but not breaking UI')
         }
       }
     }
 
     // Poll immediately, then every 2 seconds
     pollProgress()
-    const interval = setInterval(pollProgress, 2000)
+    const interval = setInterval(() => {
+      // Only poll if process is still processing or pending
+      const currentStatus = usePipelineStore.getState().status
+      if (currentStatus === 'completed' || currentStatus === 'error' || currentStatus === 'failed') {
+        clearInterval(interval)
+        return
+      }
+      pollProgress()
+    }, 2000)
 
     return () => clearInterval(interval)
   }, [processId, onComplete, onError, setStatus, setProgress, setCurrentStep, setSteps, setVisualizationId, setErrorMessage])
