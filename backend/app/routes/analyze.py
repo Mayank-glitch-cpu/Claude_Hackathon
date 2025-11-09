@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
-from app.services.llm_service import LLMService
-from app.services.prompt_selector import PromptSelector
-from app.routes.upload import questions_store
+"""Analyze route - refactored to use database"""
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+from app.services.pipeline.layer2_classification import ClassificationOrchestrator
+from app.repositories.question_repository import QuestionRepository
+from app.db.session import get_db
 from app.utils.logger import setup_logger
 
 # Set up logging
@@ -9,76 +11,51 @@ logger = setup_logger("analyze")
 
 router = APIRouter()
 
-# Lazy initialization - create instances when needed
-def get_llm_service():
-    return LLMService()
-
-def get_prompt_selector():
-    return PromptSelector()
-
-# Initialize at module level but allow it to fail gracefully
-try:
-    llm_service = LLMService()
-    prompt_selector = PromptSelector()
-    logger.info("LLM service and prompt selector initialized")
-except ValueError as e:
-    # Service will be initialized on first use
-    llm_service = None
-    prompt_selector = None
-    logger.warning(f"LLM service not initialized: {e}")
-
 @router.post("/analyze/{question_id}")
-async def analyze_question(question_id: str):
+async def analyze_question(
+    question_id: str,
+    db: Session = Depends(get_db)
+):
     """Analyze question and select appropriate prompt template"""
     logger.info(f"[API] /analyze/{question_id} - Request received")
     
-    if question_id not in questions_store:
+    question = QuestionRepository.get_by_id(db, question_id)
+    if not question:
         logger.error(f"[API] Question {question_id} not found")
         raise HTTPException(status_code=404, detail="Question not found")
     
-    # Initialize services if not already done
-    if llm_service is None:
-        logger.info("[API] Initializing LLM service...")
-        service = get_llm_service()
-    else:
-        service = llm_service
-    
-    if prompt_selector is None:
-        logger.info("[API] Initializing prompt selector...")
-        selector = get_prompt_selector()
-    else:
-        selector = prompt_selector
-    
-    question = questions_store[question_id]
-    logger.info(f"[API] Analyzing question: {question['text'][:50]}...")
-    
     try:
-        # Analyze question
-        logger.info("[API] Calling LLM for question analysis...")
-        analysis = service.analyze_question(
-            question["text"],
-            question.get("options")
-        )
-        logger.info(f"[API] Analysis result: type={analysis.get('question_type')}, subject={analysis.get('subject')}")
+        # Use classification orchestrator
+        classifier = ClassificationOrchestrator()
+        result = classifier.analyze_question(question.text, question.options)
+        analysis_data = result["data"]
         
-        # Select prompt template
-        prompt_template = selector.select_prompt(
-            analysis.get("question_type", "reasoning"),
-            analysis.get("subject", "General")
+        # Store analysis in database
+        from app.db.models import QuestionAnalysis
+        analysis = QuestionAnalysis(
+            question_id=question_id,
+            question_type=analysis_data["question_type"],
+            subject=analysis_data["subject"],
+            difficulty=analysis_data["difficulty"],
+            key_concepts=analysis_data.get("key_concepts", []),
+            intent=analysis_data.get("intent", "")
         )
-        logger.info(f"[API] Prompt template selected (length: {len(prompt_template)} chars)")
-        
-        # Store analysis and prompt
-        questions_store[question_id]["analysis"] = analysis
-        questions_store[question_id]["prompt_template"] = prompt_template
+        db.add(analysis)
+        db.commit()
+        db.refresh(analysis)
         
         logger.info(f"[API] Analysis stored successfully for question_id={question_id}")
         return {
             "question_id": question_id,
-            "analysis": analysis,
+            "analysis": {
+                "question_type": analysis.question_type,
+                "subject": analysis.subject,
+                "difficulty": analysis.difficulty,
+                "key_concepts": analysis.key_concepts,
+                "intent": analysis.intent
+            },
             "prompt_selected": True
         }
     except Exception as e:
         logger.error(f"[API] Analysis failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-

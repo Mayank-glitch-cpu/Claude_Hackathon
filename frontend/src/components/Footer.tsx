@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div>
             <Link href="/" className="text-2xl font-bold mb-4 block">
-              Brilliant
+              URBrilliant.AI
             </Link>
           </div>
           {Object.entries(footerLinks).map(([category, links]) => (
@@ -41,13 +41,13 @@ export default function Footer() {
         {/* Social Icons */}
         <div className="flex items-center gap-4 mb-8">
           {[
-            { icon: Facebook, href: '#' },
-            { icon: Instagram, href: '#' },
-            { icon: Twitter, href: '#' },
-            { icon: Linkedin, href: '#' },
-          ].map(({ icon: Icon, href }) => (
+            { icon: Facebook, href: '#', name: 'Facebook' },
+            { icon: Instagram, href: '#', name: 'Instagram' },
+            { icon: Twitter, href: '#', name: 'Twitter' },
+            { icon: Linkedin, href: '#', name: 'LinkedIn' },
+          ].map(({ icon: Icon, href, name }) => (
             <Link
-              key={href}
+              key={name}
               href={href}
               className="w-8 h-8 text-gray-400 hover:text-white transition-colors"
             >
@@ -58,7 +58,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-          <p>© 2025 Brilliant Worldwide, Inc.</p>
+          <p>© 2025 URBrilliant.AI Worldwide, Inc.</p>
           <div className="flex gap-4">
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms

@@ -5,12 +5,16 @@ from openai import OpenAI
 from anthropic import Anthropic
 from dotenv import load_dotenv
 from app.utils.logger import setup_logger
+from app.services.pipeline.retry_handler import RetryHandler, retry_on_failure
 
 # Load environment variables
 load_dotenv()
 
 # Set up logging
 logger = setup_logger("llm_service")
+
+# Initialize retry handler for LLM calls
+llm_retry_handler = RetryHandler(max_retries=3, initial_delay=1.0, max_delay=30.0)
 
 class LLMService:
     def __init__(self):
@@ -29,23 +33,37 @@ class LLMService:
         if openai_key:
             try:
                 self.openai_client = OpenAI(api_key=openai_key)
+                logger.info("OpenAI client initialized successfully")
             except Exception as e:
-                print(f"Warning: Failed to initialize OpenAI client: {e}")
+                logger.warning(f"Failed to initialize OpenAI client: {e}")
+        else:
+            logger.info("OPENAI_API_KEY not found in environment variables")
         
         # Try to initialize Anthropic
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
         if anthropic_key:
             try:
                 self.anthropic_client = Anthropic(api_key=anthropic_key)
+                logger.info("Anthropic client initialized successfully")
             except Exception as e:
-                print(f"Warning: Failed to initialize Anthropic client: {e}")
+                logger.warning(f"Failed to initialize Anthropic client: {e}")
+        else:
+            logger.info("ANTHROPIC_API_KEY not found in environment variables")
+        
+        # Log configuration status
+        if not self.openai_client and not self.anthropic_client:
+            logger.warning(
+                "No LLM API keys configured. Please create a .env file in the backend directory "
+                "with either OPENAI_API_KEY or ANTHROPIC_API_KEY. "
+                "See SETUP.md for instructions."
+            )
         
         self._initialized = True
         
         # Don't raise error here - check when actually using the service
 
     def _call_openai(self, messages: list, model: str = "gpt-4", temperature: float = 0.7) -> str:
-        """Call OpenAI API"""
+        """Call OpenAI API with retry logic"""
         if not self.openai_client:
             raise ValueError("OpenAI client not initialized")
         
@@ -53,12 +71,17 @@ class LLMService:
         logger.debug(f"OpenAI Request - Messages count: {len(messages)}")
         logger.debug(f"OpenAI Request - System message: {messages[0].get('content', '')[:200] if messages else 'None'}...")
         
-        try:
+        def _make_call():
             response = self.openai_client.chat.completions.create(
                 model=model,
                 messages=messages,
                 temperature=temperature
             )
+            return response
+        
+        # Use retry handler
+        try:
+            response = llm_retry_handler.execute_sync(_make_call)
             
             content = response.choices[0].message.content
             logger.info(f"OpenAI API call successful - Response length: {len(content)} chars")
@@ -67,11 +90,11 @@ class LLMService:
             
             return content
         except Exception as e:
-            logger.error(f"OpenAI API call failed: {str(e)}", exc_info=True)
+            logger.error(f"OpenAI API call failed after retries: {str(e)}", exc_info=True)
             raise
 
     def _call_anthropic(self, messages: list, model: str = "claude-3-opus-20240229", temperature: float = 0.7) -> str:
-        """Call Anthropic API"""
+        """Call Anthropic API with retry logic"""
         if not self.anthropic_client:
             raise ValueError("Anthropic client not initialized")
         
@@ -93,7 +116,7 @@ class LLMService:
         logger.debug(f"Anthropic Request - Conversation messages: {len(conversation)}")
         logger.debug(f"Anthropic Request - System preview: {system_message[:200] if system_message else 'None'}...")
         
-        try:
+        def _make_call():
             response = self.anthropic_client.messages.create(
                 model=model,
                 max_tokens=4096,
@@ -101,6 +124,11 @@ class LLMService:
                 messages=conversation,
                 temperature=temperature
             )
+            return response
+        
+        # Use retry handler
+        try:
+            response = llm_retry_handler.execute_sync(_make_call)
             
             content = response.content[0].text
             logger.info(f"Anthropic API call successful - Response length: {len(content)} chars")
@@ -109,7 +137,7 @@ class LLMService:
             
             return content
         except Exception as e:
-            logger.error(f"Anthropic API call failed: {str(e)}", exc_info=True)
+            logger.error(f"Anthropic API call failed after retries: {str(e)}", exc_info=True)
             raise
 
     def call_llm(self, messages: list, model: Optional[str] = None, use_anthropic: bool = False) -> str:
@@ -161,7 +189,20 @@ Respond with ONLY valid JSON, no additional text."""
         except Exception as e:
             logger.warning(f"OpenAI API call failed: {e}. Falling back to Anthropic...")
             if not self.anthropic_client:
-                raise ValueError(f"OpenAI failed and Anthropic is not available: {e}")
+                error_msg = (
+                    f"OpenAI API call failed: {e}\n\n"
+                    "To fix this issue:\n"
+                    "1. Create a .env file in the backend directory\n"
+                    "2. Add either:\n"
+                    "   OPENAI_API_KEY=your_valid_openai_key\n"
+                    "   OR\n"
+                    "   ANTHROPIC_API_KEY=your_valid_anthropic_key\n"
+                    "3. Restart the backend server\n\n"
+                    "Get your API keys from:\n"
+                    "- OpenAI: https://platform.openai.com/account/api-keys\n"
+                    "- Anthropic: https://console.anthropic.com/settings/keys"
+                )
+                raise ValueError(error_msg)
             logger.info("Using Anthropic as fallback for question analysis")
             response = self.call_llm(messages, use_anthropic=True)
         
@@ -225,7 +266,20 @@ Follow the schema and requirements in the system prompt. Respond with ONLY valid
         except Exception as e:
             logger.warning(f"OpenAI API call failed: {e}. Falling back to Anthropic...")
             if not self.anthropic_client:
-                raise ValueError(f"OpenAI failed and Anthropic is not available: {e}")
+                error_msg = (
+                    f"OpenAI API call failed: {e}\n\n"
+                    "To fix this issue:\n"
+                    "1. Create a .env file in the backend directory\n"
+                    "2. Add either:\n"
+                    "   OPENAI_API_KEY=your_valid_openai_key\n"
+                    "   OR\n"
+                    "   ANTHROPIC_API_KEY=your_valid_anthropic_key\n"
+                    "3. Restart the backend server\n\n"
+                    "Get your API keys from:\n"
+                    "- OpenAI: https://platform.openai.com/account/api-keys\n"
+                    "- Anthropic: https://console.anthropic.com/settings/keys"
+                )
+                raise ValueError(error_msg)
             logger.info("Using Anthropic as fallback for story generation")
             response = self.call_llm(messages, use_anthropic=True)
         
@@ -282,7 +336,20 @@ Generate ONLY the HTML code, no markdown, no explanations."""
         except Exception as e:
             logger.warning(f"OpenAI API call failed: {e}. Falling back to Anthropic...")
             if not self.anthropic_client:
-                raise ValueError(f"OpenAI failed and Anthropic is not available: {e}")
+                error_msg = (
+                    f"OpenAI API call failed: {e}\n\n"
+                    "To fix this issue:\n"
+                    "1. Create a .env file in the backend directory\n"
+                    "2. Add either:\n"
+                    "   OPENAI_API_KEY=your_valid_openai_key\n"
+                    "   OR\n"
+                    "   ANTHROPIC_API_KEY=your_valid_anthropic_key\n"
+                    "3. Restart the backend server\n\n"
+                    "Get your API keys from:\n"
+                    "- OpenAI: https://platform.openai.com/account/api-keys\n"
+                    "- Anthropic: https://console.anthropic.com/settings/keys"
+                )
+                raise ValueError(error_msg)
             logger.info("Using Anthropic as fallback for HTML generation")
             response = self.call_llm(messages, use_anthropic=True)
         

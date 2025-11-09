@@ -14,7 +14,8 @@ class PromptSelector:
 
     def _load_default_prompt(self):
         """Load the default coding question prompt"""
-        prompt_file = self.prompts_dir / "coding_question_systemPrompt.txt"
+        # Try to load story_base.md first
+        prompt_file = self.prompts_dir / "story_base.md"
         if prompt_file.exists():
             logger.info(f"Loading prompt template from: {prompt_file}")
             with open(prompt_file, 'r', encoding='utf-8') as f:
