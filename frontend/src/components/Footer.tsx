@@ -41,13 +41,13 @@ export default function Footer() {
         {/* Social Icons */}
         <div className="flex items-center gap-4 mb-8">
           {[
-            { icon: Facebook, href: '#' },
-            { icon: Instagram, href: '#' },
-            { icon: Twitter, href: '#' },
-            { icon: Linkedin, href: '#' },
-          ].map(({ icon: Icon, href }) => (
+            { icon: Facebook, href: '#', name: 'Facebook' },
+            { icon: Instagram, href: '#', name: 'Instagram' },
+            { icon: Twitter, href: '#', name: 'Twitter' },
+            { icon: Linkedin, href: '#', name: 'LinkedIn' },
+          ].map(({ icon: Icon, href, name }) => (
             <Link
-              key={href}
+              key={name}
               href={href}
               className="w-8 h-8 text-gray-400 hover:text-white transition-colors"
             >

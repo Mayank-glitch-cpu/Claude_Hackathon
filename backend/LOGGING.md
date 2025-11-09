@@ -2,12 +2,50 @@
 
 ## Overview
 
-The backend uses a comprehensive logging system that writes detailed logs to files for debugging purposes.
+The backend uses a comprehensive logging system with **per-run directory structure** that writes detailed logs to files for debugging purposes. Each time the application starts, a new run directory is created with a unique identifier, making it easy to track and debug specific application runs.
+
+### Key Features
+- **Per-run directories**: Each application run gets its own directory
+- **Run metadata**: Each run includes metadata (start time, end time, PID)
+- **Easy access**: Symlink/text file points to current run
+- **Component separation**: Each logger writes to its own log file
+- **Log rotation**: Individual log files rotate at 10MB with 5 backups
 
 ## Log File Location
 
-Logs are stored in the `backend/logs/` directory with the following naming pattern:
-- `app_YYYYMMDD.log` - Daily log files (e.g., `app_20250108.log`)
+Logs are stored in a **per-run directory structure** under `backend/logs/runs/`:
+
+### Directory Structure
+```
+backend/logs/
+├── runs/
+│   ├── current -> 20251108_143022_a1b2c3d4/  (symlink to current run)
+│   ├── current.txt                          (fallback for Windows)
+│   ├── 20251108_143022_a1b2c3d4/            (run directory)
+│   │   ├── metadata.json                    (run metadata)
+│   │   ├── main.log                         (main application logs)
+│   │   ├── ai_learning_platform.log       (platform logs)
+│   │   ├── llm_service.log                 (LLM service logs)
+│   │   └── ...                              (other component logs)
+│   ├── 20251108_150145_e5f6g7h8/            (previous run)
+│   └── ...
+```
+
+### Run Directory Naming
+Each run directory is named with the pattern: `YYYYMMDD_HHMMSS_<uuid>`
+- `YYYYMMDD_HHMMSS` - Timestamp when the run started
+- `<uuid>` - Short UUID (8 chars) for uniqueness
+
+### Run Metadata
+Each run directory contains a `metadata.json` file with:
+- `run_id`: Unique identifier for this run
+- `start_time`: ISO timestamp when the run started
+- `end_time`: ISO timestamp when the run ended (added on shutdown)
+- `pid`: Process ID of the application
+
+### Current Run Access
+- **Symlink**: `logs/runs/current` points to the current run directory (Unix/Mac)
+- **Text file**: `logs/runs/current.txt` contains the current run ID (Windows fallback)
 
 ## Log Levels
 
@@ -75,46 +113,86 @@ Example:
 
 ## Viewing Logs
 
-### Real-time Monitoring
+### View Current Run Logs
 ```bash
-# Watch logs in real-time (Linux/Mac)
-tail -f backend/logs/app_$(date +%Y%m%d).log
+# Use the helper script (recommended)
+cd backend
+./scripts/view_current_run.sh
 
-# Windows PowerShell
-Get-Content backend\logs\app_*.log -Wait -Tail 50
+# Or manually access current run
+tail -f logs/runs/current/main.log
+
+# View run metadata
+cat logs/runs/current/metadata.json
 ```
 
-### Search Logs
+### Real-time Monitoring
 ```bash
-# Find all errors
-grep "ERROR" backend/logs/app_*.log
+# Watch current run logs in real-time (Linux/Mac)
+tail -f backend/logs/runs/current/main.log
+
+# Watch specific component logs
+tail -f backend/logs/runs/current/llm_service.log
+tail -f backend/logs/runs/current/orchestrator.log
+
+# Windows PowerShell
+Get-Content backend\logs\runs\current\main.log -Wait -Tail 50
+```
+
+### Search Current Run Logs
+```bash
+# Find all errors in current run
+grep "ERROR" backend/logs/runs/current/*.log
 
 # Find specific process ID
-grep "process_id=abc123" backend/logs/app_*.log
+grep "process_id=abc123" backend/logs/runs/current/*.log
 
 # Find all OpenAI calls
-grep "OpenAI" backend/logs/app_*.log
+grep "OpenAI" backend/logs/runs/current/*.log
+```
+
+### Search All Runs
+```bash
+# Find errors across all runs
+grep -r "ERROR" backend/logs/runs/*/
+
+# Find specific process ID across all runs
+grep -r "process_id=abc123" backend/logs/runs/*/
+
+# List all runs
+ls -la backend/logs/runs/
 ```
 
 ### Filter by Component
 ```bash
-# LLM service logs
-grep "llm_service" backend/logs/app_*.log
+# LLM service logs (current run)
+grep "llm_service" backend/logs/runs/current/*.log
 
-# Pipeline logs
-grep "PIPELINE" backend/logs/app_*.log
+# Pipeline logs (current run)
+grep "PIPELINE" backend/logs/runs/current/*.log
 
-# API endpoint logs
-grep "\[API\]" backend/logs/app_*.log
+# API endpoint logs (current run)
+grep "\[API\]" backend/logs/runs/current/*.log
+```
+
+### Access Specific Run
+```bash
+# View a specific run's logs
+tail -f backend/logs/runs/20251108_143022_a1b2c3d4/main.log
+
+# View run metadata
+cat backend/logs/runs/20251108_143022_a1b2c3d4/metadata.json
 ```
 
 ## Debugging Workflow
 
-1. **Start the backend server** - Logs begin immediately
-2. **Reproduce the issue** - All actions are logged
-3. **Check the log file** - Look for ERROR or WARNING entries
-4. **Follow the process ID** - Each pipeline run has a unique process_id
-5. **Check LLM responses** - Full API responses are logged at DEBUG level
+1. **Start the backend server** - A new run directory is created automatically
+2. **Note the Run ID** - Check startup logs or `logs/runs/current/metadata.json`
+3. **Reproduce the issue** - All actions are logged to the current run directory
+4. **Check the log files** - Look for ERROR or WARNING entries in `logs/runs/current/`
+5. **Follow the process ID** - Each pipeline run has a unique process_id
+6. **Check LLM responses** - Full API responses are logged at DEBUG level
+7. **Review run metadata** - Check `metadata.json` for run timing information
 
 ## Example Log Search Patterns
 
@@ -140,11 +218,28 @@ grep "Falling back" backend/logs/app_*.log
 
 ## Log File Rotation
 
-Logs are created daily. Old log files are kept for historical debugging. You can manually clean them:
+Each run creates its own directory. Log files within each run directory use rotation (10MB max, 5 backups per file).
 
+### Cleanup Old Runs
 ```bash
-# Keep only last 7 days
-find backend/logs -name "app_*.log" -mtime +7 -delete
+# List all runs
+ls -la backend/logs/runs/
+
+# Remove runs older than 7 days
+find backend/logs/runs -type d -name "20*" -mtime +7 -exec rm -rf {} \;
+
+# Keep only last 10 runs
+cd backend/logs/runs
+ls -t | tail -n +11 | xargs rm -rf
+```
+
+### Archive Runs
+```bash
+# Archive a specific run
+tar -czf run_20251108_143022.tar.gz backend/logs/runs/20251108_143022_a1b2c3d4/
+
+# Archive all runs older than 30 days
+find backend/logs/runs -type d -name "20*" -mtime +30 -exec tar -czf {}.tar.gz {} \;
 ```
 
 ## Log File Size
@@ -168,4 +263,37 @@ Log files can grow large with DEBUG level logging. To reduce size:
 ### Need more detail?
 - Ensure DEBUG level is enabled
 - Check that `exc_info=True` is used in error logs
+
+## Helper Scripts
+
+### View Current Run
+```bash
+# Bash script (Unix/Mac)
+cd backend
+./scripts/view_current_run.sh
+
+# Python script (Cross-platform)
+cd backend
+python scripts/view_current_run.py
+```
+
+### List All Runs
+```bash
+cd backend
+./scripts/list_runs.sh
+```
+
+### Get Run Info via API
+```bash
+curl http://localhost:8000/api/run-info
+```
+
+## Benefits of Per-Run Logging
+
+1. **Isolation**: Each run's logs are completely separate
+2. **Easy Debugging**: Find logs for a specific run without searching through daily files
+3. **Metadata Tracking**: Know exactly when each run started and ended
+4. **Cleanup**: Easy to archive or delete old runs
+5. **Comparison**: Compare logs between different runs
+6. **No Interference**: Multiple restarts don't mix logs together
 

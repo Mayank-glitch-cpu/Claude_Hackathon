@@ -1,0 +1,32 @@
+export interface ParameterPlaygroundBlueprint {
+  templateType: "PARAMETER_PLAYGROUND";
+  title: string;
+  narrativeIntro: string;
+  parameters: Array<{
+    id: string;
+    label: string;
+    type: "slider" | "input" | "dropdown";
+    min?: number;
+    max?: number;
+    defaultValue: number | string;
+    unit?: string;
+  }>;
+  visualization: {
+    type: "chart" | "graph" | "diagram" | "simulation";
+    assetPrompt?: string;
+    assetUrl?: string;
+  };
+  tasks: Array<{
+    id: string;
+    type: "parameter_adjustment" | "prediction";
+    questionText: string;
+    targetValues?: Record<string, number | string>;
+    requiredToProceed: boolean;
+  }>;
+  animationCues: {
+    parameterChange: string;
+    visualizationUpdate: string;
+    targetReached?: string;
+  };
+}
+

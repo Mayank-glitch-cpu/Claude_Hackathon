@@ -70,7 +70,7 @@ export default function UploadPage() {
               Upload Your Question
             </h1>
             <p className="text-body-lg text-body-gray max-w-2xl mx-auto">
-              Upload a PDF, DOCX, or text file containing your question. We'll transform it into an interactive learning experience.
+              Upload a PDF, DOCX, or text file containing your question. We&apos;ll transform it into an interactive learning experience.
             </p>
           </motion.div>
 

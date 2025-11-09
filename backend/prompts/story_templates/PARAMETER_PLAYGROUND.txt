@@ -1,0 +1,13 @@
+### Template Context: PARAMETER_PLAYGROUND
+
+The resulting visualization will be implemented as:
+- Interactive playground to adjust parameters and see results.
+- Parameters are controlled via sliders or inputs.
+- Visualization updates in real-time based on parameters.
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+- Focus on experimentation, parameter adjustment, and cause-effect relationships.
+- Visual elements should show how parameters affect outcomes.
+- Questions should involve predicting or understanding parameter effects.
+- Animation cues should show parameter changes and result updates.
+

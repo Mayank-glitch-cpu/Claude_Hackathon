@@ -1,37 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+// Preview page for question review and pipeline processing
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import Header from '@/components/Header'
+import PipelineProgress from '@/components/PipelineProgress'
+import { useQuestionStore } from '@/stores/questionStore'
+import { usePipelineStore } from '@/stores/pipelineStore'
 
-interface Question {
-  id: string
-  text: string
-  options?: string[]
-  correct_answer?: string
-  story?: {
-    story_title: string
-    story_context: string
-    question_flow: Array<{
-      question_number: number
-      intuitive_question: string
-      answer_structure: {
-        options: string[]
-        correct_answer: string
-      }
-    }>
-  }
-}
+// Create axios instance with backend URL for direct calls
+const backendApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  timeout: 60000, // 60 seconds timeout
+})
 
 export default function PreviewPage() {
   const router = useRouter()
-  const [question, setQuestion] = useState<Question | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { question, loading, setQuestion, setLoading } = useQuestionStore()
+  const { processId, setProcessId, reset: resetPipeline } = usePipelineStore()
   const [processing, setProcessing] = useState(false)
-  const [progress, setProgress] = useState(0)
+  const [completed, setCompleted] = useState(false)
 
   useEffect(() => {
     const questionId = localStorage.getItem('questionId')
@@ -40,8 +31,15 @@ export default function PreviewPage() {
       return
     }
 
+    // Check if visualization already exists (processing completed previously)
+    const existingVizId = localStorage.getItem('visualizationId')
+    if (existingVizId) {
+      setCompleted(true)
+    }
+
     // Fetch question details
     const fetchQuestion = async () => {
+      setLoading(true)
       try {
         const response = await axios.get(`/api/questions/${questionId}`)
         setQuestion(response.data)
@@ -53,7 +51,12 @@ export default function PreviewPage() {
     }
 
     fetchQuestion()
-  }, [router])
+    
+    // Reset pipeline state on mount (but keep completed state if visualization exists)
+    if (!existingVizId) {
+      resetPipeline()
+    }
+  }, [router, setQuestion, setLoading, resetPipeline])
 
   const handleStartGame = async () => {
     if (!question) {
@@ -72,82 +75,63 @@ export default function PreviewPage() {
       return
     }
 
-    console.log('[Start Game] Question ID:', questionId)
-
     try {
-      // Start processing pipeline
+      // Start processing pipeline - call backend directly to avoid Next.js proxy timeout
       console.log('[Start Game] Calling /api/process endpoint...')
-      const processResponse = await axios.post(`/api/process/${questionId}`)
-      const processId = processResponse.data.process_id
-      console.log('[Start Game] Process started with ID:', processId)
-
-      // Poll for progress
-      let pollCount = 0
-      const maxPolls = 300 // 10 minutes max (300 * 2 seconds)
-      const progressInterval = setInterval(async () => {
-        pollCount++
-        try {
-          console.log(`[Start Game] Polling progress (attempt ${pollCount})...`)
-          const progressResponse = await axios.get(`/api/progress/${processId}`)
-          const progressData = progressResponse.data
-
-          console.log('[Start Game] Progress update:', {
-            status: progressData.status,
-            progress: progressData.progress,
-            step: progressData.current_step,
-            error: progressData.error_message
-          })
-
-          setProgress(progressData.progress)
-
-          if (progressData.status === 'completed') {
-            console.log('[Start Game] Processing completed! Visualization ID:', progressData.visualization_id)
-            clearInterval(progressInterval)
-            localStorage.setItem('visualizationId', progressData.visualization_id)
-            router.push('/app/game')
-          } else if (progressData.status === 'error') {
-            console.error('[Start Game] Processing failed:', progressData.error_message)
-            clearInterval(progressInterval)
-            const errorMsg = progressData.error_message || 'Processing failed. Please try again.'
-            alert(`Processing failed: ${errorMsg}`)
-            setProcessing(false)
-          } else if (pollCount >= maxPolls) {
-            console.error('[Start Game] Max polling attempts reached')
-            clearInterval(progressInterval)
-            alert('Processing is taking too long. Please try again.')
-            setProcessing(false)
-          }
-        } catch (error: any) {
-          console.error('[Start Game] Progress check failed:', error)
-          console.error('[Start Game] Error details:', {
-            message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
-          })
-          if (pollCount >= 5) {
-            clearInterval(progressInterval)
-            alert(`Failed to check progress: ${error.response?.data?.detail || error.message}`)
-            setProcessing(false)
-          }
-        }
-      }, 2000) // Poll every 2 seconds
+      const processResponse = await backendApi.post(`/api/process/${questionId}`)
+      const newProcessId = processResponse.data.process_id
+      setProcessId(newProcessId)
+      console.log('[Start Game] Process started with ID:', newProcessId)
     } catch (error: any) {
       console.error('[Start Game] Failed to start processing:', error)
       console.error('[Start Game] Error details:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        code: error.code
       })
-      const errorMsg = error.response?.data?.detail || error.message || 'Failed to start processing'
-      alert(`Failed to start processing: ${errorMsg}`)
+      
+      // Handle connection errors gracefully
+      if (error.code === 'ECONNRESET' || error.message?.includes('socket hang up')) {
+        alert('Backend is restarting. Please wait a moment and try again.')
+      } else if (error.response?.status === 500) {
+        const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Server error (500). The backend may be processing. Check the backend logs for details.'
+        alert(`Failed to start processing: ${errorMsg}`)
+      } else {
+        const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || 'Failed to start processing'
+        alert(`Failed to start processing: ${errorMsg}`)
+      }
       setProcessing(false)
     }
+  }
+
+  const handleComplete = (visualizationId: string) => {
+    console.log('[Preview] Processing completed! Visualization ID:', visualizationId)
+    localStorage.setItem('visualizationId', visualizationId)
+    setProcessing(false)
+    setCompleted(true)
+    // Don't auto-redirect - let user click button to go to game
+  }
+
+  const handleGoToGame = () => {
+    const vizId = localStorage.getItem('visualizationId')
+    if (!vizId) {
+      alert('Visualization not ready. Please wait for processing to complete.')
+      return
+    }
+    router.push('/app/game')
+  }
+
+  const handleError = (error: string) => {
+    console.error('[Preview] Processing failed:', error)
+    alert(`Processing failed: ${error}`)
+    setProcessing(false)
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-[#FFFEF9] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-brilliant-green" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#00A67E]" />
       </div>
     )
   }
@@ -155,141 +139,143 @@ export default function PreviewPage() {
   if (!question) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-[#FFFEF9] flex items-center justify-center">
-        <p className="text-body-gray">Question not found</p>
+        <p className="text-gray-600">Question not found</p>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-[#FFFEF9]">
-      <Header />
-      <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
-              Question Preview
-            </h1>
-            <p className="text-body-lg text-body-gray">
-              Review your question before we transform it into an interactive game
-            </p>
-          </motion.div>
-
-          {/* Question Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8"
-          >
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-black mb-4">Question</h2>
-                <p className="text-body-lg text-body-gray leading-relaxed">
-                  {question.text}
-                </p>
-              </div>
-
-              {question.options && question.options.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-semibold text-black mb-3">Options</h3>
-                  <ul className="space-y-2">
-                    {question.options.map((option, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <span className="font-semibold text-vibrant-blue">
-                          {String.fromCharCode(65 + index)}.
-                        </span>
-                        <span className="text-body-gray">{option}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {question.story && (
-                <div className="mt-6 p-6 bg-light-lavender rounded-lg">
-                  <h3 className="text-xl font-semibold text-black mb-2">
-                    {question.story.story_title}
-                  </h3>
-                  <p className="text-body-gray leading-relaxed mb-4">
-                    {question.story.story_context}
-                  </p>
-                  <div className="space-y-3">
-                    {question.story.question_flow.map((q) => (
-                      <div key={q.question_number} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-brilliant-green mt-1 flex-shrink-0" />
-                        <div>
-                          <p className="font-semibold text-black">{q.intuitive_question}</p>
-                          <p className="text-sm text-muted-gray mt-1">
-                            {q.answer_structure.options.length} options
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Progress Indicator */}
-          {processing && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="mb-8"
-            >
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-lg font-semibold text-black">
-                    Processing your question...
-                  </span>
-                  <span className="text-sm text-muted-gray">{progress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <motion.div
-                    className="bg-brilliant-green h-2 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
-                <p className="text-sm text-muted-gray mt-4">
-                  {progress < 30 && 'Analyzing question...'}
-                  {progress >= 30 && progress < 60 && 'Generating story...'}
-                  {progress >= 60 && progress < 90 && 'Creating visualization...'}
-                  {progress >= 90 && 'Finalizing...'}
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Start Game Button */}
-          {!processing && (
+        <Header />
+        <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-center"
+              className="mb-8"
             >
-              <button
-                onClick={handleStartGame}
-                className="px-8 py-4 rounded-full bg-brilliant-green text-white font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 mx-auto"
-              >
-                Start Interactive Game
-                <ArrowRight className="w-5 h-5" />
-              </button>
+              <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+                Question Preview
+              </h1>
+              <p className="text-lg text-gray-600">
+                Review your question before we transform it into an interactive game
+              </p>
             </motion.div>
-          )}
+
+            {/* Question Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8"
+            >
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-black mb-4">Question</h2>
+                  <p className="text-lg text-gray-700 leading-relaxed">
+                    {question.text}
+                  </p>
+                </div>
+
+                {question.options && question.options.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-semibold text-black mb-3">Options</h3>
+                    <ul className="space-y-2">
+                      {question.options.map((option, index) => (
+                        <li
+                          key={index}
+                          className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
+                        >
+                          <span className="font-semibold text-blue-600">
+                            {String.fromCharCode(65 + index)}.
+                          </span>
+                          <span className="text-gray-700">{option}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {question.analysis && (
+                  <div className="mt-6 p-6 bg-blue-50 rounded-lg">
+                    <h3 className="text-xl font-semibold text-black mb-2">Analysis</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-semibold">Type:</span> {question.analysis.question_type}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Subject:</span> {question.analysis.subject}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Difficulty:</span> {question.analysis.difficulty}
+                      </div>
+                      {question.analysis.key_concepts && question.analysis.key_concepts.length > 0 && (
+                        <div className="col-span-2">
+                          <span className="font-semibold">Key Concepts:</span>{' '}
+                          {question.analysis.key_concepts.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Pipeline Progress */}
+            {processing && processId && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-8"
+              >
+                <PipelineProgress
+                  processId={processId}
+                  onComplete={handleComplete}
+                  onError={handleError}
+                />
+              </motion.div>
+            )}
+
+            {/* Action Buttons */}
+            {!processing && !completed && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-center"
+              >
+                <button
+                  onClick={handleStartGame}
+                  className="px-8 py-4 rounded-full bg-[#00A67E] text-white font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 mx-auto"
+                >
+                  Start Interactive Game
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            )}
+
+            {/* Go to Game Button - shown after processing completes */}
+            {completed && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 font-semibold mb-2">✓ Processing Complete!</p>
+                  <p className="text-green-700 text-sm">Your interactive game is ready. Click below to start playing.</p>
+                </div>
+                <button
+                  onClick={handleGoToGame}
+                  className="px-8 py-4 rounded-full bg-[#00A67E] text-white font-semibold text-lg hover:scale-105 transition-transform flex items-center gap-2 mx-auto"
+                >
+                  Go to Game
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </motion.div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
   )
 }
-

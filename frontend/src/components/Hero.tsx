@@ -68,7 +68,7 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-body-lg text-body-gray mb-4 max-w-2xl mx-auto"
           >
-            Interactive problem solving that's effective and fun.
+            Interactive problem solving that&apos;s effective and fun.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

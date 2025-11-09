@@ -1,0 +1,13 @@
+### Template Context: STATE_TRACER_CODE
+
+The resulting visualization will be implemented as:
+- Step through code execution and track variable states.
+- Code is displayed with line-by-line execution.
+- Variable states are tracked and displayed at each step.
+
+When generating story_context, visual_metaphor, visual_elements, question_flow, and animation_cues:
+- Emphasize stepping through execution, variable states, and debugging.
+- Visual elements should represent code lines, variables, and state changes.
+- Questions should involve predicting variable values or execution flow.
+- Animation cues should show line highlighting, state updates, and step progression.
+

@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import Header from '@/components/Header'
+import { GameEngine } from '@/components/GameEngine'
+import type { GameBlueprint } from '@/types/gameBlueprint'
 
 interface GameState {
   currentQuestion: number
@@ -20,7 +22,9 @@ interface GameState {
 
 export default function GamePage() {
   const router = useRouter()
+  const [blueprint, setBlueprint] = useState<GameBlueprint | null>(null)
   const [visualizationHtml, setVisualizationHtml] = useState<string>('')
+  const [visualizationType, setVisualizationType] = useState<'blueprint' | 'html'>('html')
   const [loading, setLoading] = useState(true)
   const [gameState, setGameState] = useState<GameState>({
     currentQuestion: 0,
@@ -41,17 +45,27 @@ export default function GamePage() {
 
     const fetchVisualization = async () => {
       try {
-        const response = await axios.get(`/api/visualization/${visualizationId}`)
-        setVisualizationHtml(response.data.html)
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const response = await axios.get(`${apiUrl}/api/visualization/${visualizationId}`)
         
-        // Extract question data from the visualization
-        const questionData = response.data.question_data
-        setGameState({
-          currentQuestion: 0,
-          totalQuestions: questionData.question_flow?.length || 1,
-          score: 0,
-          answers: [],
-        })
+        if (response.data.type === 'blueprint' && response.data.blueprint) {
+          // New blueprint-based visualization
+          setBlueprint(response.data.blueprint.blueprint as GameBlueprint)
+          setVisualizationType('blueprint')
+        } else if (response.data.html) {
+          // Legacy HTML visualization
+          setVisualizationHtml(response.data.html)
+          setVisualizationType('html')
+          
+          // Extract question data from the visualization
+          const questionData = response.data.question_data
+          setGameState({
+            currentQuestion: 0,
+            totalQuestions: questionData?.question_flow?.length || 1,
+            score: 0,
+            answers: [],
+          })
+        }
       } catch (error) {
         console.error('Failed to fetch visualization:', error)
       } finally {
@@ -162,10 +176,14 @@ export default function GamePage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8"
           >
-            <div
-              className="visualization-container w-full"
-              dangerouslySetInnerHTML={{ __html: visualizationHtml }}
-            />
+            {visualizationType === 'blueprint' && blueprint ? (
+              <GameEngine blueprint={blueprint} />
+            ) : (
+              <div
+                className="visualization-container w-full"
+                dangerouslySetInnerHTML={{ __html: visualizationHtml }}
+              />
+            )}
           </motion.div>
 
           {/* Feedback */}
