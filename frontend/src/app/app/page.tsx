@@ -49,6 +49,8 @@ export default function UploadPage() {
 
       // Store the question ID for preview
       localStorage.setItem('questionId', response.data.question_id)
+      // Clear old visualization ID to force fresh pipeline run
+      localStorage.removeItem('visualizationId')
       router.push('/app/preview')
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Upload failed. Please try again.')

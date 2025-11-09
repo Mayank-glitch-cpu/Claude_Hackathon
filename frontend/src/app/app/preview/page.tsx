@@ -31,11 +31,11 @@ export default function PreviewPage() {
       return
     }
 
-    // Check if visualization already exists (processing completed previously)
-    const existingVizId = localStorage.getItem('visualizationId')
-    if (existingVizId) {
-      setCompleted(true)
-    }
+    // Always reset pipeline state when loading a new question
+    // This ensures fresh pipeline runs even if old visualizationId exists
+    resetPipeline()
+    setCompleted(false)
+    setProcessing(false)
 
     // Fetch question details
     const fetchQuestion = async () => {
@@ -51,11 +51,6 @@ export default function PreviewPage() {
     }
 
     fetchQuestion()
-    
-    // Reset pipeline state on mount (but keep completed state if visualization exists)
-    if (!existingVizId) {
-      resetPipeline()
-    }
   }, [router, setQuestion, setLoading, resetPipeline])
 
   const handleStartGame = async () => {
