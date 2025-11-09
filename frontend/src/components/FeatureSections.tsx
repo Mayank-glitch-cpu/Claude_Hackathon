@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { CheckCircle2, Target, Trophy, BookOpen, Zap } from 'lucide-react'
+import { CheckCircle2, Target, Trophy, BookOpen, Zap, MousePointer2 } from 'lucide-react'
 
 const features = [
   {
@@ -11,8 +11,15 @@ const features = [
     layout: 'left-text',
     visual: <div className="w-full h-96 bg-white rounded-lg flex items-center justify-center">
       <div className="relative">
-        <div className="w-32 h-32 border-4 border-vibrant-blue rounded-full" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-vibrant-blue">y</div>
+        <motion.div 
+          className="w-32 h-32 border-4 border-vibrant-blue rounded-full cursor-pointer"
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <MousePointer2 className="w-8 h-8 text-vibrant-blue" />
+        </div>
       </div>
     </div>
   },

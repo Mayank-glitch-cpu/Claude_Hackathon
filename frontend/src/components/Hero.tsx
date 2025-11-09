@@ -25,9 +25,17 @@ const BarChart = () => {
   const tallestBarIndex = 2
   
   return (
-    <svg width="200" height="80" viewBox="0 0 200 80" className="absolute left-0" style={{ top: '-5px' }}>
+    <motion.svg 
+      width="200" 
+      height="80" 
+      viewBox="0 0 200 80" 
+      className="absolute left-0" 
+      style={{ top: '-5px' }}
+      animate={{ y: [0, -5, 0] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+    >
       {bars.map((bar, i) => (
-        <rect
+        <motion.rect
           key={i}
           x={25 + i * 30}
           y={80 - bar.height * 1.5}
@@ -35,11 +43,41 @@ const BarChart = () => {
           height={bar.height * 1.5}
           fill={bar.color}
           rx={2}
+          animate={{ 
+            y: [0, -2, 0],
+            scaleY: [1, 1.05, 1]
+          }}
+          transition={{ 
+            duration: 2 + i * 0.3, 
+            repeat: Infinity, 
+            delay: i * 0.2,
+            ease: "easeInOut"
+          }}
         />
       ))}
       {/* Percentage label on tallest bar */}
-      <rect x={25 + tallestBarIndex * 30 - 10} y={80 - 32 * 1.5 - 18} width="32" height="14" fill="#A78BFA" rx="2" />
-      <text x={25 + tallestBarIndex * 30 + 9} y={80 - 32 * 1.5 - 6} fontSize="11" fill="white" fontWeight="bold" textAnchor="middle">71%</text>
+      <motion.rect 
+        x={25 + tallestBarIndex * 30 - 10} 
+        y={80 - 32 * 1.5 - 18} 
+        width="32" 
+        height="14" 
+        fill="#A78BFA" 
+        rx="2"
+        animate={{ y: [0, -3, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.text 
+        x={25 + tallestBarIndex * 30 + 9} 
+        y={80 - 32 * 1.5 - 6} 
+        fontSize="11" 
+        fill="white" 
+        fontWeight="bold" 
+        textAnchor="middle"
+        animate={{ y: [0, -3, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      >
+        71%
+      </motion.text>
       {/* Dashed line from tallest bar to scale */}
       <line
         x1={34 + tallestBarIndex * 30}
@@ -51,22 +89,29 @@ const BarChart = () => {
         strokeDasharray="3,3"
       />
       {/* Interactive slider circle */}
-      <circle
+      <motion.circle
         cx={34 + tallestBarIndex * 30}
         cy={80 - 32 * 1.5 - 12}
         r="10"
         fill="white"
         stroke="#000"
         strokeWidth="1.5"
+        animate={{ 
+          y: [0, -5, 0],
+          scale: [1, 1.1, 1]
+        }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       />
-      <path
+      <motion.path
         d="M 29 3 L 29 11 M 39 3 L 39 11"
         stroke="#000"
         strokeWidth="2"
         strokeLinecap="round"
         transform={`translate(${tallestBarIndex * 30 + 9}, ${80 - 32 * 1.5 - 12})`}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
       />
-    </svg>
+    </motion.svg>
   )
 }
 
@@ -87,17 +132,30 @@ const ScatterPlot = () => {
   const trendPoints = points.map(p => `${p.x},${p.y}`).join(' ')
   
   return (
-    <svg width="200" height="80" viewBox="0 0 200 80" className="absolute right-0" style={{ top: '-5px' }}>
+    <motion.svg 
+      width="200" 
+      height="80" 
+      viewBox="0 0 200 80" 
+      className="absolute right-0" 
+      style={{ top: '-5px' }}
+      animate={{ y: [0, 5, 0] }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+    >
       {/* Trend line */}
-      <polyline
+      <motion.polyline
         points={points.map(p => `${p.x * 1.4},${p.y * 1.6}`).join(' ')}
         fill="none"
         stroke="#FB923C"
         strokeWidth="2"
+        animate={{ 
+          pathLength: [0, 1],
+          opacity: [0.5, 1, 0.5]
+        }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
       {/* Scatter points */}
       {points.map((point, i) => (
-        <circle
+        <motion.circle
           key={i}
           cx={point.x * 1.4}
           cy={point.y * 1.6}
@@ -106,35 +164,66 @@ const ScatterPlot = () => {
           stroke={i === points.length - 1 ? 'white' : 'none'}
           strokeWidth={i === points.length - 1 ? 2.5 : 0}
           style={{ filter: i === points.length - 1 ? 'drop-shadow(0 0 5px rgba(251, 146, 60, 0.7))' : 'none' }}
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.7, 1, 0.7]
+          }}
+          transition={{ 
+            duration: 2 + i * 0.1, 
+            repeat: Infinity, 
+            delay: i * 0.05,
+            ease: "easeInOut"
+          }}
         />
       ))}
-    </svg>
+    </motion.svg>
   )
 }
 
-// Code Blocks Component for "By Seeing"
+// Code Blocks Component for "By Playing"
 const CodeBlocks = () => {
   return (
     <div className="absolute left-0 flex flex-col gap-1.5" style={{ top: '-30px' }}>
       {/* while learning block */}
       <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1.5 text-xs shadow-sm">
-        <svg width="14" height="14" viewBox="0 0 14 14" className="mr-1.5">
+        <motion.svg 
+          width="14" 
+          height="14" 
+          viewBox="0 0 14 14" 
+          className="mr-1.5"
+          animate={{ rotate: [0, 360] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        >
           <circle cx="7" cy="7" r="6" fill="none" stroke="#6366F1" strokeWidth="1.5"/>
           <path d="M7 3 L9 7 L7 11 M9 7 L5 7" stroke="#6366F1" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        </svg>
+        </motion.svg>
         <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-1.5 font-medium">while</span>
         <span className="text-gray-700">learning</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" className="ml-1.5">
+        <motion.svg 
+          width="10" 
+          height="10" 
+          viewBox="0 0 10 10" 
+          className="ml-1.5"
+          animate={{ x: [0, 2, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
           <path d="M2 2 L5 5 L2 8" stroke="#666" strokeWidth="1.2" fill="none"/>
-        </svg>
+        </motion.svg>
       </div>
       {/* if doing block */}
       <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1.5 text-xs shadow-sm ml-6">
         <span className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded mr-1.5 font-medium">if</span>
         <span className="text-gray-700">doing</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" className="ml-1.5">
+        <motion.svg 
+          width="10" 
+          height="10" 
+          viewBox="0 0 10 10" 
+          className="ml-1.5"
+          animate={{ x: [0, 2, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
           <path d="M2 2 L5 5 L2 8" stroke="#666" strokeWidth="1.2" fill="none"/>
-        </svg>
+        </motion.svg>
         {/* Empty slot indicator */}
         <div className="ml-2 border-2 border-dashed border-gray-300 rounded px-2 py-0.5 min-w-[40px]"></div>
       </div>
@@ -147,82 +236,93 @@ const CodeBlocks = () => {
       >
         <span className="bg-blue-400 text-blue-900 px-1.5 py-0.5 rounded mr-1.5 font-medium">keep</span>
         <span className="text-gray-800">growing</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" className="ml-1.5">
+        <motion.svg 
+          width="10" 
+          height="10" 
+          viewBox="0 0 10 10" 
+          className="ml-1.5"
+          animate={{ x: [0, 2, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
           <path d="M2 2 L5 5 L2 8" stroke="#666" strokeWidth="1.2" fill="none"/>
-        </svg>
+        </motion.svg>
       </motion.div>
     </div>
   )
 }
 
-// Right side blocks for "By Seeing" scale
+// Right side blocks for "By Playing" scale
 const RightBlocks = () => {
-  return (
-    <div className="flex flex-col gap-1.5 items-end w-full">
-      {/* else block */}
-      <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1.5 text-xs shadow-sm">
-        <span className="text-purple-500">else</span>
-      </div>
-      {/* bummer block */}
-      <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1.5 text-xs shadow-sm">
-        <span className="text-purple-500">bummer</span>
-      </div>
-    </div>
-  )
+  return null
 }
 
-// Sine Wave Component for "By Seeing"
+// Sine Wave Component for "By Playing"
 const SineWave = () => {
   const width = 140
   const height = 50
   const frequency = 1.5
   const amplitude = 12
   
-  const points = Array.from({ length: 120 }, (_, i) => {
-    const x = (i / 120) * width
-    const y = height / 2 + Math.sin((i / 120) * Math.PI * frequency * 2) * amplitude
-    return `${x},${y}`
-  }).join(' ')
-  
-  const peakX = 100
-  const peakY = height / 2 - amplitude
-  
   return (
-    <svg width="140" height="50" viewBox="0 0 140 50" className="absolute right-0" style={{ top: '-25px' }}>
-      <polyline
-        points={points}
+    <motion.svg 
+      width="140" 
+      height="50" 
+      viewBox="0 0 140 50" 
+      className="absolute right-0" 
+      style={{ top: '-25px' }}
+      animate={{ y: [0, -3, 0] }}
+      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <motion.polyline
+        points={Array.from({ length: 120 }, (_, i) => {
+          const x = (i / 120) * width
+          const y = height / 2 + Math.sin((i / 120) * Math.PI * frequency * 2) * amplitude
+          return `${x},${y}`
+        }).join(' ')}
         fill="none"
         stroke="#60A5FA"
         strokeWidth="2"
+        animate={{ 
+          pathLength: [0, 1],
+          pathOffset: [0, 1]
+        }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       />
       {/* Dashed line from peak to scale */}
-      <line
-        x1={peakX}
-        y1={peakY}
-        x2={peakX}
+      <motion.line
+        x1={100}
+        y1={height / 2 - amplitude}
+        x2={100}
         y2={height + 5}
         stroke="#000"
         strokeWidth="1"
         strokeDasharray="3,3"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       />
       {/* Highlighted point on peak */}
-      <circle
-        cx={peakX}
-        cy={peakY}
+      <motion.circle
+        cx={100}
+        cy={height / 2 - amplitude}
         r="6"
         fill="#60A5FA"
         stroke="white"
         strokeWidth="2"
         style={{ filter: 'drop-shadow(0 0 4px rgba(96, 165, 250, 0.6))' }}
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.8, 1, 0.8]
+        }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       />
       {/* Small dot on scale */}
       <circle
-        cx={peakX}
+        cx={100}
         cy={height + 5}
         r="3"
         fill="#000"
       />
-    </svg>
+    </motion.svg>
   )
 }
 
@@ -231,12 +331,30 @@ const HorizontalScale = ({ className }: { className?: string }) => {
   const tickCount = 25
   return (
     <div className={`relative ${className}`}>
-      <svg width="100%" height="20" viewBox="0 0 1000 20" preserveAspectRatio="none" className="w-full">
+      <motion.svg 
+        width="100%" 
+        height="20" 
+        viewBox="0 0 1000 20" 
+        preserveAspectRatio="none" 
+        className="w-full"
+      >
         {/* Main line */}
-        <line x1="0" y1="10" x2="1000" y2="10" stroke="#000" strokeWidth="1.5" />
+        <motion.line 
+          x1="0" 
+          y1="10" 
+          x2="1000" 
+          y2="10" 
+          stroke="#000" 
+          strokeWidth="1.5"
+          animate={{ 
+            pathLength: [0, 1],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
         {/* Tick marks */}
         {Array.from({ length: tickCount }, (_, i) => (
-          <line
+          <motion.line
             key={i}
             x1={(i / (tickCount - 1)) * 1000}
             y1="7"
@@ -244,9 +362,19 @@ const HorizontalScale = ({ className }: { className?: string }) => {
             y2="13"
             stroke="#000"
             strokeWidth="1"
+            animate={{ 
+              opacity: [0.3, 1, 0.3],
+              y: [0, -1, 0]
+            }}
+            transition={{ 
+              duration: 2 + i * 0.05, 
+              repeat: Infinity, 
+              delay: i * 0.03,
+              ease: "easeInOut"
+            }}
           />
         ))}
-      </svg>
+      </motion.svg>
     </div>
   )
 }
@@ -284,7 +412,7 @@ export default function Hero() {
               <HorizontalScale className="mt-0" />
             </div>
 
-            {/* Lower Scale with "By Seeing" */}
+            {/* Lower Scale with "By Playing" */}
             <div className="relative">
               <div className="relative flex items-center justify-center">
                 {/* Code Blocks on Left */}
@@ -292,9 +420,9 @@ export default function Hero() {
                   <CodeBlocks />
                 </div>
                 
-                {/* "By Seeing" Text - positioned on scale */}
+                {/* "By Playing" Text - positioned on scale */}
                 <h1 className="text-5xl md:text-7xl lg:text-[96px] font-bold text-black leading-[1.1] font-serif relative z-10" style={{ letterSpacing: '0.05em' }}>
-                  By Seeing
+                  By Playing
                 </h1>
                 
                 {/* Right side container with Sine Wave and blocks */}
@@ -302,10 +430,6 @@ export default function Hero() {
                   {/* Sine Wave */}
                   <div className="w-36 h-20 mb-3" style={{ marginTop: '-30px' }}>
                     <SineWave />
-                  </div>
-                  {/* Right blocks (else and bummer) */}
-                  <div className="w-36" style={{ marginTop: '-30px' }}>
-                    <RightBlocks />
                   </div>
                 </div>
               </div>
